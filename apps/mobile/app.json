@@ -7,20 +7,32 @@
     "userInterfaceStyle": "automatic",
     "scheme": "elixio",
     "newArchEnabled": true,
+    "icon": "./assets/icon.png",
     "plugins": ["expo-router"],
     "experiments": {
       "typedRoutes": true
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.elixio.digital"
+      "bundleIdentifier": "com.elixio.digital",
+      "icon": "./assets/icon.png",
+      "splash": {
+        "image": "./assets/splash-icon.png",
+        "backgroundColor": "#111111"
+      }
     },
     "android": {
-      "package": "com.elixio.digital"
+      "package": "com.elixio.digital",
+      "icon": "./assets/icon.png",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#111111"
+      }
     },
     "web": {
       "bundler": "metro",
-      "output": "static"
+      "output": "static",
+      "favicon": "./assets/icon.png"
     },
     "extra": {
       "apiUrl": "",
