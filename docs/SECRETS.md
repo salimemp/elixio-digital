@@ -19,7 +19,7 @@ This doc is the single source of truth for **which secrets go where** in Elixio 
 | --- | --- | --- |
 | `ELIXIO_API_URL` | web CI, mobile CI | Base URL of the deployed API. CI uses a placeholder; production uses the real Cloudflare+Railway URL. |
 | `ELIXIO_ADMIN_TOKEN` | admin scripts (publish, seed, migrate) | Long-lived **refresh token** for an admin user. Pair with `ELIXIO_ADMIN_EMAIL` only if the token is too short-lived. See §3 for the refresh pattern. |
-| `CLOUDFLARE_API_TOKEN` | web deploy, DNS automation | Token scoped to **Cloudflare Pages: Edit** + **DNS: Edit** for `elixio.digital`. |
+| `CLOUDFLARE_API_TOKEN` | web deploy, DNS automation | Token scoped to **Cloudflare Pages: Edit** + **DNS: Edit** for `elixiodigital.com`. |
 | `CLOUDFLARE_ACCOUNT_ID` | web deploy | Account ID of the Cloudflare account hosting the Pages project. |
 | `RAILWAY_TOKEN` | api deploy | Railway API token with `project:deploy` scope. |
 | `RAILWAY_PROJECT_ID` | api deploy | Project ID of the API service on Railway. |

@@ -17,7 +17,7 @@ const envSchema = z.object({
 
   // Resend
   RESEND_API_KEY: z.string().default(""),
-  EMAIL_FROM: z.string().default("Elixio Digital <no-reply@elixio.digital>"),
+  EMAIL_FROM: z.string().default("Elixio Digital <no-reply@elixiodigital.com>"),
 
   // Public URLs (used in email links + OAuth callback config)
   ELIXIO_API_URL: z.string().url().default("http://localhost:3000"),

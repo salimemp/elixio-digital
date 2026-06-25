@@ -1,6 +1,6 @@
 # Step 2 — Deploy the Web to Cloudflare Pages
 
-This deploys the Next.js web app. End state: `https://elixio-digital.pages.dev` (preview URL) or `https://elixio.digital` (custom domain, step 4).
+This deploys the Next.js web app. End state: `https://elixio-digital.pages.dev` (preview URL) or `https://elixiodigital.com` (custom domain, step 4).
 
 ## 2.1 Create the Pages project
 
@@ -18,12 +18,12 @@ This deploys the Next.js web app. End state: `https://elixio-digital.pages.dev` 
 
 | Variable | Value | Public? |
 | --- | --- | --- |
-| `NEXT_PUBLIC_API_URL` | `https://api.elixio.digital` | yes |
+| `NEXT_PUBLIC_API_URL` | `https://api.elixiodigital.com` | yes |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | from your password manager | yes (only after you wire Stripe — skip for now) |
 | `NODE_VERSION` | `24` | no |
 | `PNPM_VERSION` | `10.15.0` | no |
 
-> Use Cloudflare's **environment-specific variables** feature: set `NEXT_PUBLIC_API_URL=https://api.elixio.digital` for Production and `http://localhost:3000` for Preview, so PR previews don't hit production.
+> Use Cloudflare's **environment-specific variables** feature: set `NEXT_PUBLIC_API_URL=https://api.elixiodigital.com` for Production and `http://localhost:3000` for Preview, so PR previews don't hit production.
 
 ## 2.3 Build the project
 

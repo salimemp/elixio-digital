@@ -53,6 +53,6 @@ jobs:
         run: pnpm build
         env:
           # Web build needs the public env vars defined to inline.
-          NEXT_PUBLIC_API_URL: https://api.elixio.digital
+          NEXT_PUBLIC_API_URL: https://api.elixiodigital.com
           NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_placeholder
-          EXPO_PUBLIC_API_URL: https://api.elixio.digital
+          EXPO_PUBLIC_API_URL: https://api.elixiodigital.com

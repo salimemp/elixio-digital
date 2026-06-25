@@ -23,7 +23,7 @@ KEK="$(cat "$SECRETS_DIR/ELIXIO_MFA_KEY_ENCRYPTION_KEY")"
 # Placeholders — replace with real values from your password manager
 # once the OAuth + Resend + Resend-from-address setup is done.
 PLACEHOLDER_OAUTH="placeholder-set-real-value-in-railway-dashboard"
-RESEND_FROM="Elixio Digital <no-reply@elixio.digital>"
+RESEND_FROM="Elixio Digital <no-reply@elixiodigital.com>"
 
 echo "==> Logging in to Railway (skip if already authenticated)"
 railway whoami >/dev/null 2>&1 || {
@@ -88,15 +88,15 @@ set_var() {
 
 set_var NODE_ENV               "production"
 set_var PORT                   "3000"
-set_var CORS_ORIGIN            "https://elixio.digital,http://localhost:3001"
+set_var CORS_ORIGIN            "https://elixiodigital.com,http://localhost:3001"
 set_var JWT_SECRET             "$JWT_SECRET"
 set_var ELIXIO_MFA_KEY_ENCRYPTION_KEY  "$KEK"
-set_var ELIXIO_API_URL         "https://api.elixio.digital"
-set_var ELIXIO_WEB_URL         "https://elixio.digital"
+set_var ELIXIO_API_URL         "https://api.elixiodigital.com"
+set_var ELIXIO_WEB_URL         "https://elixiodigital.com"
 set_var ELIXIO_MOBILE_URL      "elixio://"
 set_var EMAIL_FROM             "$RESEND_FROM"
-set_var ELIXIO_WEBAUTHN_RP_ID  "elixio.digital"
-set_var ELIXIO_WEBAUTHN_ORIGINS "https://elixio.digital,https://api.elixio.digital"
+set_var ELIXIO_WEBAUTHN_RP_ID  "elixiodigital.com"
+set_var ELIXIO_WEBAUTHN_ORIGINS "https://elixiodigital.com,https://api.elixiodigital.com"
 
 # Placeholders — fill in via the Railway dashboard once you have them
 set_var RESEND_API_KEY          "$PLACEHOLDER_OAUTH"

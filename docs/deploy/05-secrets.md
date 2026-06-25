@@ -11,7 +11,7 @@ Add these (use the same names in any CI script that reads them):
 | Secret | Value | Used by |
 | --- | --- | --- |
 | `ELIXIO_DIGITAL_ADMIN_TOKEN` | From `bootstrap-admin.ts` (the long refresh token) | admin workflows, manual ops |
-| `ELIXIO_API_URL` | `https://api.elixio.digital` | deploy jobs that hit the API |
+| `ELIXIO_API_URL` | `https://api.elixiodigital.com` | deploy jobs that hit the API |
 | `CLOUDFLARE_API_TOKEN` | Cloudflare → My Profile → API Tokens → Create Token → Edit Cloudflare Pages | Cloudflare Pages deploys |
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare → Workers & Pages → right sidebar | Cloudflare Pages deploys |
 | `RAILWAY_TOKEN` | Railway → Account Settings → Tokens → Create | Railway deploys (used by the example workflow if you add one) |
@@ -55,7 +55,7 @@ When the token expires (or you suspect a leak):
 # From your laptop
 DATABASE_URL="postgresql://..." \
   pnpm --filter @elixio/api exec tsx scripts/bootstrap-admin.ts \
-    admin@elixio.digital 'your-password' --print-only
+    admin@elixiodigital.com 'your-password' --print-only
 ```
 
 This revokes all existing refresh tokens for that admin and prints a new one. Save the new value to GitHub Secrets.
@@ -77,8 +77,8 @@ Track secret changes in [docs/SECRETS.md](../SECRETS.md#audit-log). One row per 
 
 If all 5 steps are checked, you have a live Elixio Digital:
 
-- **Web:** https://elixio.digital
-- **API:** https://api.elixio.digital/v1/health
+- **Web:** https://elixiodigital.com
+- **API:** https://api.elixiodigital.com/v1/health
 - **Mobile:** installable via EAS preview link
 - **Admin:** sign in with the email/password you bootstrapped, then go to `/auth/mfa-setup` to enroll a TOTP app (highly recommended)
 - **CI:** every PR to `main` runs typecheck + lint + build; merges are blocked until green

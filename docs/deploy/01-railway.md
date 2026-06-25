@@ -1,6 +1,6 @@
 # Step 1 — Deploy the API to Railway
 
-This deploys the Fastify API + a managed PostgreSQL database. End state: `https://<railway-subdomain>.up.railway.app` is the API base. We'll point `api.elixio.digital` at it in step 4.
+This deploys the Fastify API + a managed PostgreSQL database. End state: `https://<railway-subdomain>.up.railway.app` is the API base. We'll point `api.elixiodigital.com` at it in step 4.
 
 ## 1.1 Create the project
 
@@ -29,18 +29,18 @@ In the API service's **Variables** tab, add the following. **Do not commit any o
 | `ELIXIO_MFA_KEY_ENCRYPTION_KEY` | From your password manager (32 bytes base64) | everything |
 | `NODE_ENV` | `production` | everything |
 | `PORT` | `3000` (Railway overrides this with `$PORT` automatically; set it anyway for clarity) | dev |
-| `CORS_ORIGIN` | `https://elixio.digital` (comma-separate if you add more) | prod |
-| `ELIXIO_API_URL` | `https://api.elixio.digital` (we set this after DNS) — for now use the Railway URL | prod |
-| `ELIXIO_WEB_URL` | `https://elixio.digital` (set after DNS) — for now use `http://localhost:3001` | prod |
+| `CORS_ORIGIN` | `https://elixiodigital.com` (comma-separate if you add more) | prod |
+| `ELIXIO_API_URL` | `https://api.elixiodigital.com` (we set this after DNS) — for now use the Railway URL | prod |
+| `ELIXIO_WEB_URL` | `https://elixiodigital.com` (set after DNS) — for now use `http://localhost:3001` | prod |
 | `ELIXIO_MOBILE_URL` | `elixio://` | prod |
 | `RESEND_API_KEY` | From your password manager (Resend) | prod |
-| `EMAIL_FROM` | `Elixio Digital <no-reply@elixio.digital>` (must be the verified sender) | prod |
+| `EMAIL_FROM` | `Elixio Digital <no-reply@elixiodigital.com>` (must be the verified sender) | prod |
 | `GOOGLE_CLIENT_ID` | From your password manager (Google Cloud) | prod |
 | `GOOGLE_CLIENT_SECRET` | From your password manager (Google Cloud) | prod |
 | `GITHUB_CLIENT_ID` | From your password manager (GitHub OAuth App) | prod |
 | `GITHUB_CLIENT_SECRET` | From your password manager (GitHub OAuth App) | prod |
-| `ELIXIO_WEBAUTHN_RP_ID` | `elixio.digital` | prod |
-| `ELIXIO_WEBAUTHN_ORIGINS` | `https://elixio.digital,https://api.elixio.digital` | prod |
+| `ELIXIO_WEBAUTHN_RP_ID` | `elixiodigital.com` | prod |
+| `ELIXIO_WEBAUTHN_ORIGINS` | `https://elixiodigital.com,https://api.elixiodigital.com` | prod |
 
 > **For first deploy only:** set `ELIXIO_API_URL` and `ELIXIO_WEB_URL` to placeholder values. We'll update them after DNS is wired in step 4.
 
@@ -85,7 +85,7 @@ pnpm --filter @elixio/api exec tsx scripts/bootstrap-admin.ts <email> <password>
 For example:
 
 ```bash
-pnpm --filter @elixio/api exec tsx scripts/bootstrap-admin.ts admin@elixio.digital 'pick-a-long-password'
+pnpm --filter @elixio/api exec tsx scripts/bootstrap-admin.ts admin@elixiodigital.com 'pick-a-long-password'
 ```
 
 The output will print:
@@ -94,7 +94,7 @@ The output will print:
 ════════════════════════════════════════════════════════════════
   ✓ Elixio Digital admin bootstrapped
 ════════════════════════════════════════════════════════════════
-  User:    admin@elixio.digital
+  User:    admin@elixiodigital.com
   ELIXIO_DIGITAL_ADMIN_TOKEN=<a-very-long-hex-string>
   Expires: 2026-07-09T… (14 days)
 ```

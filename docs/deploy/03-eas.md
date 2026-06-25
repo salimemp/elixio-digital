@@ -48,15 +48,15 @@ The repo doesn't ship with one (it's project-specific). Create `apps/mobile/eas.
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "env": { "EXPO_PUBLIC_API_URL": "https://staging.api.elixio.digital" }
+      "env": { "EXPO_PUBLIC_API_URL": "https://staging.api.elixiodigital.com" }
     },
     "preview": {
       "distribution": "internal",
       "ios": { "simulator": false },
-      "env": { "EXPO_PUBLIC_API_URL": "https://api.elixio.digital" }
+      "env": { "EXPO_PUBLIC_API_URL": "https://api.elixiodigital.com" }
     },
     "production": {
-      "env": { "EXPO_PUBLIC_API_URL": "https://api.elixio.digital" }
+      "env": { "EXPO_PUBLIC_API_URL": "https://api.elixiodigital.com" }
     }
   },
   "submit": {
@@ -88,7 +88,7 @@ First build takes 15–30 minutes. EAS emails you when it's done, or you can wat
 Once the iOS build completes:
 - EAS gives you an install link.
 - Open it on your iPhone → installs via TestFlight (you may need to register your device UDID in your Apple Developer account first; EAS walks you through this).
-- Open the app → it points at `https://api.elixio.digital` → sign in with the admin you bootstrapped.
+- Open the app → it points at `https://api.elixiodigital.com` → sign in with the admin you bootstrapped.
 
 ## 3.6 Submit to the App Stores (later)
 
@@ -96,7 +96,7 @@ When you're ready to ship publicly:
 
 ### iOS
 
-1. **App Store Connect** → https://appstoreconnect.apple.com → **My Apps** → **+** → **New App** → fill in name, primary language, bundle ID (`com.elixio.digital`).
+1. **App Store Connect** → https://appstoreconnect.apple.com → **My Apps** → **+** → **New App** → fill in name, primary language, bundle ID (`com.elixiodigital.com`).
 2. Copy the **Apple ID** (a 10-digit number) into `eas.json` `submit.production.ios.ascAppId`.
 3. **EAS Submit** will then push the build to App Store Connect for review. Apple requires IAP for digital content sold in-app. The plan is to **link out to the web checkout** (a `WebBrowser.openAuthSessionAsync` call) so the IAP 30% cut doesn't apply. Document this in App Review notes.
 
@@ -121,4 +121,4 @@ When you're ready to ship publicly:
 
 ## Next
 
-→ [04-dns-domain.md](./04-dns-domain.md) — point `elixio.digital` at Cloudflare Pages and `api.elixio.digital` at Railway.
+→ [04-dns-domain.md](./04-dns-domain.md) — point `elixiodigital.com` at Cloudflare Pages and `api.elixiodigital.com` at Railway.

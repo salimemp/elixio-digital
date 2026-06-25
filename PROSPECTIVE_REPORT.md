@@ -236,7 +236,7 @@ These have downstream effects on architecture and were left open in the plan.
 | 7 | Web hosting | **Cloudflare Pages** via `next-on-pages` | Already chosen; needs `pages:build` wired and `wrangler.toml`. |
 | 8 | 2FA on buyers | **Defer to Phase 2** | Adds friction at MVP; security can wait for V1. |
 | 9 | First launch category | **Design (UI kits, templates, icons)** | Highest-volume digital category; easiest to seed with the founder's network. |
-| 10 | Branding: web URL | **elixio.digital** (owned) | Confirm domain ownership; if parked, point DNS before launch. |
+| 10 | Branding: web URL | **elixiodigital.com** (owned) | Confirm domain ownership; if parked, point DNS before launch. |
 
 ---
 
@@ -334,7 +334,7 @@ The mobile bottom tabs currently use emoji + hard-coded background colors per ta
 ## 10. Open questions for the founder
 
 1. **Stripe account ready?** You'll need it before any payment integration. Apply today if not done.
-2. **Domain in use?** Is `elixio.digital` parked, or do you have a different launch domain? Affects SSL + sitemap.
+2. **Domain in use?** Is `elixiodigital.com` parked, or do you have a different launch domain? Affects SSL + sitemap.
 3. **Founder-as-first-creator plan?** Will you seed the marketplace with your own assets? If yes, skip the cold-start problem in §7 row 7.
 4. **iOS app store account?** Costs $99/yr. Needed before any iOS release. Don't forget it.
 5. **Indie launch vs. private beta?** Indie launch needs SEO + reviews + Stripe Connect onboarding polished. Private beta can skip 60% of that.

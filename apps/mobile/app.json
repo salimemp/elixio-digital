@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.elixio.digital",
+      "bundleIdentifier": "com.elixiodigital",
       "icon": "./assets/icon.png",
       "splash": {
         "image": "./assets/splash-icon.png",
@@ -22,7 +22,7 @@
       }
     },
     "android": {
-      "package": "com.elixio.digital",
+      "package": "com.elixiodigital",
       "icon": "./assets/icon.png",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",

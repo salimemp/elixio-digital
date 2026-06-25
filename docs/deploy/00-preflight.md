@@ -16,7 +16,7 @@ Before you start, gather these. Most are free signups; only the domain is paid.
 
 ## Domain
 
-- [ ] `elixio.digital` is in your account and accessible via Cloudflare DNS. If it's parked at Hostinger, transfer the nameservers to Cloudflare first (see https://developers.cloudflare.com/dns/zone-setups/full-setup/).
+- [ ] `elixiodigital.com` is in your account and accessible via Cloudflare DNS. If it's parked at Hostinger, transfer the nameservers to Cloudflare first (see https://developers.cloudflare.com/dns/zone-setups/full-setup/).
 
 ## Local prerequisites
 
@@ -60,26 +60,26 @@ You will copy them into Railway (for the API), Cloudflare Pages (for the web if 
 ## Resend setup
 
 1. Sign in to https://resend.com
-2. **Add Domain** → add `elixio.digital` (they'll give you DNS records; add them in Cloudflare).
-3. **API Keys** → **Create API Key** with "Sending access" permission, scope it to `elixio.digital`.
+2. **Add Domain** → add `elixiodigital.com` (they'll give you DNS records; add them in Cloudflare).
+3. **API Keys** → **Create API Key** with "Sending access" permission, scope it to `elixiodigital.com`.
 4. Copy the key (`re_…`) into your password manager: `Elixio Digital / Resend API Key`.
-5. Note the verified `from` address (e.g., `no-reply@elixio.digital`).
+5. Note the verified `from` address (e.g., `no-reply@elixiodigital.com`).
 
 ## Google OAuth setup
 
 1. https://console.cloud.google.com → **APIs & Services** → **Credentials** → **Create Credentials** → **OAuth client ID** → Application type **Web application**.
-2. **Authorized JavaScript origins:** `https://elixio.digital`, `https://api.elixio.digital`
+2. **Authorized JavaScript origins:** `https://elixiodigital.com`, `https://api.elixiodigital.com`
 3. **Authorized redirect URIs:**
-   - `https://api.elixio.digital/v1/auth/oauth/google/callback`
+   - `https://api.elixiodigital.com/v1/auth/oauth/google/callback`
    - `http://localhost:3000/v1/auth/oauth/google/callback` (for dev)
 4. Copy the **Client ID** and **Client secret** into your password manager.
 
 ## GitHub OAuth setup
 
 1. https://github.com/settings/developers → **New OAuth App**.
-2. **Homepage URL:** `https://elixio.digital`
+2. **Homepage URL:** `https://elixiodigital.com`
 3. **Authorization callback URL:**
-   - `https://api.elixio.digital/v1/auth/oauth/github/callback`
+   - `https://api.elixiodigital.com/v1/auth/oauth/github/callback`
    - `http://localhost:3000/v1/auth/oauth/github/callback` (for dev)
 4. Copy **Client ID** and generate a **client secret** (with "Generate a new client secret"). Save both.
 

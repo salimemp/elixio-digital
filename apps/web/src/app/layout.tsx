@@ -8,7 +8,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://elixio.digital"),
+  metadataBase: new URL("https://elixiodigital.com"),
   title: {
     default: "Elixio Digital — Marketplace for Creators",
     template: "%s · Elixio Digital",
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://elixio.digital",
+    url: "https://elixiodigital.com",
     siteName: "Elixio Digital",
     title: "Elixio Digital — Marketplace for Creators",
     description:
