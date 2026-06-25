@@ -1,6 +1,10 @@
 import { FastifyInstance } from "fastify";
 import { ZodError } from "zod";
-import { Prisma } from "@prisma/client";
+import prismaPkg from "@prisma/client";
+
+// Prisma client is CJS — default import + destructure works across
+// ESM/CJS interop boundaries in Node 22+.
+const { Prisma } = prismaPkg;
 
 export async function registerErrorHandler(app: FastifyInstance): Promise<void> {
   app.setErrorHandler((error, request, reply) => {

@@ -29,7 +29,7 @@ export async function beginPasskeyRegistration(userId: string, userEmail: string
       residentKey: "preferred",
       userVerification: "preferred",
     },
-    excludeCredentials: existing.map((p) => ({
+    excludeCredentials: existing.map((p: { credentialId: string; transports: string[] }) => ({
       id: p.credentialId,
       transports: p.transports as never,
     })),

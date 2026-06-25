@@ -15,6 +15,7 @@ import {
   passwordResetTemplate,
 } from "./email.js";
 import type { User as PrismaUser } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import type { AuthSession, User } from "@elixio/shared";
 
 const SALT_ROUNDS = 12;
@@ -385,7 +386,7 @@ export async function confirmTotpSetup(
   }
   // Promote: set lastUsedAt = now, enable user.mfaEnabled, generate backup codes
   const backupCodes = Array.from({ length: 10 }, () => generateBackupCode());
-  await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     await tx.mfaFactor.update({
       where: { id: pending.id },
       data: { lastUsedAt: new Date() },
