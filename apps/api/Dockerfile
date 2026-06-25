@@ -26,4 +26,4 @@ COPY --from=build /app/apps/api/package.json ./apps/api/package.json
 COPY --from=build /app/package.json ./package.json
 COPY --from=build /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 EXPOSE 3000
-CMD ["node", "dist/server.js"]
+CMD ["node", "dist/apps/api/server.js"]
