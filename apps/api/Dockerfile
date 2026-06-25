@@ -25,6 +25,10 @@ COPY packages/shared/package.json ./packages/shared/package.json
 RUN pnpm install --frozen-lockfile --prod
 COPY --from=build /app/apps/api/dist ./dist
 COPY --from=build /app/apps/api/prisma ./prisma
-COPY --from=build /app/packages/shared ./packages/shared
+# Hoist the workspace package so `@elixio/shared` resolves at runtime.
+# We rebuild a real node_modules/@elixio/shared with the build artifacts
+# (the build stage only copies src/ to packages/shared; we ship the
+# src directly because the shared package is consumed from source).
+COPY --from=build /app/packages/shared /app/node_modules/@elixio/shared
 EXPOSE 3000
 CMD ["node", "dist/apps/api/src/server.js"]
