@@ -2,6 +2,7 @@
   "name": "elixio-digital",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "description": "Elixio Digital — a cross-platform marketplace where creators showcase, market, and sell digital assets.",
   "packageManager": "pnpm@10.15.0",
   "engines": {
