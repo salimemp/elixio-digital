@@ -35,5 +35,10 @@ COPY --from=build /app/node_modules/.prisma /app/node_modules/.prisma
 # (the build stage only copies src/ to packages/shared; we ship the
 # src directly because the shared package is consumed from source).
 COPY --from=build /app/packages/shared /app/node_modules/@elixio/shared
+# Ship the prisma CLI so we can run `migrate deploy` at startup.
+COPY --from=build /app/node_modules/prisma /app/node_modules/prisma
 EXPOSE 3000
-CMD ["node", "dist/apps/api/src/server.js"]
+# Run Prisma migrations before starting the API. Idempotent and
+# required to make the schema match the client. We invoke the prisma
+# CLI directly from node_modules (no pnpm in runner).
+CMD ["sh", "-c", "node node_modules/prisma/build/index.js migrate deploy --schema=./prisma/schema.prisma && node dist/apps/api/src/server.js"]
