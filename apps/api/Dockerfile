@@ -40,5 +40,6 @@ COPY --from=build /app/node_modules/prisma /app/node_modules/prisma
 EXPOSE 3000
 # Run Prisma migrations before starting the API. Idempotent and
 # required to make the schema match the client. We invoke the prisma
-# CLI directly from node_modules (no pnpm in runner).
-CMD ["sh", "-c", "node node_modules/prisma/build/index.js migrate deploy --schema=./prisma/schema.prisma && node dist/apps/api/src/server.js"]
+# CLI directly from node_modules (no pnpm in runner). Output is
+# streamed to stdout/stderr so it appears in Railway logs.
+CMD ["sh", "-c", "echo '[migrate] starting prisma migrate deploy' && node node_modules/prisma/build/index.js migrate deploy --schema=./prisma/schema.prisma 2>&1 && echo '[migrate] done — starting server' && node dist/apps/api/src/server.js"]
