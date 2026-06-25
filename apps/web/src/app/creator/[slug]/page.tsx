@@ -1,17 +1,11 @@
-import { getStorefront, type ApiResult } from "@/lib/api";
-import type { Storefront } from "@elixio/shared";
+import { getStorefront } from "@/lib/api";
 
 interface CreatorPageProps {
   params: { slug: string };
 }
 
 export default async function CreatorPage({ params }: CreatorPageProps) {
-  let result: ApiResult<Storefront>;
-  try {
-    result = await getStorefront(params.slug);
-  } catch {
-    result = { ok: false, error: "Unable to load storefront" };
-  }
+  const result = await getStorefront(params.slug);
 
   if (!result.ok) {
     return (
@@ -21,7 +15,7 @@ export default async function CreatorPage({ params }: CreatorPageProps) {
     );
   }
 
-  const storefront = result.data;
+  const storefront = result.data as { slug: string };
 
   return (
     <main className="p-6">

@@ -1,47 +1,85 @@
-import type { Asset, AssetDetail, PaginatedResponse, Storefront } from "@elixio/shared";
+// Shared API client for the web app. Single place for base URL,
+// fetch wrapper, and typed responses. All auth pages import from here.
 
-export function getApiBaseUrl(): string {
-  const url = process.env.NEXT_PUBLIC_API_URL;
-  if (!url) {
-    throw new Error("NEXT_PUBLIC_API_URL is not defined");
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
+
+export type ApiResult<T> =
+  | { ok: true; data: T; error?: undefined }
+  | { ok: false; data?: undefined; error: string };
+
+export interface ApiOptions extends Omit<RequestInit, "body"> {
+  body?: unknown;
+  authToken?: string | null;
+}
+
+export async function api<T = unknown>(
+  path: string,
+  options: ApiOptions = {}
+): Promise<T> {
+  const url = `${API_URL}${path}`;
+  const headers = new Headers(options.headers);
+
+  if (options.body !== undefined && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
   }
-  return url.replace(/\/$/, "");
-}
+  if (options.authToken) {
+    headers.set("Authorization", `Bearer ${options.authToken}`);
+  }
 
-interface ApiSuccess<T> {
-  ok: true;
-  data: T;
-}
+  const response = await fetch(url, {
+    ...options,
+    headers,
+    body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+    credentials: "include",
+  });
 
-interface ApiFailure {
-  ok: false;
-  error: string;
-}
-
-export type ApiResult<T> = ApiSuccess<T> | ApiFailure;
-
-async function fetchJson<T>(url: string, options?: RequestInit): Promise<ApiResult<T>> {
-  try {
-    const response = await fetch(url, options);
-    if (!response.ok) {
-      return { ok: false, error: `HTTP ${response.status}` };
+  if (!response.ok) {
+    let message = `HTTP ${response.status}`;
+    try {
+      const data = await response.json();
+      message = data?.error?.message ?? data?.message ?? message;
+    } catch {
+      // ignore
     }
-    const data = (await response.json()) as T;
+    const err = new Error(message) as Error & { status?: number };
+    err.status = response.status;
+    throw err;
+  }
+
+  if (response.status === 204) return undefined as T;
+  return (await response.json()) as T;
+}
+
+// Convenience helpers for common read endpoints. Each returns a wrapped
+// `ApiResult` so callers can do `if (!result.ok) ...` cleanly in
+// server components. Throws are caught and converted.
+export async function getAssets(
+  params: Record<string, string> = {}
+): Promise<ApiResult<unknown[]>> {
+  try {
+    const data = await api<unknown[]>(`/v1/assets?${new URLSearchParams(params).toString()}`);
     return { ok: true, data };
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Network error";
-    return { ok: false, error: message };
+  } catch (err) {
+    return { ok: false, error: (err as Error).message };
   }
 }
 
-export async function getAssets(): Promise<ApiResult<PaginatedResponse<Asset>>> {
-  return fetchJson(`${getApiBaseUrl()}/assets`);
+export async function getAsset(id: string): Promise<ApiResult<unknown>> {
+  try {
+    const data = await api<unknown>(`/v1/assets/${encodeURIComponent(id)}`);
+    return { ok: true, data };
+  } catch (err) {
+    return { ok: false, error: (err as Error).message };
+  }
 }
 
-export async function getAsset(id: string): Promise<ApiResult<AssetDetail>> {
-  return fetchJson(`${getApiBaseUrl()}/assets/${id}`);
+export async function getStorefront(slug: string): Promise<ApiResult<unknown>> {
+  try {
+    const data = await api<unknown>(`/v1/storefronts/${encodeURIComponent(slug)}`);
+    return { ok: true, data };
+  } catch (err) {
+    return { ok: false, error: (err as Error).message };
+  }
 }
 
-export async function getStorefront(slug: string): Promise<ApiResult<Storefront>> {
-  return fetchJson(`${getApiBaseUrl()}/storefronts/${slug}`);
-}
+export { API_URL };

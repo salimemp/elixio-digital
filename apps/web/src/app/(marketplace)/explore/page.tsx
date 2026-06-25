@@ -1,14 +1,18 @@
 import { AssetCard } from "@/components/ui/AssetCard";
-import { getAssets, type ApiResult } from "@/lib/api";
-import type { Asset, PaginatedResponse } from "@elixio/shared";
+import { getAssets } from "@/lib/api";
 
 export default async function ExplorePage() {
-  let result: ApiResult<PaginatedResponse<Asset>>;
-  try {
-    result = await getAssets();
-  } catch {
-    result = { ok: false, error: "Unable to load assets" };
-  }
+  const result = await getAssets();
+
+  type Asset = {
+    id: string;
+    title: string;
+    description: string;
+    priceCents: number;
+    currency: string;
+  };
+  type PaginatedAssets = { items: Asset[]; total: number };
+  const data = (result.ok ? result.data : { items: [], total: 0 }) as PaginatedAssets;
 
   return (
     <main className="min-h-screen bg-gum-cream px-6 py-10">
@@ -24,14 +28,33 @@ export default async function ExplorePage() {
       <section className="mx-auto max-w-7xl">
         <div className="mb-6 flex items-center justify-between">
           <span className="rounded-full border-2 border-gum-black bg-white px-4 py-2 text-sm font-bold">
-            {result.ok ? `${result.data.total} assets` : "0 assets"}
+            {`${data.total} assets`}
           </span>
         </div>
 
-        {result.ok && result.data.items.length > 0 ? (
+        {data.items.length > 0 ? (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {result.data.items.map((asset) => (
-              <AssetCard key={asset.id} asset={asset} />
+            {data.items.map((asset) => (
+              <AssetCard
+                key={asset.id}
+                asset={{
+                  id: asset.id,
+                  title: asset.title,
+                  description: asset.description,
+                  priceCents: asset.priceCents,
+                  currency: asset.currency,
+                  creatorId: "",
+                  slug: "",
+                  categoryId: "",
+                  licenseId: "",
+                  status: "published",
+                  avgRating: null,
+                  reviewCount: 0,
+                  salesCount: 0,
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString(),
+                }}
+              />
             ))}
           </div>
         ) : (

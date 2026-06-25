@@ -1,5 +1,4 @@
-import { getAsset, type ApiResult } from "@/lib/api";
-import type { AssetDetail } from "@elixio/shared";
+import { getAsset } from "@/lib/api";
 
 interface AssetDetailPageProps {
   params: { id: string };
@@ -8,12 +7,7 @@ interface AssetDetailPageProps {
 export default async function AssetDetailPage({
   params,
 }: AssetDetailPageProps) {
-  let result: ApiResult<AssetDetail>;
-  try {
-    result = await getAsset(params.id);
-  } catch {
-    result = { ok: false, error: "Unable to load asset" };
-  }
+  const result = await getAsset(params.id);
 
   if (!result.ok) {
     return (
@@ -23,7 +17,7 @@ export default async function AssetDetailPage({
     );
   }
 
-  const asset = result.data;
+  const asset = result.data as { title: string; description: string; priceCents: number; currency: string };
 
   return (
     <main className="p-6">
