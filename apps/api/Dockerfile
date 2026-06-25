@@ -26,6 +26,10 @@ COPY packages/shared/package.json ./packages/shared/package.json
 RUN pnpm install --frozen-lockfile --prod
 COPY --from=build /app/apps/api/dist ./dist
 COPY --from=build /app/apps/api/prisma ./prisma
+# Copy the generated Prisma client. `prisma generate` puts the
+# runtime artifacts at /app/node_modules/.prisma/client/ in the build
+# stage; the @prisma/client wrapper requires it via a relative path.
+COPY --from=build /app/node_modules/.prisma /app/node_modules/.prisma
 # Hoist the workspace package so `@elixio/shared` resolves at runtime.
 # We rebuild a real node_modules/@elixio/shared with the build artifacts
 # (the build stage only copies src/ to packages/shared; we ship the
