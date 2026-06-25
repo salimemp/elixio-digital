@@ -1,0 +1,33 @@
+# CODEOWNERS — Elixio Digital
+#
+# Every change to a path below requires a review from the listed owner(s)
+# before it can land on main. GitHub auto-assigns reviewers on PRs that
+# touch these paths. Combined with `require_code_owner_reviews: true`
+# in branch protection, this is the strongest soft gate we have.
+#
+# Format: <pattern>  <owner1>  <owner2> ...
+# Patterns use gitignore-style globs, last-match wins.
+
+# Default owner for everything not matched below.
+/  @salimemp
+
+# Workflows and CI — solo owner, mandatory review before changes ship.
+/.github/  @salimemp
+
+# Security, secrets, deploys, infra — extra caution.
+/.github/workflows/  @salimemp
+/apps/api/Dockerfile  @salimemp
+/apps/api/.env.example  @salimemp
+/apps/web/wrangler.toml  @salimemp
+/turbo.json  @salimemp
+/pnpm-workspace.yaml  @salimemp
+/package.json  @salimemp
+
+# Brand assets — keep visual identity consistent.
+#/brand/  @salimemp
+#/apps/web/public/favicon*  @salimemp
+#/apps/web/src/app/icon.svg  @salimemp
+#/apps/web/src/app/apple-icon.svg  @salimemp
+#/apps/mobile/assets/icon.png  @salimemp
+#/apps/mobile/assets/adaptive-icon.png  @salimemp
+#/apps/mobile/assets/splash-icon.png  @salimemp
