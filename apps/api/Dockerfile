@@ -11,6 +11,7 @@ RUN pnpm install --frozen-lockfile
 
 FROM deps AS build
 COPY . .
+RUN pnpm --filter @elixio/shared run build
 RUN pnpm --filter @elixio/api exec prisma generate
 RUN pnpm --filter @elixio/api run build
 
