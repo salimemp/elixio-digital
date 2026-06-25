@@ -37,9 +37,8 @@ COPY --from=build /app/node_modules/.prisma /app/node_modules/.prisma
 COPY --from=build /app/packages/shared /app/node_modules/@elixio/shared
 # Ship the prisma CLI so we can run `migrate deploy` at startup.
 COPY --from=build /app/node_modules/prisma /app/node_modules/prisma
+# Entrypoint script: runs migrations, then the server, with logging.
+COPY apps/api/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 EXPOSE 3000
-# Run Prisma migrations before starting the API. Idempotent and
-# required to make the schema match the client. We invoke the prisma
-# CLI directly from node_modules (no pnpm in runner). Output is
-# streamed to stdout/stderr so it appears in Railway logs.
-CMD ["sh", "-c", "echo '[migrate] starting prisma migrate deploy' && node node_modules/prisma/build/index.js migrate deploy --schema=./prisma/schema.prisma 2>&1 && echo '[migrate] done — starting server' && node dist/apps/api/src/server.js"]
+CMD ["/app/entrypoint.sh"]
