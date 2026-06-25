@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022"],
+    "types": ["react-native"],
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "paths": {
+      "@elixio/shared": ["../../packages/shared/src"],
+      "@elixio/shared/*": ["../../packages/shared/src/*"]
+    }
+  },
+  "include": ["src/**/*", ".expo/types/**/*.ts", "expo-env.d.ts"],
+  "exclude": ["node_modules", "dist", ".expo", ".turbo", "build"]
+}

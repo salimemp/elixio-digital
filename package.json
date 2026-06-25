@@ -1,0 +1,40 @@
+{
+  "name": "elixio-digital",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Elixio Digital — a cross-platform marketplace where creators showcase, market, and sell digital assets.",
+  "packageManager": "pnpm@10.15.0",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:web": "turbo run dev --filter=@elixio/web",
+    "dev:mobile": "turbo run dev --filter=@elixio/mobile",
+    "dev:api": "turbo run dev --filter=@elixio/api",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "db:generate": "pnpm --filter @elixio/api exec prisma generate",
+    "db:migrate": "pnpm --filter @elixio/api exec prisma migrate dev",
+    "db:studio": "pnpm --filter @elixio/api exec prisma studio",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "turbo": "^2.1.0",
+    "typescript": "^5.5.4"
+  },
+  "pnpm": {
+    "overrides": {
+      "react-native-reanimated": "4.3.1",
+      "expo-constants": "56.0.18",
+      "expo-linking": "56.0.14"
+    },
+    "peerDependencyRules": {
+      "allowedVersions": {
+        "react-native-worklets": "0.8.3"
+      }
+    }
+  }
+}

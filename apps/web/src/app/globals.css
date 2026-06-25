@@ -1,0 +1,40 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-inter: "Inter", system-ui, sans-serif;
+}
+
+body {
+  background-color: #fffdf5;
+  color: #111111;
+}
+
+@layer components {
+  .gum-btn {
+    @apply inline-flex items-center justify-center rounded-full border-2 border-gum-black px-5 py-2 font-semibold shadow-gum transition-transform active:translate-y-1 active:shadow-none;
+  }
+
+  .gum-btn-primary {
+    @apply gum-btn bg-gum-pink text-gum-black hover:bg-[#ff7de3];
+  }
+
+  .gum-btn-secondary {
+    @apply gum-btn bg-white text-gum-black hover:bg-gum-cream;
+  }
+
+  .gum-btn-yellow {
+    @apply gum-btn bg-gum-yellow text-gum-black hover:bg-[#e8d14f];
+  }
+
+  .gum-card {
+    @apply rounded-2xl border-2 border-gum-black bg-white p-4 shadow-gum transition-transform hover:-translate-y-1;
+  }
+
+  .gum-pill {
+    @apply rounded-full border-2 border-gum-black bg-gum-mint px-3 py-1 text-xs font-bold uppercase tracking-wide text-gum-black;
+  }
+}

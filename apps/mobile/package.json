@@ -1,0 +1,36 @@
+{
+  "name": "@elixio/mobile",
+  "version": "0.1.0",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "dev": "expo start",
+    "build": "expo export --platform all",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "start": "expo start",
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo node_modules"
+  },
+  "dependencies": {
+    "@elixio/shared": "workspace:*",
+    "expo": "~56.0.12",
+    "expo-constants": "~18.0.13",
+    "expo-linking": "~8.0.5",
+    "expo-router": "~56.2.11",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.85.3",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "4.25.2",
+    "react-native-worklets": "0.8.3"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@expo/metro-runtime": "~56.0.15",
+    "@react-native/metro-config": "0.85.3",
+    "@types/react": "~19.2.2",
+    "typescript": "~6.0.3"
+  }
+}

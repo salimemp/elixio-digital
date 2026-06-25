@@ -1,0 +1,341 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  buyer
+  creator
+  admin
+}
+
+enum AssetStatus {
+  draft
+  published
+  archived
+  rejected
+}
+
+enum MediaKind {
+  image
+  video
+}
+
+enum LicenseCode {
+  personal
+  commercial
+  extended
+}
+
+enum OrderStatus {
+  pending
+  paid
+  refunded
+  failed
+}
+
+enum PayoutStatus {
+  scheduled
+  processing
+  paid
+  failed
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  passwordHash String
+  role         UserRole
+  displayName  String
+  avatarUrl    String?
+  bio          String?
+  isBuyer      Boolean  @default(true)
+  isCreator    Boolean  @default(false)
+  isVerified   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  storefront    Storefront?
+  assets        Asset[]
+  orders        Order[]
+  orderItems    OrderItem[]
+  refreshTokens RefreshToken[]
+  reviews       Review[]
+  downloadGrants DownloadGrant[]
+  payouts       Payout[]
+  discountCodes DiscountCode[]
+  collections   Collection[]
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  tokenHash String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  revoked   Boolean  @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("refresh_tokens")
+}
+
+model Storefront {
+  id                     String  @id @default(uuid()) @db.Uuid
+  userId                 String  @unique @db.Uuid
+  slug                   String  @unique
+  bannerUrl              String?
+  accentColor            String?
+  socialLinks            Json    @default("{}")
+  stripeConnectAccountId String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([slug])
+  @@map("storefronts")
+}
+
+model Asset {
+  id           String      @id @default(uuid()) @db.Uuid
+  creatorId    String      @db.Uuid
+  title        String
+  slug         String      @unique
+  description  String
+  categoryId   String      @db.Uuid
+  priceCents   Int
+  currency     String      @default("USD")
+  licenseId    String      @db.Uuid
+  status       AssetStatus @default(draft)
+  searchVector String?
+  avgRating    Float?
+  reviewCount  Int         @default(0)
+  salesCount   Int         @default(0)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  creator     User              @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  category    Category          @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  license     License           @relation(fields: [licenseId], references: [id], onDelete: Restrict)
+  files       AssetFile[]
+  media       AssetMedia[]
+  reviews     Review[]
+  orderItems  OrderItem[]
+  tags        AssetTag[]
+  collections CollectionAsset[]
+
+  @@index([creatorId])
+  @@index([categoryId])
+  @@index([status])
+  @@index([searchVector])
+  @@map("assets")
+}
+
+model AssetFile {
+  id         String @id @default(uuid()) @db.Uuid
+  assetId    String @db.Uuid
+  storageKey String
+  filename   String
+  mimeType   String
+  sizeBytes  Int
+  version    Int    @default(1)
+
+  asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@index([assetId])
+  @@map("asset_files")
+}
+
+model AssetMedia {
+  id         String    @id @default(uuid()) @db.Uuid
+  assetId    String    @db.Uuid
+  storageKey String
+  kind       MediaKind
+  position   Int       @default(0)
+
+  asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@index([assetId])
+  @@map("asset_media")
+}
+
+model Category {
+  id       String  @id @default(uuid()) @db.Uuid
+  name     String  @unique
+  slug     String  @unique
+  parentId String? @db.Uuid
+
+  parent   Category?  @relation("CategoryParent", fields: [parentId], references: [id], onDelete: SetNull)
+  children Category[] @relation("CategoryParent")
+  assets   Asset[]
+
+  @@index([slug])
+  @@map("categories")
+}
+
+model Tag {
+  id     String     @id @default(uuid()) @db.Uuid
+  name   String     @unique
+
+  assets AssetTag[]
+
+  @@index([name])
+  @@map("tags")
+}
+
+model AssetTag {
+  id      String @id @default(uuid()) @db.Uuid
+  assetId String @db.Uuid
+  tagId   String @db.Uuid
+
+  asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  tag   Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([assetId, tagId])
+  @@index([assetId])
+  @@index([tagId])
+  @@map("asset_tags")
+}
+
+model License {
+  id      String      @id @default(uuid()) @db.Uuid
+  code    LicenseCode @unique
+  name    String
+  summary String
+
+  assets Asset[]
+
+  @@map("licenses")
+}
+
+model Order {
+  id                    String      @id @default(uuid()) @db.Uuid
+  buyerId               String      @db.Uuid
+  status                OrderStatus
+  subtotalCents         Int
+  platformFeeCents      Int
+  totalCents            Int
+  currency              String
+  stripePaymentIntentId String?
+
+  createdAt DateTime @default(now())
+
+  buyer  User        @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  items  OrderItem[]
+
+  @@index([buyerId, createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String      @id @default(uuid()) @db.Uuid
+  orderId     String      @db.Uuid
+  assetId     String      @db.Uuid
+  priceCents  Int
+  creatorId   String      @db.Uuid
+  licenseCode LicenseCode
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  asset Asset @relation(fields: [assetId], references: [id], onDelete: Restrict)
+  user  User  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  downloadGrants DownloadGrant[]
+
+  @@index([creatorId])
+  @@map("order_items")
+}
+
+model DownloadGrant {
+  id            String   @id @default(uuid()) @db.Uuid
+  orderItemId   String   @db.Uuid
+  buyerId       String   @db.Uuid
+  expiresAt     DateTime
+  downloadCount Int      @default(0)
+  maxDownloads  Int
+
+  orderItem OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  buyer     User      @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+
+  @@index([buyerId, expiresAt])
+  @@map("download_grants")
+}
+
+model Review {
+  id        String   @id @default(uuid()) @db.Uuid
+  assetId   String   @db.Uuid
+  userId    String   @db.Uuid
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([assetId, userId])
+  @@index([assetId])
+  @@map("reviews")
+}
+
+model Payout {
+  id               String       @id @default(uuid()) @db.Uuid
+  creatorId        String       @db.Uuid
+  amountCents      Int
+  currency         String
+  status           PayoutStatus
+  stripeTransferId String?
+
+  creator User @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@index([creatorId])
+  @@map("payouts")
+}
+
+model DiscountCode {
+  id             String    @id @default(uuid()) @db.Uuid
+  creatorId      String    @db.Uuid
+  code           String
+  percentOff     Int
+  maxRedemptions Int?
+  expiresAt      DateTime?
+
+  creator User @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@unique([creatorId, code])
+  @@index([creatorId])
+  @@map("discount_codes")
+}
+
+model Collection {
+  id         String  @id @default(uuid()) @db.Uuid
+  title      String
+  slug       String  @unique
+  isFeatured Boolean @default(false)
+  curatorId  String  @db.Uuid
+
+  curator User              @relation(fields: [curatorId], references: [id], onDelete: Cascade)
+  assets  CollectionAsset[]
+
+  @@map("collections")
+}
+
+model CollectionAsset {
+  id           String @id @default(uuid()) @db.Uuid
+  collectionId String @db.Uuid
+  assetId      String @db.Uuid
+  position     Int    @default(0)
+
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  asset      Asset      @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([collectionId, assetId])
+  @@index([collectionId])
+  @@map("collection_assets")
+}
