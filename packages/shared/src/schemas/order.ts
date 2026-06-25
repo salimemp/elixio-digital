@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { licenseCodeSchema } from "./asset.js";
+import { licenseCodeSchema } from "./asset";
 
 export const orderStatusSchema = z.enum([
   "pending",

@@ -1,4 +1,4 @@
-import type { Asset } from "./asset.js";
+import type { Asset } from "./asset";
 
 export type OrderStatus = "pending" | "paid" | "refunded" | "failed";
 
