@@ -1,20 +1,32 @@
 import bcrypt from "bcryptjs";
+import QRCode from "qrcode";
 import { createHash } from "node:crypto";
+import * as totp from "../lib/totp.js";
 import { prisma } from "../lib/prisma.js";
 import { mapUser } from "../lib/mappers.js";
 import { httpError } from "../lib/errors.js";
-import type {
-  AuthSession,
-  ChangePasswordInput,
-  LoginInput,
-  RegisterInput,
-  User,
-} from "@elixio/shared";
+import { randomToken, sha256Hex, generateBackupCode } from "../lib/tokens.js";
+import { encrypt, decrypt, safeDecryptOrNull } from "../lib/crypto.js";
+import { env } from "../config/env.js";
+import {
+  sendEmail,
+  verifyEmailTemplate,
+  magicLinkTemplate,
+  passwordResetTemplate,
+} from "./email.js";
 import type { User as PrismaUser } from "@prisma/client";
+import type { AuthSession, User } from "@elixio/shared";
 
 const SALT_ROUNDS = 12;
 const ACCESS_TOKEN_TTL_SECONDS = 900;
 const REFRESH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const EMAIL_VERIFY_TTL_MS = 24 * 60 * 60 * 1000;
+const MAGIC_LINK_TTL_MS = 15 * 60 * 1000;
+const PASSWORD_RESET_TTL_MS = 60 * 60 * 1000;
+const WEBAUTHN_CHALLENGE_TTL_MS = 5 * 60 * 1000;
+const LOGIN_LOCKOUT_THRESHOLD = 5;
+const LOGIN_LOCKOUT_WINDOW_MS = 15 * 60 * 1000;
+const LOGIN_LOCKOUT_DURATION_MS = 15 * 60 * 1000;
 
 export interface TokenSigner {
   signAccessToken(payload: {
@@ -22,6 +34,7 @@ export interface TokenSigner {
     email: string;
     isCreator: boolean;
     isAdmin: boolean;
+    emailVerified: boolean;
   }): string;
   createRefreshToken(): string;
 }
@@ -30,48 +43,96 @@ function hashRefreshToken(token: string): string {
   return createHash("sha256").update(token).digest("hex");
 }
 
-async function createSession(user: PrismaUser, signer: TokenSigner): Promise<AuthSession> {
+interface IssueSessionOptions {
+  rotate?: boolean;
+  mfaPending?: boolean;
+}
+
+async function issueSession(
+  user: PrismaUser,
+  signer: TokenSigner,
+  opts: IssueSessionOptions = {}
+): Promise<AuthSession> {
   const accessToken = signer.signAccessToken({
     userId: user.id,
     email: user.email,
     isCreator: user.isCreator,
     isAdmin: user.role === "admin",
+    emailVerified: user.emailVerifiedAt !== null,
   });
-  const refreshToken = signer.createRefreshToken();
-  const tokenHash = hashRefreshToken(refreshToken);
 
-  await prisma.refreshToken.create({
-    data: {
-      userId: user.id,
-      tokenHash,
-      expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL_MS),
-    },
-  });
+  let refreshToken: string | undefined;
+  if (!opts.mfaPending) {
+    refreshToken = signer.createRefreshToken();
+    await prisma.refreshToken.create({
+      data: {
+        userId: user.id,
+        tokenHash: hashRefreshToken(refreshToken),
+        expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL_MS),
+      },
+    });
+  }
 
   return {
     user: mapUser(user),
-    tokens: {
-      accessToken,
-      refreshToken,
-      expiresIn: ACCESS_TOKEN_TTL_SECONDS,
-    },
+    tokens: refreshToken
+      ? { accessToken, refreshToken, expiresIn: ACCESS_TOKEN_TTL_SECONDS }
+      : { accessToken, refreshToken: "", expiresIn: ACCESS_TOKEN_TTL_SECONDS },
+    mfaRequired: opts.mfaPending ?? false,
   };
 }
 
-export async function register(input: RegisterInput, signer: TokenSigner): Promise<AuthSession> {
-  const existing = await prisma.user.findUnique({
-    where: { email: input.email.toLowerCase() },
+async function recordLoginAttempt(
+  email: string,
+  userId: string | null,
+  ip: string | null,
+  ua: string | null,
+  success: boolean,
+  method: string,
+  reason?: string
+): Promise<void> {
+  await prisma.loginAttempt.create({
+    data: { email, userId: userId ?? undefined, ipAddress: ip ?? undefined, userAgent: ua ?? undefined, success, method, reason },
   });
-
-  if (existing) {
-    throw httpError("Email already registered", 409, "CONFLICT");
+  if (!success) {
+    const recent = await prisma.loginAttempt.count({
+      where: {
+        email,
+        success: false,
+        createdAt: { gt: new Date(Date.now() - LOGIN_LOCKOUT_WINDOW_MS) },
+      },
+    });
+    if (recent >= LOGIN_LOCKOUT_THRESHOLD && userId) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { lockedUntil: new Date(Date.now() + LOGIN_LOCKOUT_DURATION_MS) },
+      });
+    }
   }
+}
+
+async function isLockedOut(email: string): Promise<boolean> {
+  const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+  if (!user?.lockedUntil) return false;
+  return user.lockedUntil > new Date();
+}
+
+// ─────────── Public auth surface ───────────
+
+export async function register(
+  input: { email: string; password: string; displayName: string },
+  ip: string | null,
+  ua: string | null,
+  signer: TokenSigner
+): Promise<AuthSession> {
+  const email = input.email.toLowerCase();
+  const existing = await prisma.user.findUnique({ where: { email } });
+  if (existing) throw httpError("Email already registered", 409, "CONFLICT");
 
   const passwordHash = await bcrypt.hash(input.password, SALT_ROUNDS);
-
   const user = await prisma.user.create({
     data: {
-      email: input.email.toLowerCase(),
+      email,
       passwordHash,
       displayName: input.displayName,
       role: "buyer",
@@ -79,91 +140,365 @@ export async function register(input: RegisterInput, signer: TokenSigner): Promi
       isCreator: false,
     },
   });
-
-  return createSession(user, signer);
+  await sendVerificationEmail(user);
+  await recordLoginAttempt(email, user.id, ip, ua, true, "register");
+  return issueSession(user, signer);
 }
 
-export async function login(input: LoginInput, signer: TokenSigner): Promise<AuthSession> {
-  const user = await prisma.user.findUnique({
-    where: { email: input.email.toLowerCase() },
-  });
-
+export async function login(
+  input: { email: string; password: string },
+  ip: string | null,
+  ua: string | null,
+  signer: TokenSigner
+): Promise<AuthSession> {
+  const email = input.email.toLowerCase();
+  if (await isLockedOut(email)) {
+    await recordLoginAttempt(email, null, ip, ua, false, "password", "locked_out");
+    throw httpError("Account temporarily locked. Try again later.", 429, "TOO_MANY_REQUESTS");
+  }
+  const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
+    await recordLoginAttempt(email, null, ip, ua, false, "password", "user_not_found");
     throw httpError("Invalid credentials", 401, "UNAUTHORIZED");
   }
-
   const valid = await bcrypt.compare(input.password, user.passwordHash);
-
   if (!valid) {
+    await recordLoginAttempt(email, user.id, ip, ua, false, "password", "invalid_password");
     throw httpError("Invalid credentials", 401, "UNAUTHORIZED");
   }
-
-  return createSession(user, signer);
+  await recordLoginAttempt(email, user.id, ip, ua, true, "password");
+  return issueSession(user, signer, { mfaPending: user.mfaEnabled });
 }
 
-export async function refresh(token: string, signer: TokenSigner): Promise<AuthSession> {
+export async function refresh(
+  token: string,
+  rotate: boolean,
+  signer: TokenSigner
+): Promise<AuthSession> {
   const tokenHash = hashRefreshToken(token);
-
   const record = await prisma.refreshToken.findFirst({
-    where: {
-      tokenHash,
-      revoked: false,
-      expiresAt: { gt: new Date() },
-    },
+    where: { tokenHash, revoked: false, expiresAt: { gt: new Date() } },
     include: { user: true },
   });
+  if (!record) throw httpError("Invalid refresh token", 401, "UNAUTHORIZED");
 
-  if (!record) {
-    throw httpError("Invalid refresh token", 401, "UNAUTHORIZED");
+  if (rotate) {
+    await prisma.refreshToken.update({ where: { id: record.id }, data: { revoked: true } });
   }
-
-  await prisma.refreshToken.update({
-    where: { id: record.id },
-    data: { revoked: true },
-  });
-
-  return createSession(record.user, signer);
+  return issueSession(record.user, signer);
 }
 
 export async function logout(token: string): Promise<void> {
   const tokenHash = hashRefreshToken(token);
-
   await prisma.refreshToken.updateMany({
     where: { tokenHash, revoked: false },
     data: { revoked: true },
   });
 }
 
+export async function issueSessionPublic(
+  user: PrismaUser,
+  signer: TokenSigner
+): Promise<AuthSession> {
+  return issueSession(user, signer);
+}
+
 export async function me(userId: string): Promise<User> {
   const user = await prisma.user.findUnique({ where: { id: userId } });
-
-  if (!user) {
-    throw httpError("User not found", 404, "NOT_FOUND");
-  }
-
+  if (!user) throw httpError("User not found", 404, "NOT_FOUND");
   return mapUser(user);
 }
 
 export async function changePassword(
   userId: string,
-  input: ChangePasswordInput
+  input: { currentPassword: string; newPassword: string }
 ): Promise<void> {
   const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw httpError("User not found", 404, "NOT_FOUND");
+  const valid = await bcrypt.compare(input.currentPassword, user.passwordHash);
+  if (!valid) throw httpError("Invalid credentials", 401, "UNAUTHORIZED");
+  const passwordHash = await bcrypt.hash(input.newPassword, SALT_ROUNDS);
+  await prisma.user.update({ where: { id: userId }, data: { passwordHash } });
+}
 
+// ─────────── Email verification ───────────
+
+export async function sendVerificationEmail(user: PrismaUser): Promise<void> {
+  const token = randomToken(32);
+  const tokenHash = sha256Hex(token);
+  await prisma.emailVerification.create({
+    data: {
+      userId: user.id,
+      tokenHash,
+      expiresAt: new Date(Date.now() + EMAIL_VERIFY_TTL_MS),
+    },
+  });
+  const url = `${env.ELIXIO_WEB_URL}/auth/verify-email?token=${token}`;
+  const tpl = verifyEmailTemplate({ verifyUrl: url });
+  await sendEmail({ ...tpl, to: user.email });
+}
+
+export async function verifyEmail(token: string): Promise<void> {
+  const tokenHash = sha256Hex(token);
+  const record = await prisma.emailVerification.findUnique({ where: { tokenHash } });
+  if (!record || record.usedAt || record.expiresAt < new Date()) {
+    throw httpError("Invalid or expired verification link", 400, "BAD_REQUEST");
+  }
+  await prisma.$transaction([
+    prisma.emailVerification.update({ where: { id: record.id }, data: { usedAt: new Date() } }),
+    prisma.user.update({
+      where: { id: record.userId },
+      data: { emailVerifiedAt: new Date(), isVerified: true },
+    }),
+  ]);
+}
+
+// ─────────── Password reset ───────────
+
+export async function requestPasswordReset(emailRaw: string): Promise<void> {
+  const email = emailRaw.toLowerCase();
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) return; // silent — don't leak which emails exist
+  const token = randomToken(32);
+  const tokenHash = sha256Hex(token);
+  await prisma.passwordResetToken.create({
+    data: { userId: user.id, tokenHash, expiresAt: new Date(Date.now() + PASSWORD_RESET_TTL_MS) },
+  });
+  const url = `${env.ELIXIO_WEB_URL}/auth/reset-password?token=${token}`;
+  const tpl = passwordResetTemplate({ url });
+  await sendEmail({ ...tpl, to: user.email });
+}
+
+export async function confirmPasswordReset(
+  token: string,
+  newPassword: string
+): Promise<void> {
+  const tokenHash = sha256Hex(token);
+  const record = await prisma.passwordResetToken.findUnique({ where: { tokenHash } });
+  if (!record || record.usedAt || record.expiresAt < new Date()) {
+    throw httpError("Invalid or expired reset link", 400, "BAD_REQUEST");
+  }
+  const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+  await prisma.$transaction([
+    prisma.passwordResetToken.update({ where: { id: record.id }, data: { usedAt: new Date() } }),
+    prisma.user.update({ where: { id: record.userId }, data: { passwordHash } }),
+  ]);
+}
+
+// ─────────── Magic link ───────────
+
+export async function requestMagicLink(
+  emailRaw: string,
+  ip: string | null,
+  ua: string | null
+): Promise<{ sent: boolean }> {
+  const email = emailRaw.toLowerCase();
+  const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
+    await recordLoginAttempt(email, null, ip, ua, false, "magic_link", "user_not_found");
+    return { sent: true };
+  }
+  const token = randomToken(32);
+  const tokenHash = sha256Hex(token);
+  await prisma.magicLinkToken.create({
+    data: {
+      email,
+      userId: user.id,
+      tokenHash,
+      expiresAt: new Date(Date.now() + MAGIC_LINK_TTL_MS),
+      ipAddress: ip ?? undefined,
+      userAgent: ua ?? undefined,
+    },
+  });
+  const url = `${env.ELIXIO_WEB_URL}/auth/magic-link?token=${token}`;
+  const tpl = magicLinkTemplate({ url });
+  await sendEmail({ ...tpl, to: user.email });
+  await recordLoginAttempt(email, user.id, ip, ua, true, "magic_link_request");
+  return { sent: true };
+}
+
+export async function consumeMagicLink(
+  token: string,
+  ip: string | null,
+  ua: string | null,
+  signer: TokenSigner
+): Promise<AuthSession> {
+  const tokenHash = sha256Hex(token);
+  const record = await prisma.magicLinkToken.findUnique({ where: { tokenHash } });
+  if (!record || record.usedAt || record.expiresAt < new Date()) {
+    throw httpError("Invalid or expired magic link", 400, "BAD_REQUEST");
+  }
+  if (!record.userId) {
     throw httpError("User not found", 404, "NOT_FOUND");
   }
+  const user = await prisma.user.findUnique({ where: { id: record.userId } });
+  if (!user) throw httpError("User not found", 404, "NOT_FOUND");
 
-  const valid = await bcrypt.compare(input.currentPassword, user.passwordHash);
+  await prisma.magicLinkToken.update({ where: { id: record.id }, data: { usedAt: new Date() } });
+  await recordLoginAttempt(user.email, user.id, ip, ua, true, "magic_link");
+  return issueSession(user, signer, { mfaPending: user.mfaEnabled });
+}
 
-  if (!valid) {
+// ─────────── MFA: TOTP + backup codes ───────────
+
+export interface TotpSetup {
+  secret: string;
+  otpauthUrl: string;
+  qrCodeDataUrl: string;
+}
+
+export async function beginTotpSetup(userId: string): Promise<TotpSetup> {
+  const secret = totp.generateSecret();
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw httpError("User not found", 404, "NOT_FOUND");
+  const otpauthUrl = totp.keyUri(user.email, "Elixio Digital", secret);
+  const qrCodeDataUrl = await QRCode.toDataURL(otpauthUrl);
+  // Stash the unencrypted secret on the user record in `mfaEnrolledAt = null`
+  // by writing a pending factor. We use a separate "pending" state by
+  // checking that the user is not yet mfaEnabled — we store the secret
+  // in a scratch column? Simpler: write it to a new MfaFactor with
+  // totpSecretEnc but no lastUsedAt and no revokedAt — treat factors
+  // with `lastUsedAt == null && revokedAt == null` as pending until
+  // confirmed.
+  await prisma.mfaFactor.create({
+    data: {
+      userId,
+      type: "totp",
+      totpSecretEnc: encrypt(secret),
+    },
+  });
+  return { secret, otpauthUrl, qrCodeDataUrl };
+}
+
+export async function confirmTotpSetup(
+  userId: string,
+  code: string
+): Promise<{ backupCodes: string[] }> {
+  const pending = await prisma.mfaFactor.findFirst({
+    where: { userId, type: "totp", revokedAt: null, lastUsedAt: null },
+    orderBy: { enrolledAt: "desc" },
+  });
+  if (!pending || !pending.totpSecretEnc) throw httpError("No pending TOTP setup", 400, "BAD_REQUEST");
+  const secret = decrypt(pending.totpSecretEnc);
+  if (!totp.check(code, secret)) {
+    throw httpError("Invalid code", 400, "BAD_REQUEST");
+  }
+  // Promote: set lastUsedAt = now, enable user.mfaEnabled, generate backup codes
+  const backupCodes = Array.from({ length: 10 }, () => generateBackupCode());
+  await prisma.$transaction(async (tx) => {
+    await tx.mfaFactor.update({
+      where: { id: pending.id },
+      data: { lastUsedAt: new Date() },
+    });
+    await tx.user.update({
+      where: { id: userId },
+      data: { mfaEnabled: true, mfaEnrolledAt: new Date(), lastMfaVerifiedAt: new Date() },
+    });
+    for (const code of backupCodes) {
+      await tx.mfaBackupCode.create({
+        data: { userId, codeHash: await bcrypt.hash(code.toLowerCase().replace(/-/g, ""), SALT_ROUNDS) },
+      });
+    }
+  });
+  return { backupCodes };
+}
+
+export async function verifyMfa(
+  userId: string,
+  code: string,
+  ip: string | null,
+  ua: string | null
+): Promise<{ verified: boolean }> {
+  const factors = await prisma.mfaFactor.findMany({
+    where: { userId, revokedAt: null, lastUsedAt: { not: null } },
+  });
+  for (const f of factors) {
+    if (f.type === "totp" && f.totpSecretEnc) {
+      const secret = safeDecryptOrNull(f.totpSecretEnc);
+      if (secret && totp.check(code, secret)) {
+        await prisma.mfaFactor.update({ where: { id: f.id }, data: { lastUsedAt: new Date() } });
+        await prisma.user.update({ where: { id: userId }, data: { lastMfaVerifiedAt: new Date() } });
+        await recordLoginAttempt((await prisma.user.findUniqueOrThrow({ where: { id: userId } })).email, userId, ip, ua, true, "totp");
+        return { verified: true };
+      }
+    }
+  }
+  // Try backup codes
+  const cleanCode = code.toLowerCase().replace(/-/g, "");
+  const backupCodes = await prisma.mfaBackupCode.findMany({ where: { userId, usedAt: null } });
+  for (const bc of backupCodes) {
+    if (await bcrypt.compare(cleanCode, bc.codeHash)) {
+      await prisma.mfaBackupCode.update({ where: { id: bc.id }, data: { usedAt: new Date() } });
+      await prisma.user.update({ where: { id: userId }, data: { lastMfaVerifiedAt: new Date() } });
+      return { verified: true };
+    }
+  }
+  await recordLoginAttempt((await prisma.user.findUniqueOrThrow({ where: { id: userId } })).email, userId, ip, ua, false, "mfa", "invalid_code");
+  throw httpError("Invalid MFA code", 401, "UNAUTHORIZED");
+}
+
+export async function disableMfa(
+  userId: string,
+  password: string
+): Promise<void> {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw httpError("User not found", 404, "NOT_FOUND");
+  if (!(await bcrypt.compare(password, user.passwordHash))) {
     throw httpError("Invalid credentials", 401, "UNAUTHORIZED");
   }
+  await prisma.$transaction([
+    prisma.mfaFactor.updateMany({ where: { userId }, data: { revokedAt: new Date() } }),
+    prisma.mfaBackupCode.updateMany({ where: { userId, usedAt: null }, data: { usedAt: new Date() } }),
+    prisma.user.update({ where: { id: userId }, data: { mfaEnabled: false, mfaEnrolledAt: null } }),
+  ]);
+}
 
-  const passwordHash = await bcrypt.hash(input.newPassword, SALT_ROUNDS);
+export async function regenerateBackupCodes(
+  userId: string,
+  password: string
+): Promise<{ backupCodes: string[] }> {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw httpError("User not found", 404, "NOT_FOUND");
+  if (!(await bcrypt.compare(password, user.passwordHash))) {
+    throw httpError("Invalid credentials", 401, "UNAUTHORIZED");
+  }
+  const backupCodes = Array.from({ length: 10 }, () => generateBackupCode());
+  const hashedCodes = await Promise.all(
+    backupCodes.map((code) =>
+      bcrypt.hash(code.toLowerCase().replace(/-/g, ""), SALT_ROUNDS)
+    )
+  );
+  await prisma.$transaction([
+    prisma.mfaBackupCode.updateMany({ where: { userId, usedAt: null }, data: { usedAt: new Date() } }),
+    ...hashedCodes.map((codeHash) =>
+      prisma.mfaBackupCode.create({ data: { userId, codeHash } })
+    ),
+  ]);
+  return { backupCodes };
+}
 
-  await prisma.user.update({
-    where: { id: userId },
-    data: { passwordHash },
+// ─────────── WebAuthn (passkeys) ───────────
+
+export async function storeWebAuthnChallenge(
+  userId: string | null,
+  challenge: string,
+  type: "registration" | "authentication"
+): Promise<void> {
+  await prisma.webAuthnChallenge.create({
+    data: {
+      userId: userId ?? undefined,
+      challenge,
+      type,
+      expiresAt: new Date(Date.now() + WEBAUTHN_CHALLENGE_TTL_MS),
+    },
   });
+}
+
+export async function consumeWebAuthnChallenge(
+  challenge: string
+): Promise<{ userId: string | null; type: string } | null> {
+  const record = await prisma.webAuthnChallenge.findUnique({ where: { challenge } });
+  if (!record || record.usedAt || record.expiresAt < new Date()) return null;
+  await prisma.webAuthnChallenge.update({ where: { id: record.id }, data: { usedAt: new Date() } });
+  return { userId: record.userId, type: record.type };
 }

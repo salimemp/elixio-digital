@@ -10,6 +10,8 @@ export interface User {
   isCreator: boolean;
   isAdmin: boolean;
   isVerified: boolean;
+  emailVerified: boolean;
+  mfaEnabled: boolean;
   createdAt: string;
 }
 
@@ -22,6 +24,7 @@ export interface AuthTokens {
 export interface AuthSession {
   user: User;
   tokens: AuthTokens;
+  mfaRequired?: boolean;
 }
 
 export interface Storefront {
@@ -40,4 +43,28 @@ export interface SocialLinks {
   youtube?: string;
   github?: string;
   linkedin?: string;
+}
+
+export type OAuthProviderName = "google" | "github";
+export type MfaFactorKind = "totp" | "webauthn";
+
+export interface PasskeySummary {
+  id: string;
+  name: string;
+  aaguid: string | null;
+  transports: string[];
+  lastUsedAt: string | null;
+  createdAt: string;
+}
+
+export interface TotpSetup {
+  secret: string;
+  otpauthUrl: string;
+  qrCodeDataUrl: string;
+}
+
+export interface MfaStatus {
+  enabled: boolean;
+  enrolledAt: string | null;
+  lastVerifiedAt: string | null;
 }

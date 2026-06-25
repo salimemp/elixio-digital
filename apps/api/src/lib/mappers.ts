@@ -31,6 +31,8 @@ export function mapUser(user: PrismaUser): SharedUser {
     isCreator: user.isCreator,
     isAdmin: user.role === "admin",
     isVerified: user.isVerified,
+    emailVerified: user.emailVerifiedAt !== null,
+    mfaEnabled: user.mfaEnabled,
     createdAt: user.createdAt.toISOString(),
   };
 }
