@@ -1,0 +1,65 @@
+name: Admin (manual dispatch)
+
+# Reference example of the ELIXIO_ADMIN_TOKEN pattern. Trigger via the
+# Actions tab → "Run workflow" with an explicit `intent` input. Real
+# admin workflows (publish, seed, migrate) are added as separate
+# workflow files and follow this same shape.
+
+on:
+  workflow_dispatch:
+    inputs:
+      intent:
+        description: "Free-form note for the audit log (what this run is doing)"
+        required: true
+        type: string
+
+jobs:
+  admin:
+    name: Run admin task
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Setup pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.15.0 --activate
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Mint fresh access token from stored refresh token
+        env:
+          ELIXIO_API_URL: ${{ secrets.ELIXIO_API_URL }}
+          ELIXIO_ADMIN_TOKEN: ${{ secrets.ELIXIO_ADMIN_TOKEN }}
+        run: |
+          set -euo pipefail
+          echo "::add-mask::$ELIXIO_ADMIN_TOKEN"
+          RESP=$(curl -sf -X POST "$ELIXIO_API_URL/v1/auth/refresh" \
+            -H "Content-Type: application/json" \
+            -d "{\"refreshToken\": \"$ELIXIO_ADMIN_TOKEN\", \"rotate\": false}")
+          ACCESS=$(echo "$RESP" | jq -r .accessToken)
+          echo "::add-mask::$ACCESS"
+          echo "$ACCESS" > /tmp/admin-access-token
+          echo "✓ fresh access token minted (intent: ${{ inputs.intent }})"
+
+      - name: Smoke-test admin access
+        env:
+          ELIXIO_API_URL: ${{ secrets.ELIXIO_API_URL }}
+          ACCESS: /tmp/admin-access-token
+        run: |
+          set -euo pipefail
+          curl -sf -H "Authorization: Bearer $(cat $ACCESS)" \
+            "$ELIXIO_API_URL/v1/admin/health" | jq .
+
+      - name: Cleanup
+        if: always()
+        run: rm -f /tmp/admin-access-token
