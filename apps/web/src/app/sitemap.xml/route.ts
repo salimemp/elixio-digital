@@ -46,13 +46,19 @@ export const GET = (): Response => {
 
   const entries = [...staticEntries, ...postEntries];
 
+  const formatLastmod = (v: Date | string | undefined): string => {
+    if (!v) return now.toISOString();
+    if (v instanceof Date) return v.toISOString();
+    return v;
+  };
+
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${entries
   .map(
     (e) => `  <url>
     <loc>${e.url}</loc>
-    <lastmod>${(e.lastModified ?? now).toISOString()}</lastmod>
+    <lastmod>${formatLastmod(e.lastModified)}</lastmod>
     <changefreq>${e.changeFrequency}</changefreq>
     <priority>${e.priority}</priority>
   </url>`,
