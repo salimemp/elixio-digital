@@ -326,6 +326,20 @@ def cmd_publish(article_id: str) -> Path | None:
     out = BLOG_DIR / f"{slug}.html"
     out.write_text(_frontmatter(blog) + blog["body_html"], encoding="utf-8")
     print(f"  → wrote {out} ({out.stat().st_size} bytes, {blog['word_count']} words)")
+
+    # Auto-ping IndexNow so the new post gets crawled within minutes
+    try:
+        site_url = os.environ.get("ELIXIO_SITE_URL", "https://elixiodigital.com").rstrip("/")
+        url = f"{site_url}/blog/{slug}"
+        sys.path.insert(0, str(Path(__file__).parent))
+        from indexnow import submit as indexnow_submit  # type: ignore
+        code, _ = indexnow_submit([url])
+        print(f"  → IndexNow: HTTP {code} (re-crawl pinged for {url})")
+    except Exception as e:
+        # IndexNow failure is non-fatal — the article is still published.
+        # Operators can re-ping later with `python3 scripts/indexnow.py submit-blog`.
+        print(f"  ! IndexNow ping failed (non-fatal): {e}", file=sys.stderr)
+
     return out
 
 
