@@ -1,5 +1,3 @@
-import type { MetadataRoute } from "next";
-
 /**
  * GET /robots.txt
  *
