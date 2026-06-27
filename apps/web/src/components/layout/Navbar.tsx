@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export function Navbar() {
   return (
@@ -6,9 +7,18 @@ export function Navbar() {
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
         <Link
           href="/"
-          className="rounded-full bg-gum-black px-4 py-2 text-xl font-extrabold tracking-tight text-white"
+          aria-label="Elixio Digital — home"
+          className="flex items-center gap-2 rounded-full bg-gum-black px-3 py-1.5 text-white"
         >
-          Elixio
+          <Image
+            src="/elixio-mark.svg"
+            alt=""
+            width={32}
+            height={32}
+            priority
+            className="h-8 w-8"
+          />
+          <span className="text-xl font-extrabold tracking-tight">Elixio</span>
         </Link>
 
         <div className="hidden items-center gap-2 md:flex">
