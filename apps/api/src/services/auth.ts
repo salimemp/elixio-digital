@@ -200,7 +200,21 @@ export async function register(
   // 4. Always send the verification email. This is mandatory — the
   //    email-verified gate is enforced on /auth/me and most protected
   //    routes, so users who skip this step can't actually use the app.
-  await sendVerificationEmail(user);
+  //
+  //    We make the email send non-fatal: if the SMTP/Resend call fails
+  //    (placeholder API key, network blip, etc.) we still create the
+  //    user and let them re-send the verification from the UI. A user
+  //    without a working email is better than no user at all.
+  try {
+    await sendVerificationEmail(user);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error(
+      `[register] verification email failed for ${email}:`,
+      err instanceof Error ? err.message : err,
+    );
+    // continue — the user is created, they can re-send verification
+  }
 
   // 5. Audit-log the successful registration.
   logRegistration({
