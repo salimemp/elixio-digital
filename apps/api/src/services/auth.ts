@@ -14,6 +14,8 @@ import {
   magicLinkTemplate,
   passwordResetTemplate,
 } from "./email.js";
+import { checkPassword, describeIssue } from "../lib/password-security.js";
+import { logRegistration } from "../lib/registration-logger.js";
 import type { User as PrismaUser } from "@prisma/client";
 import type { Prisma } from "@prisma/client";
 import type { AuthSession, User } from "@elixio/shared";
@@ -121,27 +123,100 @@ async function isLockedOut(email: string): Promise<boolean> {
 // ─────────── Public auth surface ───────────
 
 export async function register(
-  input: { email: string; password: string; displayName: string },
+  input: {
+    email: string;
+    password: string;
+    displayName: string;
+    signupType: "buyer" | "creator";
+  },
   ip: string | null,
   ua: string | null,
   signer: TokenSigner
 ): Promise<AuthSession> {
   const email = input.email.toLowerCase();
-  const existing = await prisma.user.findUnique({ where: { email } });
-  if (existing) throw httpError("Email already registered", 409, "CONFLICT");
+  const role = input.signupType; // 'buyer' or 'creator'
 
+  // 1. Strong-password + HIBP breach check (server-side enforced).
+  //    Even though Zod validates strength, we re-validate here so the
+  //    breach count is in the same error path.
+  const pwCheck = await checkPassword(input.password);
+  if (!pwCheck.ok) {
+    // Log the failed attempt — useful for spotting brute-force on
+    // accounts that don't yet exist.
+    const issueMsgs = pwCheck.issues.map((i) => describeIssue(i, pwCheck.pwnedCount));
+    logRegistration({
+      ts: new Date().toISOString(),
+      event: "register_failed",
+      role,
+      userId: null,
+      email,
+      displayName: input.displayName,
+      ip,
+      userAgent: ua,
+      outcome: pwCheck.issues.includes("pwned") ? "pwned_password" : "weak_password",
+      pwnedCount: pwCheck.pwnedCount,
+      reason: issueMsgs.join(" "),
+    });
+    throw httpError(
+      issueMsgs.length > 0 ? issueMsgs[0] : "Password does not meet security requirements",
+      422,
+      "WEAK_PASSWORD",
+    );
+  }
+
+  // 2. Uniqueness check.
+  const existing = await prisma.user.findUnique({ where: { email } });
+  if (existing) {
+    logRegistration({
+      ts: new Date().toISOString(),
+      event: "register_failed",
+      role,
+      userId: existing.id,
+      email,
+      displayName: input.displayName,
+      ip,
+      userAgent: ua,
+      outcome: "duplicate",
+    });
+    throw httpError("Email already registered", 409, "CONFLICT");
+  }
+
+  // 3. Hash the password and create the user with the chosen role.
+  //    Email verification is required — we set emailVerified=null and
+  //    send a verification email below.
   const passwordHash = await bcrypt.hash(input.password, SALT_ROUNDS);
   const user = await prisma.user.create({
     data: {
       email,
       passwordHash,
       displayName: input.displayName,
-      role: "buyer",
-      isBuyer: true,
-      isCreator: false,
+      role,
+      isBuyer: role === "buyer",
+      isCreator: role === "creator",
+      emailVerifiedAt: null, // MUST verify email before accessing protected features
     },
   });
+
+  // 4. Always send the verification email. This is mandatory — the
+  //    email-verified gate is enforced on /auth/me and most protected
+  //    routes, so users who skip this step can't actually use the app.
   await sendVerificationEmail(user);
+
+  // 5. Audit-log the successful registration.
+  logRegistration({
+    ts: new Date().toISOString(),
+    event: "register",
+    role,
+    userId: user.id,
+    email,
+    displayName: input.displayName,
+    ip,
+    userAgent: ua,
+    outcome: "ok",
+    passwordScore: pwCheck.score,
+  });
+
+  // 6. Track in login attempts (legacy, used for lockout state).
   await recordLoginAttempt(email, user.id, ip, ua, true, "register");
   return issueSession(user, signer);
 }

@@ -35,11 +35,11 @@ import {
 } from "../services/webauthn.js";
 import { httpError } from "../lib/errors.js";
 
-const registerSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8).max(200),
-  displayName: z.string().min(1).max(60),
-});
+// Reuse the strong-password schema from the shared package so client
+// and server validate the same way. The shared schema also enforces
+// the 1 letter + 1 number + 1 special character rule.
+import { registerSchema as sharedRegisterSchema } from "@elixio/shared";
+const registerSchema = sharedRegisterSchema;
 
 const loginSchema = z.object({
   email: z.string().email(),
