@@ -33,6 +33,9 @@ const envSchema = z.object({
   // WebAuthn (passkeys)
   ELIXIO_WEBAUTHN_RP_ID: z.string().default("localhost"),
   ELIXIO_WEBAUTHN_ORIGINS: z.string().default("http://localhost:3001"),
+
+  // Gemini — creator AI (listing copywriter, asset critique, sales coach)
+  GEMINI_API_KEY: z.string().default(""),
 });
 
 export const env = envSchema.parse(process.env);

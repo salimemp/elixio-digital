@@ -14,6 +14,10 @@ import { storefrontRoutes } from "./routes/storefronts.js";
 import { assetRoutes } from "./routes/assets.js";
 import { statsRoutes } from "./routes/stats.js";
 import { categoryRoutes } from "./routes/categories.js";
+import { creatorAnalyticsRoutes } from "./routes/creator-analytics.js";
+import { creatorAIRoutes } from "./routes/creator-ai.js";
+import { creatorToolsRoutes } from "./routes/creator-tools.js";
+import { bulkOpsRoutes } from "./routes/creator-bulk.js";
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({ logger: true });
@@ -104,6 +108,14 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(assetRoutes, { prefix: "/assets" });
   await app.register(categoryRoutes, { prefix: "/categories" });
   await app.register(statsRoutes, { prefix: "/stats" });
+
+  // Creator-only routes — strict role enforcement at the route level
+  // (each route uses preHandler [app.authenticate, app.requireCreator]).
+  // Defense in depth: the service layer also re-checks ownership.
+  await app.register(creatorAnalyticsRoutes, { prefix: "/creator/analytics" });
+  await app.register(creatorAIRoutes, { prefix: "/creator/ai" });
+  await app.register(creatorToolsRoutes, { prefix: "/creator/tools" });
+  await app.register(bulkOpsRoutes, { prefix: "/creator/bulk" });
 
   return app;
 }

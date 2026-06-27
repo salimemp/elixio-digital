@@ -37,6 +37,7 @@ export interface TokenSigner {
   signAccessToken(payload: {
     userId: string;
     email: string;
+    role: "buyer" | "creator" | "admin";
     isCreator: boolean;
     isAdmin: boolean;
     emailVerified: boolean;
@@ -61,6 +62,7 @@ async function issueSession(
   const accessToken = signer.signAccessToken({
     userId: user.id,
     email: user.email,
+    role: user.role,
     isCreator: user.isCreator,
     isAdmin: user.role === "admin",
     emailVerified: user.emailVerifiedAt !== null,

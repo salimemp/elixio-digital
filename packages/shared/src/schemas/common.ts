@@ -21,4 +21,10 @@ export const apiErrorSchema = z.object({
   }),
 });
 
+/**
+ * Analytics time-range selector. Used by every creator analytics route.
+ */
+export const analyticsRangeSchema = z.enum(["7d", "30d", "90d", "1y", "all"]);
+export type AnalyticsRange = z.infer<typeof analyticsRangeSchema>;
+
 export type PaginationInput = z.infer<typeof paginationSchema>;

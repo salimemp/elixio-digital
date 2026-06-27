@@ -85,6 +85,13 @@ model User {
   discountCodes DiscountCode[]
   collections   Collection[]
 
+  // Creator analytics + AI
+  assetViews        AssetView[]
+  assetDownloads    AssetDownload[]
+  aiGenerations     AIGeneration[]
+  analyticsSnapshots AnalyticsSnapshot[]
+  bulkOperations    BulkOperation[]
+
   emailVerifications EmailVerification[]
   passwordResets     PasswordResetToken[]
   magicLinks         MagicLinkToken[]
@@ -307,6 +314,11 @@ model Asset {
   tags        AssetTag[]
   collections CollectionAsset[]
 
+  // Creator analytics
+  views               AssetView[]
+  downloads           AssetDownload[]
+  analyticsSnapshots  AnalyticsSnapshot[]
+
   @@index([creatorId])
   @@index([categoryId])
   @@index([status])
@@ -437,6 +449,7 @@ model DownloadGrant {
 
   orderItem OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
   buyer     User      @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  downloads AssetDownload[]
 
   @@index([buyerId, expiresAt])
   @@map("download_grants")
@@ -512,4 +525,139 @@ model CollectionAsset {
   @@unique([collectionId, assetId])
   @@index([collectionId])
   @@map("collection_assets")
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Creator analytics + AI generation tables
+// ──────────────────────────────────────────────────────────────────────
+
+enum AITaskKind {
+  listing_copywriter
+  asset_critique
+  sales_coach
+  metadata_seo
+}
+
+enum AIJobStatus {
+  pending
+  running
+  completed
+  failed
+}
+
+// One row per asset-page load. Used for conversion-funnel analytics
+// (views → adds-to-cart → purchases). Aggregated nightly for retention.
+model AssetView {
+  id        String   @id @default(uuid()) @db.Uuid
+  assetId   String   @db.Uuid
+  viewerId  String?  @db.Uuid  // null = anonymous (rare on Elixio, but log it)
+  referrer  String?
+  createdAt DateTime @default(now())
+
+  asset  Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  viewer User? @relation(fields: [viewerId], references: [id], onDelete: SetNull)
+
+  @@index([assetId, createdAt])
+  @@index([viewerId, createdAt])
+  @@index([createdAt])
+  @@map("asset_views")
+}
+
+// One row per file download grant used. Drives per-asset download
+// counts and creator "your top assets by downloads" leaderboard.
+model AssetDownload {
+  id        String   @id @default(uuid()) @db.Uuid
+  assetId   String   @db.Uuid
+  buyerId   String   @db.Uuid
+  grantId   String?  @db.Uuid  // optional link to DownloadGrant
+  createdAt DateTime @default(now())
+
+  asset  Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  buyer  User  @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  grant  DownloadGrant? @relation(fields: [grantId], references: [id], onDelete: SetNull)
+
+  @@index([assetId, createdAt])
+  @@index([buyerId, createdAt])
+  @@map("asset_downloads")
+}
+
+// Job record for every Gemini call so we can:
+// - audit what was generated
+// - throttle per-creator rate limits
+// - show "your AI history" in the studio
+// - replay/regenerate on user request
+model AIGeneration {
+  id          String      @id @default(uuid()) @db.Uuid
+  creatorId   String      @db.Uuid
+  kind        AITaskKind
+  status      AIJobStatus @default(pending)
+  inputJson   Json        // the prompt inputs (filename, free-text description, etc.)
+  outputJson  Json?       // structured response from Gemini
+  errorMessage String?
+  tokensIn    Int?
+  tokensOut   Int?
+  costUsd     Float?
+  durationMs  Int?
+  createdAt   DateTime    @default(now())
+  completedAt DateTime?
+
+  creator User @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@index([creatorId, createdAt])
+  @@index([creatorId, kind])
+  @@index([status])
+  @@map("ai_generations")
+}
+
+// Per-asset asset-level snapshot of daily metrics. Populated by the
+// analytics aggregation cron (and on-demand for the creator dashboard).
+// Keeping a snapshot table makes the dashboard queries O(dayCount)
+// instead of O(eventsCount).
+model AnalyticsSnapshot {
+  id            String   @id @default(uuid()) @db.Uuid
+  creatorId     String   @db.Uuid
+  assetId       String?  @db.Uuid  // null = creator-wide rollup row
+  date          DateTime @db.Date
+
+  views         Int @default(0)
+  uniqueViewers Int @default(0)
+  downloads     Int @default(0)
+  purchases     Int @default(0)
+  revenueCents  Int @default(0)
+
+  creator User  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  asset   Asset? @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([creatorId, assetId, date])
+  @@index([creatorId, date])
+  @@index([assetId, date])
+  @@map("analytics_snapshots")
+}
+
+// Log of every bulk operation (price-update batch, archive-batch, etc.)
+// so creators can audit what happened + undo if needed.
+model BulkOperation {
+  id          String   @id @default(uuid()) @db.Uuid
+  creatorId   String   @db.Uuid
+  kind        String   // "price_update" | "tag_add" | "tag_remove" | "publish" | "archive" | "delete"
+  affectedIds String[] // asset ids affected
+  beforeJson  Json?    // snapshot of pre-change values for undo
+  afterJson   Json?    // snapshot of post-change values
+  rolledBackAt DateTime?
+  createdAt   DateTime @default(now())
+
+  creator User @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@index([creatorId, createdAt])
+  @@map("bulk_operations")
+}
+
+// Internal rate-limit table managed by lib/rate-limit.ts.
+// Modeled here so Prisma migrations don't drop it.
+model RateLimitBucket {
+  key         String   @id
+  windowStart DateTime @default(now()) @map("window_start")
+  count       Int      @default(0)
+
+  @@map("rate_limit_buckets")
 }
