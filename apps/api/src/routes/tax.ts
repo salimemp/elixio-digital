@@ -8,6 +8,9 @@ const calcSchema = z.object({
     country: z.string().length(2),
     region: z.string().max(10).optional(),
     postalCode: z.string().max(20).optional(),
+    // India-only: GST slab selector (0/5/12/18/28). Becomes the
+    // region's discriminator ("IN-GST-18") inside the service.
+    gstSlab: z.string().max(10).optional(),
   }),
 });
 

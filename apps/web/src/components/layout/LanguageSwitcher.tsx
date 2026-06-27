@@ -27,7 +27,10 @@ export function LanguageSwitcher() {
     return () => document.removeEventListener("mousedown", onClick);
   }, [open]);
 
-  const PRIORITY: Locale[] = ["en", "es", "fr", "de", "hi", "pt"];
+  // 9 priority locales — translated end-to-end.
+  // Sorted by approximate speaker count (en first since it's the
+  // platform default; then the major non-English markets).
+  const PRIORITY: Locale[] = ["en", "es", "fr", "de", "hi", "pt", "ar", "ur", "he"];
   const rest = (LOCALES as readonly Locale[]).filter((l) => !PRIORITY.includes(l));
 
   return (

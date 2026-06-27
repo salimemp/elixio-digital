@@ -62,9 +62,12 @@ import fr from "../../messages/fr.json";
 import de from "../../messages/de.json";
 import hi from "../../messages/hi.json";
 import pt from "../../messages/pt.json";
+import ar from "../../messages/ar.json";
+import he from "../../messages/he.json";
+import ur from "../../messages/ur.json";
 
 const CLIENT_MESSAGES: Partial<Record<Locale, unknown>> = {
-  en, es, fr, de, hi, pt,
+  en, es, fr, de, hi, pt, ar, he, ur,
 };
 
 function loadClientMessages(locale: Locale): Record<string, unknown> {

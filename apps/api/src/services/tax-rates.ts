@@ -137,12 +137,15 @@ export const TAX_RATES: RateRow[] = [
   // ─── UK ───────────────────────────────────────────────────────
   { country: "GB", region: "", label: "United Kingdom (VAT)", kind: "vat", rate: 0.20, currency: "GBP" },
 
-  // ─── India — 4 GST slabs (we pick the most common 18% as default) ──
-  { country: "IN", region: "", label: "India (GST 0% — essentials)", kind: "gst", rate: 0, currency: "INR", description: "Essential goods: food, books, healthcare" },
-  { country: "IN", region: "", label: "India (GST 5% — reduced)", kind: "gst", rate: 0.05, currency: "INR", description: "Reduced rate: transport, small restaurants" },
-  { country: "IN", region: "", label: "India (GST 12% — standard reduced)", kind: "gst", rate: 0.12, currency: "INR", description: "Processed food, computers" },
-  { country: "IN", region: "", label: "India (GST 18% — standard)", kind: "gst", rate: 0.18, currency: "INR", description: "Most goods including digital products" },
-  { country: "IN", region: "", label: "India (GST 28% — demerit)", kind: "gst", rate: 0.28, currency: "INR", description: "Demerit goods: luxury, tobacco, gambling" },
+  // ─── India — 4 GST slabs ────────────────────────────────────────
+  // Each slab uses a unique region discriminator ("IN-GST-0", …) so the
+  // (country, region, kind) unique constraint doesn't collide. The
+  // calculator looks up the slab via the `gstSlab` field on the address.
+  { country: "IN", region: "IN-GST-0",  label: "India (GST 0% — essentials)", kind: "gst", rate: 0,    currency: "INR", description: "Essential goods: food, books, healthcare" },
+  { country: "IN", region: "IN-GST-5",  label: "India (GST 5% — reduced)",   kind: "gst", rate: 0.05, currency: "INR", description: "Reduced rate: transport, small restaurants" },
+  { country: "IN", region: "IN-GST-12", label: "India (GST 12% — standard reduced)", kind: "gst", rate: 0.12, currency: "INR", description: "Processed food, computers" },
+  { country: "IN", region: "IN-GST-18", label: "India (GST 18% — standard)",  kind: "gst", rate: 0.18, currency: "INR", description: "Most goods including digital products" },
+  { country: "IN", region: "IN-GST-28", label: "India (GST 28% — demerit)",   kind: "gst", rate: 0.28, currency: "INR", description: "Demerit goods: luxury, tobacco, gambling" },
 
   // ─── Canada — federal GST + provincial ───────────────────────
   { country: "CA", region: "", label: "Canada (federal GST)", kind: "gst", rate: 0.05, currency: "CAD" },
@@ -178,11 +181,45 @@ export const TAX_RATES: RateRow[] = [
   { country: "BR", region: "BR-DF", label: "Brazil — Distrito Federal (ICMS 20%)", kind: "icms", rate: 0.20, currency: "BRL" },
 
   // ─── No-tax regions (digital nomad / export-friendly) ────────
-  { country: "AE", region: "", label: "UAE (no VAT for B2C digital)", kind: "none", rate: 0, currency: "AED", description: "UAE VAT applies to B2B; B2C digital services vary" },
   { country: "HK", region: "", label: "Hong Kong (no GST)", kind: "none", rate: 0, currency: "HKD" },
   { country: "SG", region: "", label: "Singapore (GST 9%)", kind: "gst", rate: 0.09, currency: "SGD" },
   { country: "CH", region: "", label: "Switzerland (MWST 8.1%)", kind: "vat", rate: 0.081, currency: "CHF" },
   { country: "NO", region: "", label: "Norway (MVA 25%)", kind: "vat", rate: 0.25, currency: "NOK" },
+
+  // ─── Gulf Cooperation Council (GCC) ───────────────────────────
+  // UAE: 5% VAT since 2018. B2C digital services are taxable at the
+  // standard rate; reverse charge doesn't apply for B2C.
+  { country: "AE", region: "", label: "UAE (VAT)", kind: "vat", rate: 0.05, currency: "AED" },
+  // UAE has no subnational tax regions — VAT is federal only.
+  // Free zones (e.g. DMCC, JAFZA) historically had 0% for goods
+  // moved within the zone, but digital services don't qualify — they
+  // get the standard 5% rate. We don't model zone exemptions.
+  // Note: UAE Federal Tax Authority considers B2C digital services
+  // as "imported services" for the buyer; the marketplace facilitator
+  // (us) is responsible for collecting. This is what we calculate here.
+
+  // Saudi Arabia: 15% VAT since July 2020 (one of the highest in the GCC).
+  // ZATCA (Zakat, Tax and Customs Authority) administers. No subnational
+  // variation. Digital services are fully taxable.
+  { country: "SA", region: "", label: "Saudi Arabia (VAT)", kind: "vat", rate: 0.15, currency: "SAR" },
+  // Note: KSA is also considering a 4th slab for luxury goods but this
+  // doesn't apply to digital services. Track via ZATCA announcements.
+
+  // Oman: 5% VAT since April 2021. Administered by the Tax Authority
+  // (OTA). No subnational variation.
+  { country: "OM", region: "", label: "Oman (VAT)", kind: "vat", rate: 0.05, currency: "OMR" },
+
+  // Bahrain: 10% VAT since January 2022. Administered by NBR.
+  { country: "BH", region: "", label: "Bahrain (VAT)", kind: "vat", rate: 0.10, currency: "BHD" },
+
+  // Kuwait: NO VAT as of 2026. Kuwait is the only GCC country without
+  // a VAT regime. They levy a corporate income tax on foreign companies
+  // only (not on individuals) but no consumption tax. Track for changes.
+  { country: "KW", region: "", label: "Kuwait (no VAT)", kind: "none", rate: 0, currency: "KWD", description: "Kuwait has not implemented VAT. Corporate tax only on foreign entities." },
+
+  // Qatar: NO VAT as of 2026. Qatar introduced a 5% VAT law in 2018
+  // but never activated it. Track for changes.
+  { country: "QA", region: "", label: "Qatar (VAT not implemented)", kind: "none", rate: 0, currency: "QAR", description: "Qatar enacted VAT law but has not activated it. Subject to change." },
 ];
 
 export const TAX_SEED_VERSION = "2026-01-01";

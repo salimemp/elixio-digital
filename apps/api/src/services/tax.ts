@@ -55,16 +55,37 @@ export async function calculateTax(
 ): Promise<TaxCalculationResult> {
   const country = address.country.toUpperCase();
   const region = (address.region ?? "").toUpperCase();
+  const gstSlab = (address as BillingAddress & { gstSlab?: string }).gstSlab?.toUpperCase();
 
-  // Try region-specific first
+  // For India: the region discriminator IS the GST slab (IN-GST-18 = 18%).
+  // The address.region field carries the slab directly; we accept either
+  // format ("IN-GST-18" or just "GST-18" or "18") and normalize.
+  let normalizedRegion = region;
+  if (country === "IN") {
+    if (region && region.startsWith("IN-GST")) {
+      normalizedRegion = region;
+    } else if (gstSlab) {
+      // gstSlab like "18" or "GST-18" → "IN-GST-18"
+      const num = gstSlab.replace(/[^0-9]/g, "");
+      if (num) normalizedRegion = `IN-GST-${num}`;
+    } else if (region && /^[0-9]+$/.test(region)) {
+      // Bare number as region — interpret as slab
+      normalizedRegion = `IN-GST-${region}`;
+    } else {
+      // Default to 18% (standard) when no slab provided
+      normalizedRegion = "IN-GST-18";
+    }
+  }
+
+  // Try region-specific first (or IN-GST-N for India)
   let regionRow = null;
-  if (region) {
+  if (normalizedRegion) {
     regionRow = await prisma.taxRegion.findFirst({
-      where: { country, region: { equals: region, mode: "insensitive" }, isActive: true },
+      where: { country, region: { equals: normalizedRegion, mode: "insensitive" }, isActive: true },
     });
   }
-  // Fall back to country-level
-  if (!regionRow) {
+  // Fall back to country-level (only if no region was provided AND we don't have an India row)
+  if (!regionRow && !normalizedRegion) {
     regionRow = await prisma.taxRegion.findFirst({
       where: { country, region: "", isActive: true },
     });
