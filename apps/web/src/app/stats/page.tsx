@@ -58,7 +58,7 @@ const StatCard = ({ stat }: { stat: Stat }) => (
   </div>
 );
 
-const accent = (kind: Stat["accent"], text: string) => {
+const accent = (kind: Stat["accent"]) => {
   const map: Record<Stat["accent"], string> = {
     pink: "bg-gum-pink",
     yellow: "bg-gum-yellow",
@@ -160,7 +160,7 @@ export default async function StatsPage() {
   return (
     <main className="mx-auto max-w-6xl px-6 py-12">
       <header className="mb-12">
-        <span className={accent("yellow", "Live")}>● LIVE</span>
+        <span className={accent("yellow")}>● LIVE</span>
         <h1 className="mt-4 text-5xl font-extrabold leading-tight md:text-7xl">
           Elixio in{" "}
           <span className="text-gum-purple">numbers</span>
