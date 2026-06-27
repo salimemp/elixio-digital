@@ -38,13 +38,31 @@ const STRENGTH_WIDTH: Record<PasswordStrength, string> = {
 type Rule = {
   label: string;
   met: boolean;
+  /** Plain-English explanation surfaced in a hover tooltip. */
+  why: string;
 };
 
 const computeRules = (password: string): Rule[] => [
-  { label: "8+ characters", met: password.length >= 8 },
-  { label: "1 letter", met: /[A-Za-z]/.test(password) },
-  { label: "1 number", met: /\d/.test(password) },
-  { label: "1 special character", met: /[^A-Za-z0-9\s]/.test(password) },
+  {
+    label: "8+ characters",
+    met: password.length >= 8,
+    why: "Length is the single biggest factor in password strength. Every extra character makes brute-force attacks exponentially harder — 8 chars is the minimum where offline cracking becomes impractical with strong hashing.",
+  },
+  {
+    label: "1 letter",
+    met: /[A-Za-z]/.test(password),
+    why: "Real words and names give your password memorability. Combined with numbers and special characters, this is enough to defeat most dictionary attacks.",
+  },
+  {
+    label: "1 number",
+    met: /\d/.test(password),
+    why: "Digits add 10× the keyspace per character. Even a single digit forces an attacker to try alphanumeric combinations, blowing up their search space.",
+  },
+  {
+    label: "1 special character",
+    met: /[^A-Za-z0-9\s]/.test(password),
+    why: "Special characters (like ! @ # $ %) add another 32+ symbols to the keyspace. They're especially effective against precomputed rainbow tables because most don't include them.",
+  },
 ];
 
 /**
@@ -72,28 +90,44 @@ export function PasswordStrengthMeter({ strength, pwned, password }: Props) {
         </span>
       </div>
 
-      {/* Rule checklist */}
-      <ul className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
+      {/* Rule checklist with "why we require this" tooltips.
+          Tooltip uses a native <details> element so it works without
+          JS and is keyboard-accessible (Enter/Space to open, Esc to
+          close via the browser's built-in behavior). */}
+      <ul className="grid grid-cols-1 gap-1 text-xs sm:grid-cols-2">
         {rules.map((rule) => (
           <li
             key={rule.label}
-            className={
-              rule.met
-                ? "flex items-center gap-1.5 text-emerald-700"
-                : "flex items-center gap-1.5 text-gray-500"
-            }
+            className="relative flex items-center gap-1.5"
           >
             <span
               aria-hidden="true"
               className={
                 rule.met
-                  ? "inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-bold text-emerald-700"
-                  : "inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-gray-200 text-[10px] text-gray-400"
+                  ? "inline-flex h-3.5 w-3.5 flex-none items-center justify-center rounded-full bg-emerald-100 text-[10px] font-bold text-emerald-700"
+                  : "inline-flex h-3.5 w-3.5 flex-none items-center justify-center rounded-full bg-gray-200 text-[10px] text-gray-400"
               }
             >
               {rule.met ? "✓" : "·"}
             </span>
-            {rule.label}
+            <details className="group inline">
+              <summary
+                className={
+                  "inline cursor-help list-none border-b border-dotted border-current/30 outline-none focus:border-solid " +
+                  (rule.met ? "text-emerald-700" : "text-gray-500")
+                }
+                aria-label={`${rule.label}. Click to learn why we require this.`}
+              >
+                {rule.label}
+              </summary>
+              <div
+                role="tooltip"
+                className="absolute left-0 top-full z-20 mt-1 w-72 max-w-xs rounded-lg border-2 border-gum-black bg-white p-2 text-left text-[11px] font-normal leading-snug text-gray-700 shadow-[0_4px_0_0_#111]"
+              >
+                <span className="font-bold">Why we require this: </span>
+                {rule.why}
+              </div>
+            </details>
           </li>
         ))}
       </ul>

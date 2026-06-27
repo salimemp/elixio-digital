@@ -34,6 +34,13 @@ import {
   deletePasskey,
 } from "../services/webauthn.js";
 import { httpError } from "../lib/errors.js";
+import {
+  limitLogin,
+  limitRegister,
+  limitPasswordReset,
+  limitMagicLink,
+  limitMfa,
+} from "../lib/rate-limit.js";
 
 // Reuse the strong-password schema from the shared package so client
 // and server validate the same way. The shared schema also enforces
@@ -99,12 +106,20 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
   // ── Email + password ────────────────────────────────────────────
   app.post("/register", async (request, reply) => {
     const input = registerSchema.parse(request.body);
+    // Per-IP rate limit on registration (anti-spam). 5 per hour.
+    await limitRegister(clientIp(request) ?? "unknown");
     const session = await svcRegister(input, clientIp(request), userAgent(request), makeSigner(app));
     reply.status(201).send(session);
   });
 
   app.post("/login", async (request) => {
     const input = loginSchema.parse(request.body);
+    // Per-(user OR IP) rate limit. We use the email first, falling
+    // back to IP if the email doesn't match a known user. This way
+    // attackers can't bypass by rotating emails, and legitimate
+    // users with a typo don't get locked out.
+    const key = input.email.toLowerCase();
+    await limitLogin(key);
     return svcLogin(input, clientIp(request), userAgent(request), makeSigner(app));
   });
 
@@ -148,6 +163,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
   // ── Password reset ──────────────────────────────────────────────
   app.post("/password-reset/request", async (request, reply) => {
     const { email } = emailSchema.parse(request.body);
+    await limitPasswordReset(email.toLowerCase());
     await svcRequestReset(email);
     reply.status(202).send({ sent: true });
   });
@@ -161,6 +177,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
   // ── Magic link ──────────────────────────────────────────────────
   app.post("/magic-link/request", async (request, reply) => {
     const { email } = magicLinkRequestSchema.parse(request.body);
+    await limitMagicLink(email.toLowerCase());
     const result = await svcRequestMagicLink(email, clientIp(request), userAgent(request));
     reply.status(202).send(result);
   });
@@ -172,11 +189,13 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
 
   // ── MFA: TOTP + backup codes ────────────────────────────────────
   app.post("/mfa/totp/setup", { preHandler: [app.authenticate] }, async (request) => {
+    await limitMfa(request.user.userId);
     const me = await svcMe(request.user.userId);
     return beginTotpSetup(me.id);
   });
 
   app.post("/mfa/totp/confirm", { preHandler: [app.authenticate] }, async (request) => {
+    await limitMfa(request.user.userId);
     const { code } = mfaCodeSchema.parse(request.body);
     const me = await svcMe(request.user.userId);
     return confirmTotpSetup(me.id, code);

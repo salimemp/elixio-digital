@@ -16,6 +16,8 @@ import {
 } from "./email.js";
 import { checkPassword, describeIssue } from "../lib/password-security.js";
 import { logRegistration } from "../lib/registration-logger.js";
+import { lookupGeo, formatLocation, type GeoLocation } from "../lib/geoip.js";
+import { newLocationTemplate } from "./email.js";
 import type { User as PrismaUser } from "@prisma/client";
 import type { Prisma } from "@prisma/client";
 import type { AuthSession, User } from "@elixio/shared";
@@ -92,10 +94,24 @@ async function recordLoginAttempt(
   ua: string | null,
   success: boolean,
   method: string,
-  reason?: string
+  reason?: string,
+  geo?: GeoLocation | null,
+  isNewLocation?: boolean
 ): Promise<void> {
   await prisma.loginAttempt.create({
-    data: { email, userId: userId ?? undefined, ipAddress: ip ?? undefined, userAgent: ua ?? undefined, success, method, reason },
+    data: {
+      email,
+      userId: userId ?? undefined,
+      ipAddress: ip ?? undefined,
+      userAgent: ua ?? undefined,
+      country: geo?.country ?? undefined,
+      countryCode: geo?.countryCode ?? undefined,
+      city: geo?.city ?? undefined,
+      success,
+      method,
+      reason,
+      isNewLocation: isNewLocation ?? false,
+    },
   });
   if (!success) {
     const recent = await prisma.loginAttempt.count({
@@ -243,21 +259,91 @@ export async function login(
 ): Promise<AuthSession> {
   const email = input.email.toLowerCase();
   if (await isLockedOut(email)) {
-    await recordLoginAttempt(email, null, ip, ua, false, "password", "locked_out");
+    const geo = ip ? await lookupGeo(ip) : null;
+    await recordLoginAttempt(email, null, ip, ua, false, "password", "locked_out", geo);
     throw httpError("Account temporarily locked. Try again later.", 429, "TOO_MANY_REQUESTS");
   }
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
-    await recordLoginAttempt(email, null, ip, ua, false, "password", "user_not_found");
+    const geo = ip ? await lookupGeo(ip) : null;
+    await recordLoginAttempt(email, null, ip, ua, false, "password", "user_not_found", geo);
     throw httpError("Invalid credentials", 401, "UNAUTHORIZED");
   }
   const valid = await bcrypt.compare(input.password, user.passwordHash);
   if (!valid) {
-    await recordLoginAttempt(email, user.id, ip, ua, false, "password", "invalid_password");
+    const geo = ip ? await lookupGeo(ip) : null;
+    await recordLoginAttempt(email, user.id, ip, ua, false, "password", "invalid_password", geo);
     throw httpError("Invalid credentials", 401, "UNAUTHORIZED");
   }
-  await recordLoginAttempt(email, user.id, ip, ua, true, "password");
+
+  // Successful login. Look up the geo + check if this is a new location.
+  const geo = ip ? await lookupGeo(ip) : null;
+  const isNewLocation = await isLoginFromNewLocation(user.id, ip, geo);
+  await recordLoginAttempt(email, user.id, ip, ua, true, "password", undefined, geo, isNewLocation);
+
+  // If new location, send a security email (non-blocking — don't fail login
+  // if the email send errors). Only fires on the first login from a new
+  // country to avoid alert fatigue.
+  if (isNewLocation && geo) {
+    try {
+      const template = newLocationTemplate({
+        displayName: user.displayName,
+        ip: geo.ip,
+        location: formatLocation(geo),
+        userAgent: ua ?? "Unknown",
+        time: new Date(),
+      });
+      await sendEmail({
+        to: user.email,
+        subject: template.subject,
+        html: template.html,
+        text: template.text,
+      });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("[login] new-location email failed:", err);
+    }
+  }
+
   return issueSession(user, signer, { mfaPending: user.mfaEnabled });
+}
+
+/**
+ * Returns true if this (IP, country) is a new login for the user.
+ *
+ * "New" = different from any prior successful login. We compare on the
+ * country code first (catches VPN/cell-network shifts that change IP
+ * but not country) and fall back to the IP address (catches different
+ * locations in the same country).
+ *
+ * To avoid alert fatigue, we only flag "new" once per (country, IP) —
+ * subsequent logins from the same place don't re-alert.
+ */
+async function isLoginFromNewLocation(
+  userId: string,
+  ip: string | null,
+  geo: GeoLocation | null
+): Promise<boolean> {
+  if (!ip) return false;
+
+  // Has this exact IP ever logged in successfully?
+  const priorIp = await prisma.loginAttempt.findFirst({
+    where: { userId, ipAddress: ip, success: true },
+    select: { id: true },
+  });
+  if (priorIp) return false;
+
+  // Has this country ever logged in successfully?
+  if (geo?.countryCode) {
+    const priorCountry = await prisma.loginAttempt.findFirst({
+      where: { userId, countryCode: geo.countryCode, success: true },
+      select: { id: true },
+    });
+    if (priorCountry) return false; // same country, just different IP — don't alert
+  }
+
+  // First time we've seen this user from this IP AND country. New location.
+  return true;
 }
 
 export async function refresh(

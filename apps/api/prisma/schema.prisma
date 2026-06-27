@@ -244,18 +244,23 @@ model MfaBackupCode {
 }
 
 model LoginAttempt {
-  id        String   @id @default(uuid()) @db.Uuid
-  email     String
-  userId    String?  @db.Uuid
-  ipAddress String?
-  userAgent String?
-  success   Boolean
-  method    String
-  reason    String?
-  createdAt DateTime @default(now())
+  id          String   @id @default(uuid()) @db.Uuid
+  email       String
+  userId      String?  @db.Uuid
+  ipAddress   String?
+  userAgent   String?
+  country     String?  // ISO country name from GeoIP
+  countryCode String?  // ISO 3166-1 alpha-2
+  city        String?
+  success     Boolean
+  method      String
+  reason      String?
+  isNewLocation Boolean @default(false)  // true if login from a new country/IP
+  createdAt   DateTime @default(now())
 
   @@index([email, createdAt])
   @@index([ipAddress, createdAt])
+  @@index([userId, createdAt])
   @@map("login_attempts")
 }
 

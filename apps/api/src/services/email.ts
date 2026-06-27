@@ -81,6 +81,49 @@ export function passwordResetTemplate(args: { url: string }): EmailMessage {
   };
 }
 
+export function newLocationTemplate(args: {
+  displayName: string;
+  ip: string;
+  location: string;
+  userAgent: string;
+  time: Date;
+}): EmailMessage {
+  const time = args.time.toUTCString();
+  const text =
+    `Hi ${args.displayName},\n\n` +
+    `We noticed a new sign-in to your Elixio Digital account.\n\n` +
+    `When: ${time}\n` +
+    `Where: ${args.location}\n` +
+    `IP: ${args.ip}\n` +
+    `Device: ${args.userAgent}\n\n` +
+    `If this was you, no action is needed. If you don't recognize this activity, please:\n` +
+    `1. Change your password immediately at https://elixiodigital.com/auth/login\n` +
+    `2. Enable two-factor authentication (TOTP or passkey)\n` +
+    `3. Review recent login activity in your account settings\n\n` +
+    `This is an automated security notice from Elixio Digital.`;
+  return {
+    to: "",
+    subject: `New sign-in to Elixio from ${args.location}`,
+    text,
+    html: emailShell(
+      "New sign-in to your account",
+      `<p>Hi ${args.displayName},</p>` +
+        `<p>We noticed a new sign-in to your Elixio Digital account.</p>` +
+        `<table style="width:100%;border-collapse:collapse;margin:24px 0">` +
+        `<tr><td style="padding:8px 0;color:#666;width:80px">When</td><td style="padding:8px 0"><strong>${time}</strong></td></tr>` +
+        `<tr><td style="padding:8px 0;color:#666">Where</td><td style="padding:8px 0"><strong>${args.location}</strong></td></tr>` +
+        `<tr><td style="padding:8px 0;color:#666">IP</td><td style="padding:8px 0;font-family:monospace;font-size:13px">${args.ip}</td></tr>` +
+        `<tr><td style="padding:8px 0;color:#666">Device</td><td style="padding:8px 0;font-size:13px">${args.userAgent}</td></tr>` +
+        `</table>` +
+        `<p style="background:#FFF0F0;border-left:4px solid #E11;padding:12px 16px;border-radius:4px">` +
+        `<strong>Wasn't you?</strong> Change your password and enable two-factor authentication.` +
+        `</p>` +
+        `<p style="margin:24px 0"><a href="https://elixiodigital.com/auth/login" style="background:#E11;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:700">Secure my account</a></p>` +
+        `<p style="color:#666;font-size:13px">If this was you, no action is needed. This is an automated security notice.</p>`
+    ),
+  };
+}
+
 function emailShell(title: string, body: string): string {
   return `<!doctype html><html><body style="margin:0;padding:0;background:#FFFDF5;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#111">
 <div style="max-width:560px;margin:0 auto;padding:32px 20px">
