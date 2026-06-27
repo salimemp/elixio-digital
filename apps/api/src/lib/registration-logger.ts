@@ -59,14 +59,29 @@ const writeLine = (filename: string, line: string): void => {
 };
 
 /**
- * Log a registration attempt. Always writes to registrations.log, and
- * additionally writes to creators.log or buyers.log depending on the
- * role. Safe to call from anywhere; errors writing the log do NOT
- * bubble up (we never want logging to break signup).
+ * Log a registration attempt. Always:
+ *   1. Writes one JSON line to the appropriate file
+ *      (logs/creators.log | logs/buyers.log | logs/registrations.log)
+ *   2. Emits a structured stdout line so log aggregators
+ *      (Railway, CloudWatch, Datadog) can ingest it
+ *
+ * The dual-emit pattern is intentional:
+ *   - Local dev: file logs persist on disk
+ *   - Production (Railway/containers): stdout logs survive
+ *     container restarts and ship to the platform log stream
+ *
+ * Safe to call from anywhere; errors writing the log do NOT bubble
+ * up (we never want logging to break signup).
  */
 export const logRegistration = (event: RegistrationEvent): void => {
+  const line = JSON.stringify(event);
   try {
-    const line = JSON.stringify(event);
+    // 1. Stdout (always works, picked up by Railway logs)
+    // Prefix so it's filterable in log viewers.
+    // eslint-disable-next-line no-console
+    console.log(`[registration] ${line}`);
+
+    // 2. File (best-effort, may fail in ephemeral containers)
     writeLine("registrations.log", line);
     if (event.role === "creator") {
       writeLine("creators.log", line);
