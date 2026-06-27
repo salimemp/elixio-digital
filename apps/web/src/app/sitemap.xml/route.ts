@@ -52,7 +52,7 @@ ${entries
   .map(
     (e) => `  <url>
     <loc>${e.url}</loc>
-    <lastmod>${e.lastModified.toISOString()}</lastmod>
+    <lastmod>${(e.lastModified ?? now).toISOString()}</lastmod>
     <changefreq>${e.changeFrequency}</changefreq>
     <priority>${e.priority}</priority>
   </url>`,
