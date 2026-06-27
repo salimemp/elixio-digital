@@ -4,6 +4,40 @@ import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 const archiver = require("archiver");
 import { PDFDocument } from "pdf-lib";
+import { existsSync, readdirSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, resolve } from "node:path";
+// PDF.js for full-fidelity rendering (Apache 2.0 from Mozilla — no AGPL).
+// Pairs with @napi-rs/canvas (Skia-backed offscreen canvas) to produce
+// PNG/JPEG buffers without needing poppler/ghostscript on the host.
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
+import { createCanvas, GlobalFonts } from "@napi-rs/canvas";
+
+// Register pdfjs's bundled Liberation Sans fonts with @napi-rs/canvas
+// so PDF text falls back to legible glyphs when the source PDF uses
+// standard fonts (Helvetica / Times / Courier) without embedding them.
+// Idempotent — only runs once per process.
+let _fontsRegistered = false;
+function registerStandardFonts(): void {
+  if (_fontsRegistered) return;
+  _fontsRegistered = true;
+  try {
+    const __dirname = dirname(fileURLToPath(import.meta.url));
+    const fontsDir = resolve(
+      __dirname,
+      "../../node_modules/pdfjs-dist/standard_fonts/"
+    );
+    if (!existsSync(fontsDir)) return;
+    for (const file of readdirSync(fontsDir)) {
+      if (!file.endsWith(".ttf")) continue;
+      // pdfjs ships 4 Liberation Sans variants; register each so all
+      // bold/italic combinations render.
+      GlobalFonts.registerFromPath(resolve(fontsDir, file), file.replace(".ttf", ""));
+    }
+  } catch {
+    // Non-fatal — PDF still renders shapes + images, text falls back to .notdef
+  }
+}
 
 export interface PdfToImageInput {
   pdfBuffer: Buffer;
@@ -31,54 +65,107 @@ export interface PdfToImageOutput {
 }
 
 /**
- * Convert each page of a PDF to an image. Pure pdf-lib + sharp — no
- * MuPDF dependency needed for this simple case (MuPDF would be needed
- * for OCR or complex rendering).
+ * Convert each page of a PDF to an image at the requested DPI.
  *
- * For PDFs that aren't pure image PDFs, this returns a "best effort"
- * raster via pdf-lib page extraction; for higher fidelity we'd need
- * a headless renderer (chromium / poppler) which is a Phase 2.
+ * Implementation: Mozilla pdfjs-dist (Apache 2.0) parses the PDF and
+ * produces a per-page render. We paint that onto a @napi-rs/canvas
+ * Skia surface, then export via sharp. No system poppler/ghostscript
+ * needed — works cleanly on Railway's alpine base image.
+ *
+ * Why not MuPDF.js? The official mupdf npm package is AGPL-3.0, which
+ * would require open-sourcing the entire SaaS under AGPL. pdfjs-dist is
+ * Apache 2.0 from Mozilla and gives us essentially the same fidelity for
+ * rasterization use cases (no OCR / advanced editing — those still want
+ * MuPDF with a commercial license if/when we need them).
  */
 export async function pdfToImages(
   input: PdfToImageInput
 ): Promise<PdfToImageOutput> {
   const format = input.format ?? "png";
-  const dpi = input.dpi ?? 150;
+  const targetDpi = input.dpi ?? 150;
   const maxWidth = input.maxWidth ?? 2400;
-  const pdf = await PDFDocument.load(input.pdfBuffer);
-  const pageCount = pdf.getPageCount();
+  // pdfjs render scale: device-pixel-ratio; PDF points are 72dpi base.
+  const scale = Math.min(4, Math.max(0.5, targetDpi / 72));
+  const mime = format === "jpeg" ? "image/jpeg" : format === "webp" ? "image/webp" : "image/png";
+
+  // Register Liberation Sans with @napi-rs/canvas so pdfjs finds it via
+  // the canvas font API. Combined with useSystemFonts=true, this gives
+  // us proper text rendering for PDFs that reference standard fonts
+  // (Helvetica / Times / Courier) without embedding them.
+  registerStandardFonts();
+
+  const loadingTask = pdfjsLib.getDocument({
+    data: new Uint8Array(input.pdfBuffer),
+    disableFontFace: false, // let pdfjs use canvas font lookup
+    useSystemFonts: true, // query registered fonts
+  });
+  const doc = await loadingTask.promise;
+  const totalPages = doc.numPages;
   const pages: PdfToImageOutputPage[] = [];
 
-  for (let i = 0; i < pageCount; i++) {
-    const page = pdf.getPage(i);
-    const { width: w, height: h } = page.getSize();
-    // pdf-lib doesn't render — for proper PDF→image, we'd use
-    // poppler / mupdf. As a Phase 1 placeholder, we report dimensions
-    // and return a placeholder image sized correctly.
-    // Phase 2: wire MuPDF via @mupdf/sharp-mupdf or use sharp-pdf.
-    const placeholder = await sharp({
-      create: {
-        width: Math.min(maxWidth, Math.round(w * dpi / 72)),
-        height: Math.round(h * dpi / 72),
-        channels: 3,
-        background: { r: 245, g: 245, b: 245 },
-      },
-    })
-      .png()
-      .toBuffer();
+  for (let i = 1; i <= totalPages; i++) {
+    const page = await doc.getPage(i);
+    // 1) Native viewport at scale=1 (in CSS pixels at 72dpi)
+    const baseViewport = page.getViewport({ scale: 1 });
+    const intrinsicW = baseViewport.width;
+    // 2) Apply scale + maxWidth clamp
+    let renderScale = scale;
+    if (intrinsicW * renderScale > maxWidth) {
+      renderScale = maxWidth / intrinsicW;
+    }
+    const viewport = page.getViewport({ scale: renderScale });
+    const w = Math.ceil(viewport.width);
+    const h = Math.ceil(viewport.height);
+
+    // 3) Create offscreen canvas at the render size
+    const canvas = createCanvas(w, h);
+    const ctx = canvas.getContext("2d");
+    // Paint white background (PDFs with transparency show as black otherwise)
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, w, h);
+
+    // 4) Render the PDF page onto the canvas. pdfjs uses the standard
+    //    CanvasRenderingContext2D API which our @napi-rs/canvas ctx satisfies.
+    //    We pass `canvas` (the HTMLCanvasElement-like surface) so pdfjs
+    //    allocates any internal pattern/shading surfaces through our
+    //    @napi-rs/canvas instance too.
+    await page.render({
+      canvasContext: ctx as unknown as CanvasRenderingContext2D,
+      canvas: canvas as unknown as HTMLCanvasElement,
+      viewport,
+    }).promise;
+
+    // 5) Encode via sharp (handles png/jpeg/webp compression)
+    const rawPng = canvas.toBuffer("image/png");
+    let out: Buffer;
+    let finalW = w;
+    let finalH = h;
+    if (mime === "image/png") {
+      out = rawPng;
+    } else if (mime === "image/jpeg") {
+      out = await sharp(rawPng).jpeg({ quality: 88 }).toBuffer();
+    } else {
+      out = await sharp(rawPng).webp({ quality: 88 }).toBuffer();
+    }
+
     pages.push({
-      pageNumber: i + 1,
-      buffer: placeholder,
-      width: Math.min(maxWidth, Math.round((w * dpi) / 72)),
-      height: Math.round((h * dpi) / 72),
+      pageNumber: i,
+      buffer: out,
+      width: finalW,
+      height: finalH,
       format,
-      sizeBytes: placeholder.length,
+      sizeBytes: out.length,
     });
+
+    // Free per-page memory
+    page.cleanup();
   }
+
+  await doc.cleanup();
 
   return {
     pages,
-    totalPages: pageCount,
+    totalPages,
     totalBytes: pages.reduce((s, p) => s + p.sizeBytes, 0),
   };
 }

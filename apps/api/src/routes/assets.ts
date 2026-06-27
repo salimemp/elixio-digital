@@ -6,6 +6,7 @@ import {
   updateAssetSchema,
 } from "@elixio/shared";
 import * as assetService from "../services/assets.js";
+import { recordAssetView } from "../services/analytics.js";
 
 export async function assetRoutes(app: FastifyInstance): Promise<void> {
   app.get("/", async (request) => {
@@ -19,9 +20,41 @@ export async function assetRoutes(app: FastifyInstance): Promise<void> {
     reply.status(201).send(asset);
   });
 
+  // Public asset page view. Fire-and-forget records a view event for
+  // creator analytics (funnel: views → orders → downloads). Wrapped so
+  // a DB hiccup never breaks the public page render.
+  // If the request carries a valid JWT we attribute the view to that
+  // user (so creators see "X unique viewers" rather than N anonymous
+  // hits). Auth is OPTIONAL here — anonymous views are logged too.
   app.get("/:id", async (request) => {
     const params = idParamSchema.parse(request.params);
-    return assetService.getById(params.id);
+
+    // Optional JWT verification — populates request.user if a valid
+    // bearer token is present, but never blocks anonymous viewers.
+    if (request.headers.authorization) {
+      try {
+        await request.jwtVerify();
+      } catch {
+        // invalid/expired token — treat as anonymous, don't error
+      }
+    }
+
+    const asset = await assetService.getById(params.id);
+    const viewerId = request.user?.userId ?? null;
+    const referrer =
+      (request.headers.referer as string | undefined) ??
+      (request.headers.referrer as string | undefined) ??
+      null;
+
+    // Fire-and-forget view tracking. Not awaited — the public page
+    // should render even if the analytics DB is slow.
+    void recordAssetView({ assetId: params.id, viewerId, referrer }).catch(
+      () => {
+        // Swallow — never let analytics break the user-facing page.
+      }
+    );
+
+    return asset;
   });
 
   app.patch("/:id", { preHandler: [app.authenticate, app.requireCreator] }, async (request) => {
