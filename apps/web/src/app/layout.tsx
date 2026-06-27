@@ -54,6 +54,15 @@ export const metadata: Metadata = {
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
   manifest: "/manifest.webmanifest",
+  verification: {
+    // Google Search Console
+    google: "pcVZ7hKByYRkH5ndPjew7gj2bEkpwdLTC2kQ8WVItAY",
+    // Bing Webmaster Tools (msvalidate.01 isn't a top-level key, so it
+    // lives in `other`; Next.js renders it as <meta name="msvalidate.01" ...>)
+    other: {
+      "msvalidate.01": "6D738BE6B98C4FAB5152757BEF3D069E",
+    },
+  },
   alternates: {
     canonical: "/",
     types: {
