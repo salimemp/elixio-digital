@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "name": "Malay",
+    "code": "ms",
+    "native_name": "Bahasa Melayu",
+    "direction": "ltr",
+    "currency": "MYR",
+    "needs_human_review": true,
+    "translator": null,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "note": "Scaffold for Malay. Strings fall back to English until a native speaker reviews."
+  }
+}

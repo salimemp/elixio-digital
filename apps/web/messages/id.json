@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "name": "Indonesian",
+    "code": "id",
+    "native_name": "Bahasa Indonesia",
+    "direction": "ltr",
+    "currency": "IDR",
+    "needs_human_review": true,
+    "translator": null,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "note": "Scaffold for Indonesian. Strings fall back to English until a native speaker reviews."
+  }
+}

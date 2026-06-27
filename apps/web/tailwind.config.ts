@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: "class", // enable `dark:` variants via the .dark class on <html>
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -9,15 +10,38 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Brand palette tokens — driven by CSS variables set in
+        // <html style="..."> by the ThemeProvider. Switching brand
+        // swaps the gum-* colors site-wide without a rebuild.
         gum: {
-          pink: "#ff90e8",
-          purple: "#7b61ff",
-          yellow: "#f1e05a",
-          cyan: "#23a6d5",
-          black: "#111111",
-          cream: "#fffdf5",
-          mint: "#96f7d6",
-          tangerine: "#ff9f43",
+          pink: "var(--gum-pink)",
+          purple: "var(--gum-purple)",
+          yellow: "var(--gum-yellow)",
+          cyan: "var(--gum-cyan)",
+          black: "var(--gum-black)",
+          cream: "var(--gum-cream)",
+          mint: "var(--gum-mint)",
+          tangerine: "var(--gum-tangerine)",
+        },
+        // Semantic surface tokens for light/dark mode. These use
+        // Tailwind's dark: variant to flip when .dark is set on <html>.
+        surface: {
+          DEFAULT: "#ffffff",
+          muted: "#f5f5f4",
+          subtle: "#fafaf9",
+          // Dark variants
+          "dark-DEFAULT": "#0a0a0a",
+          "dark-muted": "#171717",
+          "dark-subtle": "#0f0f0f",
+        },
+        ink: {
+          DEFAULT: "#111111",
+          muted: "#525252",
+          subtle: "#737373",
+          // Dark variants
+          "dark-DEFAULT": "#fafafa",
+          "dark-muted": "#d4d4d4",
+          "dark-subtle": "#a3a3a3",
         },
       },
       fontFamily: {
@@ -29,6 +53,7 @@ const config: Config = {
       },
       boxShadow: {
         gum: "0 6px 0 0 #111",
+        "gum-dark": "0 6px 0 0 #000",
       },
     },
   },

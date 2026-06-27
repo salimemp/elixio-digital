@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 import { Navbar } from "../components/layout/Navbar";
 import { AuthProvider } from "../lib/auth";
+import { I18nProvider } from "../lib/i18n-client";
+import { ThemeProvider } from "../lib/theme";
+import { DEFAULT_LOCALE, resolveLocaleFromCookie, type Locale } from "../lib/i18n";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -78,8 +82,13 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+  // Resolve locale server-side from the cookie so the initial HTML
+  // is already in the user's preferred language (no flash of English).
+  const cookieStore = cookies();
+  const locale: Locale = resolveLocaleFromCookie(cookieStore.get("locale")?.value) ?? DEFAULT_LOCALE;
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <head>
         {/* Feed auto-discovery — RSS readers and browsers pick these up */}
         <link
@@ -96,10 +105,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         />
       </head>
       <body className={`${inter.variable} font-display min-h-screen antialiased`}>
-        <AuthProvider>
-          <Navbar />
-          {children}
-        </AuthProvider>
+        <ThemeProvider>
+          <I18nProvider initialLocale={locale}>
+            <AuthProvider>
+              <Navbar />
+              {children}
+            </AuthProvider>
+          </I18nProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

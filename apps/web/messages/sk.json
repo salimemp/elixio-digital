@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "name": "Slovak",
+    "code": "sk",
+    "native_name": "Slovenčina",
+    "direction": "ltr",
+    "currency": "EUR",
+    "needs_human_review": true,
+    "translator": null,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "note": "Scaffold for Slovak. Strings fall back to English until a native speaker reviews."
+  }
+}

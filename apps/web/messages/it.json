@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "name": "Italian",
+    "code": "it",
+    "native_name": "Italiano",
+    "direction": "ltr",
+    "currency": "EUR",
+    "needs_human_review": true,
+    "translator": null,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "note": "Scaffold for Italian. Strings fall back to English until a native speaker reviews."
+  }
+}

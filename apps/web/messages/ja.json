@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "name": "Japanese",
+    "code": "ja",
+    "native_name": "日本語",
+    "direction": "ltr",
+    "currency": "JPY",
+    "needs_human_review": true,
+    "translator": null,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "note": "Scaffold for Japanese. Strings fall back to English until a native speaker reviews."
+  }
+}

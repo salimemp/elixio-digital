@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "name": "Thai",
+    "code": "th",
+    "native_name": "ไทย",
+    "direction": "ltr",
+    "currency": "THB",
+    "needs_human_review": true,
+    "translator": null,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "note": "Scaffold for Thai. Strings fall back to English until a native speaker reviews."
+  }
+}

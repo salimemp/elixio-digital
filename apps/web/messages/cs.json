@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "name": "Czech",
+    "code": "cs",
+    "native_name": "Čeština",
+    "direction": "ltr",
+    "currency": "CZK",
+    "needs_human_review": true,
+    "translator": null,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "note": "Scaffold for Czech. Strings fall back to English until a native speaker reviews."
+  }
+}

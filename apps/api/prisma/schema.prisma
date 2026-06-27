@@ -410,13 +410,20 @@ model Order {
   subtotalCents         Int
   platformFeeCents      Int
   totalCents            Int
+  taxCents              Int         @default(0)
   currency              String
   stripePaymentIntentId String?
+  // Billing address snapshot — captured at order time so tax is
+  // reproducible even if the buyer later changes their address.
+  billingCountry  String?
+  billingRegion   String?
+  billingPostal   String?
 
   createdAt DateTime @default(now())
 
-  buyer  User        @relation(fields: [buyerId], references: [id], onDelete: Cascade)
-  items  OrderItem[]
+  buyer   User          @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  items   OrderItem[]
+  taxes   TaxLineItem[]
 
   @@index([buyerId, createdAt])
   @@map("orders")
@@ -660,4 +667,82 @@ model RateLimitBucket {
   count       Int      @default(0)
 
   @@map("rate_limit_buckets")
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Tax regions + line items
+// ──────────────────────────────────────────────────────────────────────
+
+enum TaxKind {
+  vat       // EU + UK value-added tax
+  gst       // Goods & Services Tax (AU, NZ, SG, CA, IN)
+  hst       // Harmonized Sales Tax (CA combined federal+provincial)
+  pst       // Provincial Sales Tax (CA separate)
+  qst       // Quebec Sales Tax
+  igst      // Indian inter-state GST
+  cgst      // Indian central GST
+  sgst      // Indian state GST
+  sales     // US state sales tax
+  iva       // Spanish/Italian value-added
+  pis_cofins // Brazil federal
+  icms      // Brazil state
+  iss       // Brazil municipal
+  consumption // Japan consumption tax
+  none      // no tax region (display only)
+}
+
+model TaxRegion {
+  id          String   @id @default(uuid()) @db.Uuid
+  // ISO 3166-1 alpha-2 country code ("US", "DE", "IN", …)
+  country     String
+  // ISO 3166-2 subdivision code for state/province ("US-CA", "DE-BY", …)
+  // Empty string = country-level rate (e.g. federal GST)
+  region      String   @default("")
+  // Human label, e.g. "California", "Bayern", "Maharashtra"
+  label       String
+  // Which kind of tax this row represents
+  kind        TaxKind
+  // Rate as a fraction (0.0725 = 7.25%). Stored as Decimal for precision.
+  rate        Decimal  @db.Decimal(8, 6)
+  // Currency this rate applies in (for display)
+  currency    String
+  // Optional: reduced rates for specific categories (e.g. food 5%, books 0%)
+  // Future-proofing — for now we store the standard rate only.
+  description String?
+  // When this rate was last verified by a human
+  lastVerified DateTime?
+  // Source URL (e.g. state.gov, ec.europa.eu) so future verifications
+  // can confirm the rate is still current
+  sourceUrl   String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([country, region, kind])
+  @@index([country, region])
+  @@index([isActive])
+  @@map("tax_regions")
+}
+
+// Tax line items on each Order. An order can have multiple tax lines
+// (federal GST + state sales, VAT + reduced VAT, etc.) — these are
+// snapshotted at order-creation time so historical orders stay
+// correct even when rates change.
+model TaxLineItem {
+  id          String   @id @default(uuid()) @db.Uuid
+  orderId     String   @db.Uuid
+  kind        TaxKind
+  label       String       // "California State Sales Tax" — snapshot at calc time
+  region      String?      // "US-CA"
+  rate        Decimal  @db.Decimal(8, 6)
+  // Amount in the order's currency, in cents
+  amountCents Int
+  // Snapshot of the input that produced this line (for audit)
+  baseCents   Int
+  createdAt   DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("tax_line_items")
 }

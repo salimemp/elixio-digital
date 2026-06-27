@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "name": "Swedish",
+    "code": "sv",
+    "native_name": "Svenska",
+    "direction": "ltr",
+    "currency": "SEK",
+    "needs_human_review": true,
+    "translator": null,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "note": "Scaffold for Swedish. Strings fall back to English until a native speaker reviews."
+  }
+}

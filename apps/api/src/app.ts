@@ -19,6 +19,7 @@ import { creatorAIRoutes } from "./routes/creator-ai.js";
 import { creatorToolsRoutes } from "./routes/creator-tools.js";
 import { bulkOpsRoutes } from "./routes/creator-bulk.js";
 import { downloadRoutes } from "./routes/downloads.js";
+import { taxRoutes } from "./routes/tax.js";
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({ logger: true });
@@ -121,6 +122,9 @@ export async function buildApp(): Promise<FastifyInstance> {
   // Buyer-only routes — purchase, downloads, library. Each gated by
   // app.requireBuyer (DB re-check, not just JWT flag).
   await app.register(downloadRoutes, { prefix: "/downloads" });
+
+  // Tax routes — public calculate/list, admin-only re-seed
+  await app.register(taxRoutes, { prefix: "/tax" });
 
   return app;
 }

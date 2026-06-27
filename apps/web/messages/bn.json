@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "name": "Bengali",
+    "code": "bn",
+    "native_name": "বাংলা",
+    "direction": "ltr",
+    "currency": "INR",
+    "needs_human_review": true,
+    "translator": null,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "note": "Scaffold for Bengali. Strings fall back to English until a native speaker reviews."
+  }
+}

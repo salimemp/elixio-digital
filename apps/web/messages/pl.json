@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "name": "Polish",
+    "code": "pl",
+    "native_name": "Polski",
+    "direction": "ltr",
+    "currency": "PLN",
+    "needs_human_review": true,
+    "translator": null,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "note": "Scaffold for Polish. Strings fall back to English until a native speaker reviews."
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "name": "Dutch",
+    "code": "nl",
+    "native_name": "Nederlands",
+    "direction": "ltr",
+    "currency": "EUR",
+    "needs_human_review": true,
+    "translator": null,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "note": "Scaffold for Dutch. Strings fall back to English until a native speaker reviews."
+  }
+}

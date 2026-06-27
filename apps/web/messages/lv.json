@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "name": "Latvian",
+    "code": "lv",
+    "native_name": "Latviešu",
+    "direction": "ltr",
+    "currency": "EUR",
+    "needs_human_review": true,
+    "translator": null,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "note": "Scaffold for Latvian. Strings fall back to English until a native speaker reviews."
+  }
+}

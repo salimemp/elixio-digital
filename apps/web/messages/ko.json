@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "name": "Korean",
+    "code": "ko",
+    "native_name": "한국어",
+    "direction": "ltr",
+    "currency": "KRW",
+    "needs_human_review": true,
+    "translator": null,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "note": "Scaffold for Korean. Strings fall back to English until a native speaker reviews."
+  }
+}

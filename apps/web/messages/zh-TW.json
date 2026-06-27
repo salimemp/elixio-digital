@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "name": "Chinese (Traditional)",
+    "code": "zh-TW",
+    "native_name": "繁體中文",
+    "direction": "ltr",
+    "currency": "TWD",
+    "needs_human_review": true,
+    "translator": null,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "note": "Scaffold for Chinese (Traditional). Strings fall back to English until a native speaker reviews."
+  }
+}

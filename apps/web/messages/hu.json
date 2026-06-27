@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "name": "Hungarian",
+    "code": "hu",
+    "native_name": "Magyar",
+    "direction": "ltr",
+    "currency": "HUF",
+    "needs_human_review": true,
+    "translator": null,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "note": "Scaffold for Hungarian. Strings fall back to English until a native speaker reviews."
+  }
+}

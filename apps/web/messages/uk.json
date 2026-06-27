@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "name": "Ukrainian",
+    "code": "uk",
+    "native_name": "Українська",
+    "direction": "ltr",
+    "currency": "UAH",
+    "needs_human_review": true,
+    "translator": null,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "note": "Scaffold for Ukrainian. Strings fall back to English until a native speaker reviews."
+  }
+}

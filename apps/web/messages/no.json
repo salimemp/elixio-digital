@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "name": "Norwegian",
+    "code": "no",
+    "native_name": "Norsk",
+    "direction": "ltr",
+    "currency": "NOK",
+    "needs_human_review": true,
+    "translator": null,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "note": "Scaffold for Norwegian. Strings fall back to English until a native speaker reviews."
+  }
+}

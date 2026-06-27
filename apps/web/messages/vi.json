@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "name": "Vietnamese",
+    "code": "vi",
+    "native_name": "Tiếng Việt",
+    "direction": "ltr",
+    "currency": "VND",
+    "needs_human_review": true,
+    "translator": null,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "note": "Scaffold for Vietnamese. Strings fall back to English until a native speaker reviews."
+  }
+}

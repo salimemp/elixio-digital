@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "name": "Chinese (Simplified)",
+    "code": "zh",
+    "native_name": "简体中文",
+    "direction": "ltr",
+    "currency": "CNY",
+    "needs_human_review": true,
+    "translator": null,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "note": "Scaffold for Chinese (Simplified). Strings fall back to English until a native speaker reviews."
+  }
+}

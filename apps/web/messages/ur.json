@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "name": "Urdu",
+    "code": "ur",
+    "native_name": "اردو",
+    "direction": "rtl",
+    "currency": "PKR",
+    "needs_human_review": true,
+    "translator": null,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "note": "Scaffold for Urdu. Strings fall back to English until a native speaker reviews."
+  }
+}

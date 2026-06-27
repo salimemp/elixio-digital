@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "name": "Bulgarian",
+    "code": "bg",
+    "native_name": "Български",
+    "direction": "ltr",
+    "currency": "BGN",
+    "needs_human_review": true,
+    "translator": null,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "note": "Scaffold for Bulgarian. Strings fall back to English until a native speaker reviews."
+  }
+}

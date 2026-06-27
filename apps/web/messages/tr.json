@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "name": "Turkish",
+    "code": "tr",
+    "native_name": "Türkçe",
+    "direction": "ltr",
+    "currency": "TRY",
+    "needs_human_review": true,
+    "translator": null,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "note": "Scaffold for Turkish. Strings fall back to English until a native speaker reviews."
+  }
+}

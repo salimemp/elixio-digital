@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "name": "Catalan",
+    "code": "ca",
+    "native_name": "Català",
+    "direction": "ltr",
+    "currency": "EUR",
+    "needs_human_review": true,
+    "translator": null,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "note": "Scaffold for Catalan. Strings fall back to English until a native speaker reviews."
+  }
+}

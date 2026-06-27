@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "name": "Slovenian",
+    "code": "sl",
+    "native_name": "Slovenščina",
+    "direction": "ltr",
+    "currency": "EUR",
+    "needs_human_review": true,
+    "translator": null,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "note": "Scaffold for Slovenian. Strings fall back to English until a native speaker reviews."
+  }
+}

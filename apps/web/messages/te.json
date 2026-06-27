@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "name": "Telugu",
+    "code": "te",
+    "native_name": "తెలుగు",
+    "direction": "ltr",
+    "currency": "INR",
+    "needs_human_review": true,
+    "translator": null,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "note": "Scaffold for Telugu. Strings fall back to English until a native speaker reviews."
+  }
+}

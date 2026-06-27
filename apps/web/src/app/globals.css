@@ -6,35 +6,106 @@
 
 :root {
   --font-inter: "Inter", system-ui, sans-serif;
+
+  /* Brand palette tokens — overridden at runtime by ThemeProvider
+     when the user picks a different brand (sunset / ocean / forest).
+     The DEFAULT values match the Tailwind config so first paint
+     before hydration matches the design. */
+  --gum-pink: #ff90e8;
+  --gum-purple: #7b61ff;
+  --gum-yellow: #f1e05a;
+  --gum-cyan: #23a6d5;
+  --gum-mint: #96f7d6;
+  --gum-tangerine: #ff9f43;
+  --gum-black: #111111;
+  --gum-cream: #fffdf5;
+
+  /* Surface tokens (overridden in dark mode below) */
+  --surface: #ffffff;
+  --surface-muted: #f5f5f4;
+  --surface-subtle: #fafaf9;
+  --ink: #111111;
+  --ink-muted: #525252;
+  --ink-subtle: #737373;
+}
+
+.dark {
+  --gum-cream: #0a0a0a;       /* dark base */
+  --surface: #0a0a0a;
+  --surface-muted: #171717;
+  --surface-subtle: #0f0f0f;
+  --ink: #fafafa;
+  --ink-muted: #d4d4d4;
+  --ink-subtle: #a3a3a3;
+}
+
+html {
+  color-scheme: light dark;
 }
 
 body {
-  background-color: #fffdf5;
-  color: #111111;
+  background-color: var(--gum-cream);
+  color: var(--ink);
+  font-family: var(--font-inter);
+  /* Smooth theme transitions */
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+[dir="rtl"] body {
+  direction: rtl;
 }
 
 @layer components {
   .gum-btn {
-    @apply inline-flex items-center justify-center rounded-full border-2 border-gum-black px-5 py-2 font-semibold shadow-gum transition-transform active:translate-y-1 active:shadow-none;
+    @apply inline-flex items-center justify-center rounded-full border-2 px-5 py-2 font-semibold transition-transform active:translate-y-1 active:shadow-none;
+    border-color: var(--gum-black);
+    box-shadow: 0 6px 0 0 var(--gum-black);
   }
 
   .gum-btn-primary {
-    @apply gum-btn bg-gum-pink text-gum-black hover:bg-[#ff7de3];
+    @apply gum-btn text-gum-black;
+    background-color: var(--gum-pink);
+  }
+  .gum-btn-primary:hover {
+    filter: brightness(0.95);
   }
 
   .gum-btn-secondary {
-    @apply gum-btn bg-white text-gum-black hover:bg-gum-cream;
+    @apply gum-btn;
+    background-color: var(--surface);
+    color: var(--ink);
   }
 
   .gum-btn-yellow {
-    @apply gum-btn bg-gum-yellow text-gum-black hover:bg-[#e8d14f];
+    @apply gum-btn text-gum-black;
+    background-color: var(--gum-yellow);
   }
 
   .gum-card {
-    @apply rounded-2xl border-2 border-gum-black bg-white p-4 shadow-gum transition-transform hover:-translate-y-1;
+    @apply rounded-2xl border-2 p-4 transition-transform hover:-translate-y-1;
+    border-color: var(--gum-black);
+    background-color: var(--surface);
+    box-shadow: 0 6px 0 0 var(--gum-black);
+    color: var(--ink);
   }
 
   .gum-pill {
-    @apply rounded-full border-2 border-gum-black bg-gum-mint px-3 py-1 text-xs font-bold uppercase tracking-wide text-gum-black;
+    @apply rounded-full border-2 px-3 py-1 text-xs font-bold uppercase tracking-wide;
+    border-color: var(--gum-black);
+    background-color: var(--gum-mint);
+    color: var(--gum-black);
   }
+
+  .ink-default { color: var(--ink); }
+  .ink-muted   { color: var(--ink-muted); }
+  .ink-subtle  { color: var(--ink-subtle); }
+
+  .bg-surface       { background-color: var(--surface); }
+  .bg-surface-muted { background-color: var(--surface-muted); }
+  .bg-surface-subtle { background-color: var(--surface-subtle); }
+}
+
+/* RTL fixes for the navbar ordering — flip the buyer/creator pill order */
+[dir="rtl"] .flex-row-rtl-flip {
+  flex-direction: row-reverse;
 }

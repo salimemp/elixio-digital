@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "name": "Romanian",
+    "code": "ro",
+    "native_name": "Română",
+    "direction": "ltr",
+    "currency": "RON",
+    "needs_human_review": true,
+    "translator": null,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "note": "Scaffold for Romanian. Strings fall back to English until a native speaker reviews."
+  }
+}
