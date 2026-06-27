@@ -35,6 +35,19 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 const STORAGE_KEY = "elixio.auth";
 
+/** Pull the access token from local storage. Client-only helper. */
+export function getAccessToken(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { accessToken?: string };
+    return parsed.accessToken ?? null;
+  } catch {
+    return null;
+  }
+}
+
 function loadStored(): { accessToken: string | null; refreshToken: string | null } {
   if (typeof window === "undefined") return { accessToken: null, refreshToken: null };
   try {
