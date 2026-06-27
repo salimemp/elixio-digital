@@ -106,4 +106,3 @@ export const getAllPostSlugs = (): string[] =>
   safeReadDir()
     .filter((f) => f.endsWith(".html"))
     .map((f) => f.replace(/\.html$/, ""));
-};
