@@ -1,0 +1,19 @@
+# *
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /auth/
+Disallow: /dashboard
+Disallow: /library
+
+# GPTBot,ClaudeBot,anthropic-ai,Google-Extended,CCBot,Bytespider
+User-agent: GPTBot,ClaudeBot,anthropic-ai,Google-Extended,CCBot,Bytespider
+Disallow: /
+
+# Host
+Host: https://elixiodigital.com
+
+# Sitemaps
+Sitemap: https://elixiodigital.com/sitemap.xml
+Sitemap: https://elixiodigital.com/rss.xml
+Sitemap: https://elixiodigital.com/atom.xml

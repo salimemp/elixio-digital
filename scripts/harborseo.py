@@ -58,22 +58,15 @@ BLOG_DIR = Path("apps/web/content/blog")
 
 # Pre-queued SEO topic list. Each one targets a high-intent search query
 # for the Elixio creator-marketplace.
+#
+# Topics already covered (do NOT re-queue, even though the slugs differ):
+#   - vs-gumroad-2026    (4 published articles)
+#   - vs-lemon-squeezy-2026  (1 published article)
+#   - vs-payhip-2026     (1 published article)
+#   - best-gumroad-alternatives-2026  (4 articles overlap with gumroad)
+#
+# Currently queued (high-priority, diverse topics):
 TOPICS = [
-    {
-        "id": "vs-gumroad-2026",
-        "title": "Elixio vs Gumroad (2026): Honest Fee Comparison + Migration Guide",
-        "keywords": "gumroad alternative, gumroad fees, gumroad vs elixio, gumroad vs lemonsqueezy, sell digital products",
-    },
-    {
-        "id": "vs-lemon-squeezy-2026",
-        "title": "Elixio vs Lemon Squeezy (2026): Which Is Better for Indie Creators?",
-        "keywords": "lemon squeezy alternative, lemon squeezy vs gumroad, lemon squeezy fees, sell digital products",
-    },
-    {
-        "id": "vs-payhip-2026",
-        "title": "Elixio vs Payhip (2026): Pricing, Features, and Payout Speed Compared",
-        "keywords": "payhip alternative, payhip vs gumroad, payhip vs lemonsqueezy, sell digital products",
-    },
     {
         "id": "vs-creative-market-2026",
         "title": "Elixio vs Creative Market (2026): Where Should Designers Sell in 2026?",
@@ -103,11 +96,6 @@ TOPICS = [
         "id": "elixio-pricing-explained-2026",
         "title": "How Elixio's Pricing Works (and Why We Charge Less Than Everyone Else)",
         "keywords": "elixio pricing, marketplace fees, sell digital products, platform fees comparison",
-    },
-    {
-        "id": "best-gumroad-alternatives-2026",
-        "title": "The 7 Best Gumroad Alternatives in 2026 (Honest Comparison)",
-        "keywords": "gumroad alternatives, best gumroad alternatives, gumroad vs lemonsqueezy, sell digital products",
     },
 ]
 
@@ -186,7 +174,7 @@ def cmd_topics() -> None:
 
 
 def _next_topic() -> dict | None:
-    published = _published_slugs()
+    published = _published_topic_ids()
     for t in TOPICS:
         if t["id"] not in published:
             return t
@@ -197,6 +185,30 @@ def _published_slugs() -> set[str]:
     if not BLOG_DIR.exists():
         return set()
     return {p.stem for p in BLOG_DIR.glob("*.html")}
+
+
+def _published_topic_ids() -> set[str]:
+    """Track which TOPICS have been published by reading the frontmatter
+    of each blog file. The HarborSEO article_id is stored as `topic_id`
+    in the frontmatter when `generate` is called with a topic_id.
+
+    For articles generated without a topic_id, we use a content hash
+    of the title to avoid re-generating near-duplicates.
+    """
+    if not BLOG_DIR.exists():
+        return set()
+    import re as _re
+
+    ids: set[str] = set()
+    for p in BLOG_DIR.glob("*.html"):
+        try:
+            text = p.read_text(encoding="utf-8")
+            m = _re.search(r"^topic_id:\s*[\"']?([\w-]+)[\"']?\s*$", text, _re.MULTILINE)
+            if m:
+                ids.add(m.group(1))
+        except Exception:
+            pass
+    return ids
 
 
 def _slugify(text: str) -> str:
@@ -217,6 +229,8 @@ def _frontmatter(post: dict) -> str:
         f"author: {json.dumps(post.get('author', 'Elixio Team'))}\n"
         f"categories: {json.dumps(post.get('categories', []))}\n"
         f"wordCount: {post.get('word_count', 0)}\n"
+        f"topic_id: {json.dumps(post.get('topic_id', ''))}\n"
+        f"harborseo_id: {json.dumps(post.get('harborseo_id', ''))}\n"
         "---\n\n"
     )
 
@@ -257,6 +271,7 @@ def cmd_generate_batch(n: int) -> list[str]:
         try:
             aid = cmd_generate()
             cmd_poll(aid)
+            cmd_publish(aid, topic_id=topic["id"])
             ids.append(aid)
         except Exception as e:
             print(f"  FAILED: {e}", file=sys.stderr)
@@ -290,7 +305,7 @@ def _fetch_article(article_id: str) -> dict:
     return resp.get("data", resp)
 
 
-def _article_to_blog(article: dict) -> dict:
+def _article_to_blog(article: dict, topic_id: str = "") -> dict:
     """Convert HarborSEO article → blog-post frontmatter + HTML."""
     title = article.get("title", "Untitled")
     content = article.get("content", "")
@@ -312,14 +327,16 @@ def _article_to_blog(article: dict) -> dict:
         "categories": ["comparison"],
         "word_count": word_count,
         "body_html": content,
+        "topic_id": topic_id,
+        "harborseo_id": article.get("id", ""),
     }
 
 
-def cmd_publish(article_id: str) -> Path | None:
+def cmd_publish(article_id: str, topic_id: str = "") -> Path | None:
     article = _fetch_article(article_id)
     if article.get("status") != "completed":
         sys.exit(f"Article {article_id} is not completed (status={article.get('status')})")
-    blog = _article_to_blog(article)
+    blog = _article_to_blog(article, topic_id=topic_id)
     slug = _slugify(article.get("title", "untitled"))
 
     BLOG_DIR.mkdir(parents=True, exist_ok=True)

@@ -10,6 +10,7 @@ import { authRoutes } from "./routes/auth.js";
 import { userRoutes } from "./routes/users.js";
 import { storefrontRoutes } from "./routes/storefronts.js";
 import { assetRoutes } from "./routes/assets.js";
+import { statsRoutes } from "./routes/stats.js";
 import { categoryRoutes } from "./routes/categories.js";
 
 export async function buildApp(): Promise<FastifyInstance> {
@@ -27,6 +28,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(storefrontRoutes, { prefix: "/storefronts" });
   await app.register(assetRoutes, { prefix: "/assets" });
   await app.register(categoryRoutes, { prefix: "/categories" });
+  await app.register(statsRoutes, { prefix: "/stats" });
 
   return app;
 }

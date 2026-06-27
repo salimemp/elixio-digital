@@ -1,0 +1,51 @@
+name: IndexNow weekly submission
+
+# Re-pings every URL on elixiodigital.com to IndexNow once a week.
+# This complements the auto-ping in scripts/harborseo.py:publish by
+# catching pages that may have changed without going through the
+# publish pipeline (e.g., marketing copy updates).
+
+on:
+  schedule:
+    # Every Monday at 09:00 UTC (14:30 IST)
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Submission mode"
+        required: true
+        type: choice
+        default: submit-all
+        options:
+          - submit-all
+          - submit-sitemap
+          - submit-blog
+
+concurrency:
+  group: indexnow-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  indexnow:
+    name: Ping IndexNow
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Submit URLs to IndexNow
+        env:
+          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+          ELIXIO_SITE_URL: https://elixiodigital.com
+        run: |
+          set -euo pipefail
+          MODE="${{ github.event.inputs.mode || 'submit-all' }}"
+          echo "Running: python3 scripts/indexnow.py $MODE"
+          python3 "scripts/indexnow.py" "$MODE"
+          echo "✓ IndexNow submission complete"
