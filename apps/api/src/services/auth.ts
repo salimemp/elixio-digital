@@ -112,6 +112,28 @@ async function recordLoginAttempt(
       reason,
       isNewLocation: isNewLocation ?? false,
     },
+    // The geo + isNewLocation fields are added by migration
+    // 20260627140000_add_login_geo_fields. If the migration hasn't been
+    // applied yet, the insert will fail with a column-not-found error.
+    // We catch that and fall back to the legacy insert so old deploys
+    // (and the rolling upgrade window) keep working.
+  }).catch(async (err: Error) => {
+    if (err?.message?.includes("column") || err?.message?.includes("does not exist")) {
+      // Migration not yet applied — insert without the new fields.
+      await prisma.loginAttempt.create({
+        data: {
+          email,
+          userId: userId ?? undefined,
+          ipAddress: ip ?? undefined,
+          userAgent: ua ?? undefined,
+          success,
+          method,
+          reason,
+        },
+      });
+      return;
+    }
+    throw err;
   });
   if (!success) {
     const recent = await prisma.loginAttempt.count({
