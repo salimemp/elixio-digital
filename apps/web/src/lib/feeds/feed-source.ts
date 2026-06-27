@@ -67,63 +67,70 @@ export const feedConfig: FeedConfig = {
 /**
  * The actual feed items.
  *
- * These are populated in two ways:
- *  1. Hand-curated "announcement" entries (launches, milestones, big features)
- *  2. (Future) Dynamic items from the blog MDX dir or the assets API
+ * These are populated in three ways (in priority order):
+ *  1. Real blog posts read from `apps/web/content/blog/*.html` (set via
+ *     HarborSEO via scripts/harborseo.py)
+ *  2. Hand-curated "announcement" entries below (launches, milestones)
+ *  3. (Future) Dynamic items from the live API
  *
  * Sorted newest first by `publishedAt`.
  */
-export const feedItems: FeedItem[] = [
+import fs from "node:fs";
+import path from "node:path";
+import matter from "gray-matter";
+
+const BLOG_DIR = path.join(process.cwd(), "content", "blog");
+
+const blogToFeedItem = (filename: string): FeedItem | null => {
+  if (!filename.endsWith(".html")) return null;
+  const filePath = path.join(BLOG_DIR, filename);
+  if (!fs.existsSync(filePath)) return null;
+  const raw = fs.readFileSync(filePath, "utf8");
+  const { data, content } = matter(raw);
+  const slug = filename.replace(/\.html$/, "");
+  const publishedAt = data.date ? new Date(data.date).toISOString() : new Date().toISOString();
+  const updatedAt = data.updated ? new Date(data.updated).toISOString() : publishedAt;
+  const title = (data.title as string) ?? slug;
+  // Build a clean text-only description for the feed (feeds shouldn't
+  // ship raw HTML in <description>, that's what <content:encoded> is for)
+  const text = content.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  const description = (data.description as string) ?? text.slice(0, 240);
+  return {
+    id: `blog-${slug}`,
+    publishedAt,
+    updatedAt,
+    title,
+    description: `<p>${description}</p>`,
+    author: (data.author as string) ?? "Elixio Team",
+    url: `https://elixiodigital.com/blog/${slug}`,
+    categories: Array.isArray(data.categories) ? (data.categories as string[]) : [],
+  };
+};
+
+const loadBlogItems = (): FeedItem[] => {
+  if (!fs.existsSync(BLOG_DIR)) return [];
+  return fs
+    .readdirSync(BLOG_DIR)
+    .map(blogToFeedItem)
+    .filter((x): x is FeedItem => x !== null);
+};
+
+/** Hand-curated "announcement" entries (used as fallbacks only) */
+const ANNOUNCEMENT_ITEMS: FeedItem[] = [
   {
     id: "elixio-launch-2026",
     publishedAt: "2026-06-27T00:00:00.000Z",
     updatedAt: "2026-06-27T00:00:00.000Z",
-    title: "Introducing Elixio — sell your digital work without the headaches",
+    title: "Elixio is live — sell your digital work without the headaches",
     description:
-      "<p>Elixio is live. A creator-first marketplace with cross-platform apps (web, iOS, Android, Mac, Windows, Linux), 25+ languages at launch, voice commands, E2E-encrypted delivery, and WCAG 2.1 AA accessibility. We take less than Gumroad and ship more.</p><p>Read on to see what we built, why it matters, and how to claim your creator profile in under 5 minutes.</p>",
+      "<p>Elixio is live. A creator-first marketplace with cross-platform apps (web, iOS, Android, Mac, Windows, Linux), 25+ languages at launch, voice commands, E2E-encrypted delivery, and WCAG 2.1 AA accessibility. We take less than Gumroad and ship more.</p>",
     author: "Elixio Team",
-    url: "https://elixiodigital.com/blog/introducing-elixio",
+    url: "https://elixiodigital.com/",
     categories: ["announcement", "launch", "creators"],
   },
-  {
-    id: "elixio-vs-gumroad-2026",
-    publishedAt: "2026-06-26T00:00:00.000Z",
-    updatedAt: "2026-06-26T00:00:00.000Z",
-    title: "Elixio vs Gumroad: 2026 fee comparison (with the real math)",
-    description:
-      "<p>How much does Gumroad actually take? We crunch the numbers across 8 plans, 3 currencies, and a creator earning $1K, $10K, and $100K per month. Plus, a side-by-side feature comparison and a free migration tool.</p>",
-    author: "Elixio Team",
-    url: "https://elixiodigital.com/vs-gumroad",
-    categories: ["comparison", "creators", "pricing"],
-  },
-  {
-    id: "elixio-vs-lemon-squeezy-2026",
-    publishedAt: "2026-06-25T00:00:00.000Z",
-    title: "Elixio vs Lemon Squeezy: which is better for indie creators?",
-    description:
-      "<p>Both are merchant-of-record platforms with low fees. But they differ in payout speed, subscription tools, and the kinds of products you can sell. We compare head-to-head across 14 dimensions.</p>",
-    author: "Elixio Team",
-    url: "https://elixiodigital.com/vs-lemon-squeezy",
-    categories: ["comparison", "creators", "pricing"],
-  },
-  {
-    id: "elixio-pricing-2026",
-    publishedAt: "2026-06-24T00:00:00.000Z",
-    title: "Elixio pricing: simple, honest, and lower than everyone else",
-    description:
-      "<p>Elixio charges a flat 5% platform fee on sales. No monthly minimums, no listing fees, no payment processing surcharges. Here's how that compares to Gumroad (10%), Lemon Squeezy (5% + 50¢), CodeCanyon (30-50%), and Creative Market (30-70%).</p>",
-    author: "Elixio Team",
-    url: "https://elixiodigital.com/pricing",
-    categories: ["pricing", "creators"],
-  },
-  {
-    id: "elixio-cross-platform-2026",
-    publishedAt: "2026-06-22T00:00:00.000Z",
-    title: "One marketplace, six platforms: how we shipped Elixio everywhere",
-    description:
-      "<p>Web, iOS, Android, macOS, Windows, Linux. Same code, same data, same experience. We talk through the monorepo structure, the build pipeline, and the trade-offs we made to ship to all six in one quarter.</p>",
-    author: "Elixio Team",
-    url: "https://elixiodigital.com/blog/cross-platform-launch",
-    categories: ["engineering", "behind-the-scenes"],
-  },
 ];
+
+/** All feed items, sorted newest first. */
+export const feedItems: FeedItem[] = [...loadBlogItems(), ...ANNOUNCEMENT_ITEMS].sort(
+  (a, b) => b.publishedAt.localeCompare(a.publishedAt),
+);
