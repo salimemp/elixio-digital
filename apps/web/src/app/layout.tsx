@@ -54,11 +54,38 @@ export const metadata: Metadata = {
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
   manifest: "/manifest.webmanifest",
+  alternates: {
+    canonical: "/",
+    types: {
+      "application/rss+xml": [
+        { url: "/rss.xml", title: "Elixio — RSS Feed" },
+        { url: "/feed.xml", title: "Elixio — RSS Feed (alias)" },
+      ],
+      "application/atom+xml": [
+        { url: "/atom.xml", title: "Elixio — Atom Feed" },
+      ],
+    },
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        {/* Feed auto-discovery — RSS readers and browsers pick these up */}
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title="Elixio — RSS Feed"
+          href="/rss.xml"
+        />
+        <link
+          rel="alternate"
+          type="application/atom+xml"
+          title="Elixio — Atom Feed"
+          href="/atom.xml"
+        />
+      </head>
       <body className={`${inter.variable} font-display min-h-screen antialiased`}>
         <AuthProvider>
           <Navbar />
