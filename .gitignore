@@ -51,3 +51,7 @@ Thumbs.db
 # Prisma
 apps/api/prisma/migrations/dev.db*
 .vercel
+scripts/__pycache__/
+
+*.pyc
+__pycache__/
