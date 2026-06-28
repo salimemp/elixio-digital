@@ -7,6 +7,17 @@ on:
     branches: [main]
   schedule:
     - cron: "37 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      query_pack:
+        description: "Query pack to run (security-and-quality, security-extended, security-only)"
+        required: false
+        default: "security-and-quality"
+        type: choice
+        options:
+          - security-and-quality
+          - security-extended
+          - security-only
 
 jobs:
   analyze:
