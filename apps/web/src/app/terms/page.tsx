@@ -1,5 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
 import type { Metadata } from "next";
+import { TranslationNotice } from "@/components/legal/TranslationNotice";
 
 export const metadata: Metadata = {
   title: "Terms of Service — Elixio Digital",
@@ -14,6 +15,7 @@ export default function TermsPage() {
       <p className="mb-8 text-sm ink-muted">
         Last updated: 28 June 2026 · Effective immediately
       </p>
+      <TranslationNotice />
 
       <Section title="1. Acceptance">
         <p>

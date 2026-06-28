@@ -10,5 +10,24 @@
     "reviewed_by": null,
     "reviewed_at": null,
     "note": "Scaffold for Hungarian. Strings fall back to English until a native speaker reviews."
+  },
+  "footer": {
+    "tagline": "The marketplace where creators and buyers meet without the platform tax headaches.",
+    "product": "Product",
+    "blog": "Blog",
+    "stats": "Stats",
+    "account": "Account",
+    "legal": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "cookies": "Cookie Policy",
+    "rights": "All rights reserved."
+  },
+  "cookie": {
+    "title": "We use cookies",
+    "body": "Elixio Digital uses a minimal set of essential cookies for authentication, your language preference, and theme. We don't track you across the web or sell your data.",
+    "read_more": "Read our cookie policy",
+    "accept": "Accept",
+    "decline": "Decline"
   }
 }

@@ -1,5 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
 import type { Metadata } from "next";
+import { TranslationNotice } from "@/components/legal/TranslationNotice";
 
 export const metadata: Metadata = {
   title: "Privacy Policy — Elixio Digital",
@@ -14,6 +15,7 @@ export default function PrivacyPage() {
       <p className="mb-8 text-sm ink-muted">
         Last updated: 28 June 2026 · Effective immediately
       </p>
+      <TranslationNotice />
 
       <Section title="1. Who we are">
         <p>

@@ -1,5 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
 import type { Metadata } from "next";
+import { TranslationNotice } from "@/components/legal/TranslationNotice";
 
 export const metadata: Metadata = {
   title: "Cookie Policy — Elixio Digital",
@@ -12,6 +13,7 @@ export default function CookiesPage() {
     <div className="mx-auto max-w-3xl px-4 py-12">
       <h1 className="mb-2 text-4xl font-extrabold ink-default">Cookie Policy</h1>
       <p className="mb-8 text-sm ink-muted">Last updated: 28 June 2026</p>
+      <TranslationNotice />
 
       <Section title="What is a cookie?">
         <p>
