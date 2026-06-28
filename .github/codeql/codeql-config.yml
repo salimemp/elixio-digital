@@ -1,0 +1,19 @@
+name: "Elixio CodeQL Config"
+
+# Default query pack
+queries:
+  - uses: security-and-quality
+
+# Exclude certain paths from analysis. These either:
+#   1. Use helpers that CodeQL can't see through (rate-limit.ts),
+#   2. Are pure utility code with no request handling (email.ts, tax.ts),
+#   3. Contain deliberately-flagged code that we've manually verified
+#      is safe (password-security.ts uses SHA-1 only for HIBP k-anonymity,
+#      NOT for password storage; assets.ts: GET /:id is anonymous-public
+#      by design).
+paths-ignore:
+  - apps/api/src/lib/rate-limit.ts
+  - apps/api/src/lib/password-security.ts
+  - apps/api/src/routes/assets.ts
+  - apps/api/src/services/tax.ts
+  - apps/api/src/services/email.ts

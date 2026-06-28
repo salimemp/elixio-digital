@@ -53,8 +53,20 @@ const ensureLogDir = (): void => {
   }
 };
 
+/**
+ * Allowlist of log filenames. Hardcoded to prevent path-traversal: even
+ * if a caller passes something like `"../etc/passwd"`, the write is rejected.
+ * CodeQL flags this as `js/http-to-file-access` because the filename flows
+ * to fs.appendFileSync, but in practice only the three constants below are
+ * ever passed.
+ */
+const ALLOWED_LOG_FILES = new Set(["creators.log", "buyers.log", "registrations.log"]);
+
 const writeLine = (filename: string, line: string): void => {
   ensureLogDir();
+  if (!ALLOWED_LOG_FILES.has(filename)) {
+    throw new Error(`Refusing to write to non-allowlisted log file: ${filename}`);
+  }
   fs.appendFileSync(path.join(LOG_DIR, filename), line + "\n", "utf8");
 };
 

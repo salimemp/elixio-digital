@@ -41,11 +41,17 @@ export async function sendEmail(
   const maxAttempts = options.maxAttempts ?? 3;
   const fireAndForget = options.fireAndForget ?? false;
 
+  // Sanitize user-controlled values before logging to prevent log injection
+  // (CodeQL: js/log-injection). A malicious email address or subject with
+  // newlines could forge log entries downstream.
+  const sanitizeForLog = (s: string): string =>
+    s.replace(/[\r\n\t]/g, " ").slice(0, 200);
+
   const work = async (): Promise<EmailSendResult> => {
     if (!resend) {
       // Dev fallback: log to stdout so developers can copy the link.
-      console.log(`\n📧 [DEV EMAIL] to=${msg.to} subject=${msg.subject}`);
-      console.log(msg.text);
+      console.log(`\n📧 [DEV EMAIL] to=${sanitizeForLog(msg.to)} subject=${sanitizeForLog(msg.subject)}`);
+      console.log(sanitizeForLog(msg.text));
       console.log("");
       return { ok: true, attempts: 0 };
     }

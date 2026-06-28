@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAllPostSlugs, getPostBySlug } from "@/lib/blog";
 import { feedConfig } from "@/lib/feeds/feed-source";
+import { sanitizeBlogHtml } from "@/lib/sanitize";
 
 export const dynamic = "force-dynamic";
 
@@ -126,7 +127,7 @@ export default function BlogPostPage({
 
         <div
           // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: post.html }}
+          dangerouslySetInnerHTML={{ __html: sanitizeBlogHtml(post.html) }}
           className="prose prose-lg max-w-none prose-headings:font-extrabold prose-h2:mt-10 prose-h2:text-3xl prose-h3:mt-8 prose-h3:text-2xl prose-a:text-gum-purple prose-a:underline prose-strong:font-bold prose-ul:my-4 prose-li:my-1"
         />
       </article>
