@@ -39,13 +39,13 @@ function CallbackClient() {
     })();
   }, [params, router]);
 
-  return <p className="text-sm text-gray-600">Finishing sign-in…</p>;
+  return <p className="text-sm ink-muted">Finishing sign-in…</p>;
 }
 
 export default function OAuthCallbackPage() {
   return (
     <main className="mx-auto max-w-md px-6 py-12 text-center">
-      <Suspense fallback={<p className="text-sm text-gray-600">Loading…</p>}>
+      <Suspense fallback={<p className="text-sm ink-muted">Loading…</p>}>
         <CallbackClient />
       </Suspense>
     </main>

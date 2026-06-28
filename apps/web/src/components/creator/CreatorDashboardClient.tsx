@@ -72,7 +72,7 @@ export function CreatorDashboardClient({
     <div className="space-y-8">
       {/* Range selector */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex gap-1 rounded-full border-2 border-gum-black bg-white p-1">
+        <div className="flex gap-1 rounded-full border-2 border-gum-black bg-gum-cream p-1">
           {RANGES.map((r) => (
             <button
               key={r}
@@ -156,7 +156,7 @@ export function CreatorDashboardClient({
               </thead>
               <tbody>
                 {overview.topAssets.map((a) => (
-                  <tr key={a.assetId} className="border-b border-gray-200">
+                  <tr key={a.assetId} className="border-b border-gum-black/10">
                     <td className="py-2 font-bold">{a.title}</td>
                     <td>${(a.priceCents / 100).toFixed(2)}</td>
                     <td>{a.unitsSold}</td>
@@ -166,7 +166,7 @@ export function CreatorDashboardClient({
                     <td>
                       <button
                         onClick={() => setSelectedAsset(a.assetId)}
-                        className="rounded-full border-2 border-gum-black bg-white px-3 py-1 text-xs font-bold hover:bg-gum-cream"
+                        className="rounded-full border-2 border-gum-black bg-gum-cream px-3 py-1 text-xs font-bold hover:bg-gum-cream"
                       >
                         Drill down
                       </button>
@@ -183,7 +183,7 @@ export function CreatorDashboardClient({
       {cohorts && cohorts.cohorts.length > 0 && (
         <div className="gum-card">
           <h3 className="mb-3 text-lg font-bold">Cohort retention</h3>
-          <p className="mb-3 text-sm text-gray-600">
+          <p className="mb-3 text-sm ink-muted">
             % of buyers from each signup week still purchasing in subsequent weeks.
           </p>
           <div className="overflow-x-auto">
@@ -203,7 +203,7 @@ export function CreatorDashboardClient({
                 {cohorts.cohorts.map((c) => (
                   <tr key={c.cohortWeek}>
                     <td className="pr-2 font-bold">{c.cohortWeek}</td>
-                    <td className="px-1 text-right text-gray-500">{c.size}</td>
+                    <td className="px-1 text-right ink-muted">{c.size}</td>
                     {c.retention.map((r, w) => (
                       <td
                         key={w}
@@ -228,15 +228,15 @@ export function CreatorDashboardClient({
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <a href="/sell" className="gum-card text-center hover:bg-gum-yellow">
           <h3 className="text-lg font-bold">Create asset</h3>
-          <p className="mt-1 text-sm text-gray-700">Upload + list a new product.</p>
+          <p className="mt-1 text-sm text-gum-black">Upload + list a new product.</p>
         </a>
         <a href="/dashboard/bulk" className="gum-card text-center hover:bg-gum-cyan">
           <h3 className="text-lg font-bold">Bulk operations</h3>
-          <p className="mt-1 text-sm text-gray-700">Update prices, tags, or publish many assets at once.</p>
+          <p className="mt-1 text-sm text-gum-black">Update prices, tags, or publish many assets at once.</p>
         </a>
         <a href="/studio" className="gum-card text-center hover:bg-gum-pink">
           <h3 className="text-lg font-bold">Studio</h3>
-          <p className="mt-1 text-sm text-gray-700">AI tools — listing copywriter, asset critique, sales coach.</p>
+          <p className="mt-1 text-sm text-gum-black">AI tools — listing copywriter, asset critique, sales coach.</p>
         </a>
       </div>
     </div>
@@ -265,14 +265,14 @@ function StatCard({
       <span
         className={`absolute right-2 top-2 h-3 w-3 rounded-full ${colors[color]}`}
       />
-      <p className="text-xs font-bold uppercase tracking-wide text-gray-600">
+      <p className="text-xs font-bold uppercase tracking-wide ink-muted">
         {label}
       </p>
       <p className="mt-2 text-3xl font-extrabold tracking-tight">{value}</p>
       {delta !== undefined && (
         <p
           className={`mt-1 text-xs font-bold ${
-            delta > 0 ? "text-green-700" : delta < 0 ? "text-red-700" : "text-gray-500"
+            delta > 0 ? "text-green-700" : delta < 0 ? "text-red-700" : "ink-muted"
           }`}
         >
           {delta > 0 ? "▲" : delta < 0 ? "▼" : "—"}{" "}
@@ -286,7 +286,7 @@ function StatCard({
 function RevenueChart({ daily }: { daily: { date: string; revenueCents: number; orders: number }[] }) {
   if (daily.length === 0) {
     return (
-      <div className="flex h-48 items-center justify-center rounded-2xl border-2 border-dashed border-gum-black bg-white text-gray-500">
+      <div className="flex h-48 items-center justify-center rounded-2xl border-2 border-dashed border-gum-black bg-gum-cream ink-muted">
         No revenue in this period yet — your first sale will appear here.
       </div>
     );

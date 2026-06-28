@@ -21,7 +21,7 @@ export function StudioClient() {
   const [tab, setTab] = useState<"copywriter" | "critique" | "coach">("copywriter");
   return (
     <div className="space-y-6">
-      <div className="flex gap-1 rounded-full border-2 border-gum-black bg-white p-1">
+      <div className="flex gap-1 rounded-full border-2 border-gum-black bg-gum-cream p-1">
         {[
           { id: "copywriter", label: "Listing copywriter" },
           { id: "critique", label: "Asset critique" },
@@ -97,20 +97,20 @@ function CopywriterPanel() {
           onChange={(e) => setDescription(e.target.value)}
           placeholder="e.g. Minimalist wedding invitation template pack with 5 designs, A5 size, editable in Canva and Photoshop"
           rows={5}
-          className="w-full rounded-2xl border-2 border-gum-black bg-white p-3 text-sm"
+          className="w-full rounded-2xl border-2 border-gum-black bg-gum-cream p-3 text-sm"
         />
         <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
           <input
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             placeholder="Category (optional)"
-            className="rounded-2xl border-2 border-gum-black bg-white p-2 text-sm"
+            className="rounded-2xl border-2 border-gum-black bg-gum-cream p-2 text-sm"
           />
           <input
             value={fileFormats}
             onChange={(e) => setFileFormats(e.target.value)}
             placeholder="Formats: PSD, AI, PDF"
-            className="rounded-2xl border-2 border-gum-black bg-white p-2 text-sm"
+            className="rounded-2xl border-2 border-gum-black bg-gum-cream p-2 text-sm"
           />
         </div>
         <button
@@ -136,7 +136,7 @@ function CopywriterPanel() {
                 Copy
               </button>
             </div>
-            <div className="mt-1 space-y-1 text-xs text-gray-600">
+            <div className="mt-1 space-y-1 text-xs ink-muted">
               {out.titleAlternatives.map((t, i) => (
                 <div key={i}>
                   Alt {i + 1}: <span className="font-bold">{t}</span>
@@ -146,17 +146,17 @@ function CopywriterPanel() {
           </div>
 
           <div>
-            <p className="text-sm font-bold text-gray-700">Short pitch</p>
+            <p className="text-sm font-bold text-gum-black">Short pitch</p>
             <p className="text-sm">{out.shortPitch}</p>
           </div>
 
           <div>
-            <p className="text-sm font-bold text-gray-700">Description</p>
+            <p className="text-sm font-bold text-gum-black">Description</p>
             <p className="whitespace-pre-wrap text-sm">{out.description}</p>
           </div>
 
           <div>
-            <p className="text-sm font-bold text-gray-700">Tags</p>
+            <p className="text-sm font-bold text-gum-black">Tags</p>
             <div className="mt-1 flex flex-wrap gap-1">
               {out.tags.map((t) => (
                 <span key={t} className="rounded-full bg-gum-yellow px-2 py-1 text-xs font-bold">
@@ -167,19 +167,19 @@ function CopywriterPanel() {
           </div>
 
           <div>
-            <p className="text-sm font-bold text-gray-700">Suggested price</p>
+            <p className="text-sm font-bold text-gum-black">Suggested price</p>
             <p className="text-2xl font-extrabold text-gum-purple">
               ${(out.suggestedPriceCents / 100).toFixed(2)}
             </p>
-            <p className="text-xs text-gray-600">{out.suggestedPriceRationale}</p>
+            <p className="text-xs ink-muted">{out.suggestedPriceRationale}</p>
           </div>
 
           <div>
-            <p className="text-sm font-bold text-gray-700">Social caption</p>
+            <p className="text-sm font-bold text-gum-black">Social caption</p>
             <p className="text-sm">{out.socialCaption}</p>
           </div>
 
-          <details className="rounded-2xl border-2 border-gum-black bg-white p-2">
+          <details className="rounded-2xl border-2 border-gum-black bg-gum-cream p-2">
             <summary className="cursor-pointer text-sm font-bold">SEO keywords</summary>
             <p className="mt-2 text-xs">{out.seoKeywords.join(", ")}</p>
           </details>
@@ -230,20 +230,20 @@ function CritiquePanel() {
           value={imageUrl}
           onChange={(e) => setImageUrl(e.target.value)}
           placeholder="Public image URL (https://…)"
-          className="w-full rounded-2xl border-2 border-gum-black bg-white p-2 text-sm"
+          className="w-full rounded-2xl border-2 border-gum-black bg-gum-cream p-2 text-sm"
         />
         <input
           value={assetKind}
           onChange={(e) => setAssetKind(e.target.value)}
           placeholder="Asset kind (e.g. icon set, wedding invitation, 3D model)"
-          className="mt-2 w-full rounded-2xl border-2 border-gum-black bg-white p-2 text-sm"
+          className="mt-2 w-full rounded-2xl border-2 border-gum-black bg-gum-cream p-2 text-sm"
         />
         <textarea
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           placeholder="Optional specific question for the AI"
           rows={3}
-          className="mt-2 w-full rounded-2xl border-2 border-gum-black bg-white p-2 text-sm"
+          className="mt-2 w-full rounded-2xl border-2 border-gum-black bg-gum-cream p-2 text-sm"
         />
         <button
           onClick={run}
@@ -277,7 +277,7 @@ function CritiquePanel() {
           </div>
 
           <div>
-            <p className="text-sm font-bold text-gray-700">Strengths</p>
+            <p className="text-sm font-bold text-gum-black">Strengths</p>
             <ul className="ml-4 list-disc text-sm">
               {out.strengths.map((s, i) => (
                 <li key={i}>{s}</li>
@@ -287,23 +287,23 @@ function CritiquePanel() {
 
           {out.issues.length > 0 && (
             <div>
-              <p className="text-sm font-bold text-gray-700">Issues</p>
+              <p className="text-sm font-bold text-gum-black">Issues</p>
               <div className="space-y-2">
                 {out.issues.map((iss, i) => (
-                  <div key={i} className="rounded-2xl border-2 border-gum-black bg-white p-2">
+                  <div key={i} className="rounded-2xl border-2 border-gum-black bg-gum-cream p-2">
                     <span
                       className={`text-xs font-bold uppercase ${
                         iss.severity === "blocker"
                           ? "text-red-700"
                           : iss.severity === "major"
                           ? "text-orange-700"
-                          : "text-gray-600"
+                          : "ink-muted"
                       }`}
                     >
                       {iss.severity}
                     </span>
                     <p className="text-sm">{iss.description}</p>
-                    <p className="mt-1 text-xs text-gray-700">
+                    <p className="mt-1 text-xs text-gum-black">
                       <span className="font-bold">Fix:</span> {iss.fix}
                     </p>
                   </div>
@@ -313,11 +313,11 @@ function CritiquePanel() {
           )}
 
           <div>
-            <p className="text-sm font-bold text-gray-700">Composition</p>
+            <p className="text-sm font-bold text-gum-black">Composition</p>
             <div className="grid grid-cols-2 gap-2">
               {Object.entries(out.composition).map(([k, v]) => (
-                <div key={k} className="rounded-2xl bg-white p-2">
-                  <p className="text-xs capitalize text-gray-600">{k}</p>
+                <div key={k} className="rounded-2xl bg-gum-cream p-2">
+                  <p className="text-xs capitalize ink-muted">{k}</p>
                   <p className="text-lg font-extrabold">{v}/10</p>
                 </div>
               ))}
@@ -326,7 +326,7 @@ function CritiquePanel() {
 
           {out.recommendations.length > 0 && (
             <div>
-              <p className="text-sm font-bold text-gray-700">Recommendations</p>
+              <p className="text-sm font-bold text-gum-black">Recommendations</p>
               <ul className="ml-4 list-disc text-sm">
                 {out.recommendations.map((r, i) => (
                   <li key={i}>{r}</li>
@@ -397,7 +397,7 @@ function SalesCoachPanel() {
                         ? "bg-green-200 text-green-900"
                         : ins.type === "warning"
                         ? "bg-red-200 text-red-900"
-                        : "bg-blue-200 text-blue-900"
+                        : "bg-gum-mint text-gum-black"
                     }`}
                   >
                     {ins.type}
@@ -428,7 +428,7 @@ function SalesCoachPanel() {
                 </thead>
                 <tbody>
                   {out.pricingSuggestions.map((p) => (
-                    <tr key={p.assetId} className="border-b border-gray-200">
+                    <tr key={p.assetId} className="border-b border-gum-black/10">
                       <td className="py-2 font-bold">{p.assetTitle}</td>
                       <td>${(p.currentPriceCents / 100).toFixed(2)}</td>
                       <td className="font-extrabold text-gum-purple">

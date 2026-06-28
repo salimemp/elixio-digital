@@ -13,7 +13,7 @@ export default function CreatorDashboardPage() {
         <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-4xl font-extrabold text-gum-black">Creator Dashboard</h1>
-            <p className="mt-1 text-gray-700">
+            <p className="mt-1 text-gum-black">
               Revenue, top assets, conversion, cohort retention.
             </p>
           </div>

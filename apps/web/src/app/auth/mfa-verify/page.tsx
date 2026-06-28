@@ -45,12 +45,12 @@ export default function MfaVerifyPage() {
   return (
     <main className="mx-auto max-w-md px-6 py-12">
       <h1 className="text-3xl font-extrabold">Two-factor code</h1>
-      <p className="mt-2 text-sm text-gray-600">
+      <p className="mt-2 text-sm ink-muted">
         Open your authenticator app and enter the 6-digit code, or one of your backup codes.
       </p>
       <form onSubmit={handleSubmit} className="mt-6 space-y-3">
         <label className="block text-sm">
-          <span className="text-gray-700">Code</span>
+          <span className="text-gum-black">Code</span>
           <Input
             value={code}
             onChange={(e) => setCode(e.target.value)}

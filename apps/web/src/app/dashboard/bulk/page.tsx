@@ -12,7 +12,7 @@ export default function BulkOpsPage() {
         <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-4xl font-extrabold text-gum-black">Bulk operations</h1>
-            <p className="mt-1 text-gray-700">
+            <p className="mt-1 text-gum-black">
               Update many assets at once. Non-delete operations can be rolled back.
             </p>
           </div>

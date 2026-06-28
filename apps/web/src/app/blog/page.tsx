@@ -41,14 +41,14 @@ export default function BlogIndexPage() {
           Guides for{" "}
           <span className="text-gum-purple">digital creators</span>
         </h1>
-        <p className="mt-4 max-w-2xl text-xl text-gray-700">
+        <p className="mt-4 max-w-2xl text-xl text-gum-black">
           How to sell your digital work, what platforms pay creators the most,
           and how to grow an audience that buys. Updated weekly.
         </p>
       </header>
 
       {posts.length === 0 ? (
-        <p className="rounded-2xl border-2 border-dashed border-gum-black bg-white p-8 text-center text-gray-600">
+        <p className="rounded-2xl border-2 border-dashed border-gum-black bg-gum-cream p-8 text-center ink-muted">
           No posts yet — check back soon.
         </p>
       ) : (
@@ -56,7 +56,7 @@ export default function BlogIndexPage() {
           {posts.map((post) => (
             <li key={post.slug}>
               <article className="gum-card">
-                <div className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wide text-gray-600">
+                <div className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wide ink-muted">
                   <time dateTime={post.publishedAt}>
                     {formatDate(post.publishedAt)}
                   </time>
@@ -77,11 +77,11 @@ export default function BlogIndexPage() {
                     {post.title}
                   </Link>
                 </h2>
-                <p className="mt-3 text-gray-700">{post.excerpt}</p>
+                <p className="mt-3 text-gum-black">{post.excerpt}</p>
                 <div className="mt-4">
                   <Link
                     href={`/blog/${post.slug}`}
-                    className="inline-block rounded-full border-2 border-gum-black bg-white px-4 py-2 text-sm font-bold shadow-[0_3px_0_0_#111] transition-transform active:translate-y-[3px] active:shadow-none hover:bg-gum-cream"
+                    className="inline-block rounded-full border-2 border-gum-black bg-gum-cream px-4 py-2 text-sm font-bold shadow-[0_3px_0_0_#111] transition-transform active:translate-y-[3px] active:shadow-none hover:bg-gum-cream"
                   >
                     Read post →
                   </Link>

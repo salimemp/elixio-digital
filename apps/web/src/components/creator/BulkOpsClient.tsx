@@ -164,7 +164,7 @@ export function BulkOpsClient() {
               {assets.map((a) => (
                 <tr
                   key={a.id}
-                  className={`border-b border-gray-200 ${
+                  className={`border-b border-gum-black/10 ${
                     selected.has(a.id) ? "bg-gum-yellow" : ""
                   }`}
                 >
@@ -184,7 +184,7 @@ export function BulkOpsClient() {
             </tbody>
           </table>
         </div>
-        <p className="mt-2 text-xs text-gray-600">
+        <p className="mt-2 text-xs ink-muted">
           {selected.size} selected
         </p>
       </div>
@@ -195,7 +195,7 @@ export function BulkOpsClient() {
           <select
             value={op}
             onChange={(e) => setOp(e.target.value as typeof op)}
-            className="rounded-2xl border-2 border-gum-black bg-white p-2 text-sm"
+            className="rounded-2xl border-2 border-gum-black bg-gum-cream p-2 text-sm"
           >
             <option value="price_update">Update price</option>
             <option value="publish">Publish</option>
@@ -210,7 +210,7 @@ export function BulkOpsClient() {
               <select
                 value={payload.mode}
                 onChange={(e) => setPayload({ ...payload, mode: e.target.value })}
-                className="rounded-2xl border-2 border-gum-black bg-white p-2 text-sm"
+                className="rounded-2xl border-2 border-gum-black bg-gum-cream p-2 text-sm"
               >
                 <option value="set">Set to (cents)</option>
                 <option value="increase_pct">Increase by (%)</option>
@@ -221,7 +221,7 @@ export function BulkOpsClient() {
                 value={payload.value}
                 onChange={(e) => setPayload({ ...payload, value: Number(e.target.value) })}
                 placeholder={payload.mode === "set" ? "Price in cents" : "Percentage"}
-                className="rounded-2xl border-2 border-gum-black bg-white p-2 text-sm"
+                className="rounded-2xl border-2 border-gum-black bg-gum-cream p-2 text-sm"
               />
             </>
           )}
@@ -231,7 +231,7 @@ export function BulkOpsClient() {
               value={payload.tags ?? ""}
               onChange={(e) => setPayload({ ...payload, tags: e.target.value })}
               placeholder="Tags (comma-separated, e.g. wedding, minimalist, canva)"
-              className="rounded-2xl border-2 border-gum-black bg-white p-2 text-sm md:col-span-2"
+              className="rounded-2xl border-2 border-gum-black bg-gum-cream p-2 text-sm md:col-span-2"
             />
           )}
         </div>
@@ -275,7 +275,7 @@ export function BulkOpsClient() {
               </thead>
               <tbody>
                 {history.map((op) => (
-                  <tr key={op.id} className="border-b border-gray-200">
+                  <tr key={op.id} className="border-b border-gum-black/10">
                     <td className="py-2 font-bold">{op.kind}</td>
                     <td>{op.affectedIds.length}</td>
                     <td className="text-xs">
@@ -283,9 +283,9 @@ export function BulkOpsClient() {
                     </td>
                     <td>
                       {op.rolledBackAt ? (
-                        <span className="text-xs text-gray-500">rolled back</span>
+                        <span className="text-xs ink-muted">rolled back</span>
                       ) : op.kind === "delete" ? (
-                        <span className="text-xs text-gray-400">irreversible</span>
+                        <span className="text-xs ink-subtle">irreversible</span>
                       ) : (
                         <button
                           onClick={() => rollback(op.id)}

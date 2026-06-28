@@ -46,14 +46,14 @@ type Stat = {
 
 const StatCard = ({ stat }: { stat: Stat }) => (
   <div className="gum-card">
-    <p className="text-xs font-bold uppercase tracking-wide text-gray-600">
+    <p className="text-xs font-bold uppercase tracking-wide ink-muted">
       {stat.label}
     </p>
     <p className="mt-2 text-4xl font-extrabold tracking-tight text-gum-black">
       {stat.value}
     </p>
     {stat.hint && (
-      <p className="mt-2 text-sm text-gray-500">{stat.hint}</p>
+      <p className="mt-2 text-sm ink-muted">{stat.hint}</p>
     )}
   </div>
 );
@@ -165,11 +165,11 @@ export default async function StatsPage() {
           Elixio in{" "}
           <span className="text-gum-purple">numbers</span>
         </h1>
-        <p className="mt-4 max-w-2xl text-xl text-gray-700">
+        <p className="mt-4 max-w-2xl text-xl text-gum-black">
           We show the numbers, not just the marketing. Updated every 60 seconds
           from our production database.
         </p>
-        <p className="mt-2 text-sm text-gray-500">
+        <p className="mt-2 text-sm ink-muted">
           Last updated {formatTimeAgo(stats.generatedAt)}
         </p>
       </header>
@@ -207,13 +207,13 @@ export default async function StatsPage() {
       <footer className="mt-16 border-t-2 border-gum-black pt-8">
         <div className="gum-card">
           <h2 className="text-2xl font-extrabold">Why we share this</h2>
-          <p className="mt-2 text-gray-700">
+          <p className="mt-2 text-gum-black">
             Every other marketplace hides its numbers. We don&apos;t. If
             you&apos;re a creator thinking about switching, you should be able
             to see exactly what kind of growth we&apos;re getting — and judge
             for yourself whether it&apos;s worth it.
           </p>
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-2 text-sm ink-muted">
             Source: <code className="rounded bg-gray-100 px-1 py-0.5 text-xs">
               GET https://api.elixiodigital.com/stats
             </code>{" "}

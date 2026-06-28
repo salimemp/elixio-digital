@@ -8,7 +8,7 @@ export default function LibraryPage() {
             Buyer Only
           </span>
         </div>
-        <p className="text-gray-700">Purchased assets and downloads appear here.</p>
+        <p className="text-gum-black">Purchased assets and downloads appear here.</p>
       </section>
     </main>
   );

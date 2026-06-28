@@ -20,14 +20,14 @@ export default async function ExplorePage() {
         <h1 className="mb-3 text-4xl font-extrabold text-gum-black md:text-5xl">
           Discover digital assets
         </h1>
-        <p className="mx-auto max-w-2xl text-lg text-gray-800">
+        <p className="mx-auto max-w-2xl text-lg text-gum-black">
           Templates, mockups, code, music, and more from independent creators.
         </p>
       </section>
 
       <section className="mx-auto max-w-7xl">
         <div className="mb-6 flex items-center justify-between">
-          <span className="rounded-full border-2 border-gum-black bg-white px-4 py-2 text-sm font-bold">
+          <span className="rounded-full border-2 border-gum-black bg-gum-cream px-4 py-2 text-sm font-bold">
             {`${data.total} assets`}
           </span>
         </div>
@@ -58,7 +58,7 @@ export default async function ExplorePage() {
             ))}
           </div>
         ) : (
-          <p className="text-gray-600">No assets available right now.</p>
+          <p className="ink-muted">No assets available right now.</p>
         )}
       </section>
     </main>

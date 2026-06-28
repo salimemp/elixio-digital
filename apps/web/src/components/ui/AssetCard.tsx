@@ -13,7 +13,7 @@ export function AssetCard({ asset }: AssetCardProps) {
           <span className="text-4xl">🎨</span>
         </div>
         <h2 className="mb-1 text-lg font-bold text-gum-black">{asset.title}</h2>
-        <p className="mb-3 line-clamp-2 text-sm text-gray-600">{asset.description}</p>
+        <p className="mb-3 line-clamp-2 text-sm ink-muted">{asset.description}</p>
         <div className="flex items-center justify-between">
           <span className="gum-pill">
             {(asset.priceCents / 100).toFixed(2)} {asset.currency}

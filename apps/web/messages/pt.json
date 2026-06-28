@@ -278,5 +278,24 @@
     "validation": "Por favor verifique o formulário para erros",
     "network": "Erro de rede. Tente novamente.",
     "rate_limited": "Muitas requisições. Por favor diminua o ritmo."
+  },
+  "footer": {
+    "tagline": "O marketplace onde criadores e compradores se encontram sem o incômodo dos impostos da plataforma.",
+    "product": "Produto",
+    "blog": "Blog",
+    "stats": "Estatísticas",
+    "account": "Conta",
+    "legal": "Legal",
+    "privacy": "Política de Privacidade",
+    "terms": "Termos de Serviço",
+    "cookies": "Política de Cookies",
+    "rights": "Todos os direitos reservados."
+  },
+  "cookie": {
+    "title": "Usamos cookies",
+    "body": "Elixio Digital usa um conjunto mínimo de cookies essenciais para autenticação, preferência de idioma e tema. Não rastreamos você na web nem vendemos seus dados.",
+    "read_more": "Leia nossa política de cookies",
+    "accept": "Aceitar",
+    "decline": "Recusar"
   }
 }

@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 import { Navbar } from "../components/layout/Navbar";
+import { Footer } from "../components/layout/Footer";
+import { CookieBanner } from "../components/layout/CookieBanner";
 import { AuthProvider } from "../lib/auth";
 import { I18nProvider } from "../lib/i18n-client";
 import { ThemeProvider } from "../lib/theme";
@@ -104,12 +106,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           href="/atom.xml"
         />
       </head>
-      <body className={`${inter.variable} font-display min-h-screen antialiased`}>
+      <body className={`${inter.variable} font-display flex min-h-screen flex-col antialiased`}>
         <ThemeProvider>
           <I18nProvider initialLocale={locale}>
             <AuthProvider>
               <Navbar />
-              {children}
+              <main className="flex-1">{children}</main>
+              <Footer />
+              <CookieBanner />
             </AuthProvider>
           </I18nProvider>
         </ThemeProvider>

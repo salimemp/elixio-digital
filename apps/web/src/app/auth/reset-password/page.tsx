@@ -35,7 +35,7 @@ function ResetPasswordForm() {
   return (
     <form onSubmit={handleSubmit} className="mt-6 space-y-3">
       <label className="block text-sm">
-        <span className="text-gray-700">New password (min 8 chars)</span>
+        <span className="text-gum-black">New password (min 8 chars)</span>
         <Input
           type="password"
           value={password}
@@ -57,7 +57,7 @@ export default function ResetPasswordPage() {
   return (
     <main className="mx-auto max-w-md px-6 py-12">
       <h1 className="text-3xl font-extrabold">Choose a new password</h1>
-      <Suspense fallback={<p className="text-sm text-gray-600">Loading…</p>}>
+      <Suspense fallback={<p className="text-sm ink-muted">Loading…</p>}>
         <ResetPasswordForm />
       </Suspense>
     </main>

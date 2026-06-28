@@ -85,7 +85,7 @@ export function PasswordStrengthMeter({ strength, pwned, password }: Props) {
             className={`h-full transition-all ${STRENGTH_COLOR[strength]} ${STRENGTH_WIDTH[strength]}`}
           />
         </div>
-        <span className="text-xs font-bold text-gray-600">
+        <span className="text-xs font-bold ink-muted">
           {STRENGTH_LABELS[strength]}
         </span>
       </div>
@@ -105,7 +105,7 @@ export function PasswordStrengthMeter({ strength, pwned, password }: Props) {
               className={
                 rule.met
                   ? "inline-flex h-3.5 w-3.5 flex-none items-center justify-center rounded-full bg-emerald-100 text-[10px] font-bold text-emerald-700"
-                  : "inline-flex h-3.5 w-3.5 flex-none items-center justify-center rounded-full bg-gray-200 text-[10px] text-gray-400"
+                  : "inline-flex h-3.5 w-3.5 flex-none items-center justify-center rounded-full bg-gray-200 text-[10px] ink-subtle"
               }
             >
               {rule.met ? "✓" : "·"}
@@ -114,7 +114,7 @@ export function PasswordStrengthMeter({ strength, pwned, password }: Props) {
               <summary
                 className={
                   "inline cursor-help list-none border-b border-dotted border-current/30 outline-none focus:border-solid " +
-                  (rule.met ? "text-emerald-700" : "text-gray-500")
+                  (rule.met ? "text-emerald-700" : "ink-muted")
                 }
                 aria-label={`${rule.label}. Click to learn why we require this.`}
               >
@@ -122,7 +122,7 @@ export function PasswordStrengthMeter({ strength, pwned, password }: Props) {
               </summary>
               <div
                 role="tooltip"
-                className="absolute left-0 top-full z-20 mt-1 w-72 max-w-xs rounded-lg border-2 border-gum-black bg-white p-2 text-left text-[11px] font-normal leading-snug text-gray-700 shadow-[0_4px_0_0_#111]"
+                className="absolute left-0 top-full z-20 mt-1 w-72 max-w-xs rounded-lg border-2 border-gum-black bg-gum-cream p-2 text-left text-[11px] font-normal leading-snug text-gum-black shadow-[0_4px_0_0_#111]"
               >
                 <span className="font-bold">Why we require this: </span>
                 {rule.why}

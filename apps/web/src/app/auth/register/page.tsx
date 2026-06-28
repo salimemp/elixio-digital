@@ -13,7 +13,7 @@ export default function RegisterChooserPage() {
       <h1 className="text-4xl font-extrabold leading-tight md:text-5xl">
         Join Elixio
       </h1>
-      <p className="mt-2 text-lg text-gray-600">
+      <p className="mt-2 text-lg ink-muted">
         Are you here to discover creators, or to sell your own work?
       </p>
 
@@ -26,12 +26,12 @@ export default function RegisterChooserPage() {
             For Buyers
           </span>
           <h2 className="mt-4 text-2xl font-extrabold">I want to buy digital work</h2>
-          <p className="mt-2 text-gray-700">
+          <p className="mt-2 text-gum-black">
             Discover, preview, and buy from thousands of independent
             creators. New drops every week across templates, design files,
             code, music, 3D, and more.
           </p>
-          <ul className="mt-4 space-y-1 text-sm text-gray-600">
+          <ul className="mt-4 space-y-1 text-sm ink-muted">
             <li>· Secure checkout, instant download</li>
             <li>· 25+ languages, voice search</li>
             <li>· E2E-encrypted delivery</li>
@@ -50,11 +50,11 @@ export default function RegisterChooserPage() {
             For Creators
           </span>
           <h2 className="mt-4 text-2xl font-extrabold">I want to sell my work</h2>
-          <p className="mt-2 text-gray-700">
+          <p className="mt-2 text-gum-black">
             Keep more of every sale. 5% platform fee, no monthly minimums,
             no listing fees. Set up your storefront in under 5 minutes.
           </p>
-          <ul className="mt-4 space-y-1 text-sm text-gray-600">
+          <ul className="mt-4 space-y-1 text-sm ink-muted">
             <li>· Branded storefront + custom domain</li>
             <li>· Subscriptions, bundles, pay-what-you-want</li>
             <li>· Stripe + Razorpay payouts</li>
@@ -66,7 +66,7 @@ export default function RegisterChooserPage() {
         </Link>
       </div>
 
-      <p className="mt-8 text-center text-sm text-gray-600">
+      <p className="mt-8 text-center text-sm ink-muted">
         Already have an account?{" "}
         <Link
           href="/auth/login"

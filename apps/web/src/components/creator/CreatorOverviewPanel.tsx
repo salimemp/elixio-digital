@@ -16,7 +16,7 @@ import {
 export function RevenueChart({ daily }: { daily: CreatorOverview["daily"] }) {
   if (daily.length === 0) {
     return (
-      <div className="flex h-48 items-center justify-center rounded-2xl border-2 border-dashed border-gum-black bg-white text-gray-500">
+      <div className="flex h-48 items-center justify-center rounded-2xl border-2 border-dashed border-gum-black bg-gum-cream ink-muted">
         No revenue in this period yet — your first sale will appear here.
       </div>
     );
@@ -110,7 +110,7 @@ export function CreatorOverviewPanel({
     <section>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-2xl font-extrabold">Overview</h2>
-        <div className="flex gap-1 rounded-full border-2 border-gum-black bg-white p-1">
+        <div className="flex gap-1 rounded-full border-2 border-gum-black bg-gum-cream p-1">
           {(["7d", "30d", "90d", "1y", "all"] as AnalyticsRange[]).map((r) => (
             <button
               key={r}
@@ -191,7 +191,7 @@ function StatCard({
       <span
         className={`absolute right-2 top-2 h-3 w-3 rounded-full ${colors[color]}`}
       />
-      <p className="text-xs font-bold uppercase tracking-wide text-gray-600">
+      <p className="text-xs font-bold uppercase tracking-wide ink-muted">
         {label}
       </p>
       <p className="mt-2 text-3xl font-extrabold tracking-tight">{value}</p>

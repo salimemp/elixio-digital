@@ -29,7 +29,7 @@ export default function ForgotPasswordPage() {
   return (
     <main className="mx-auto max-w-md px-6 py-12">
       <h1 className="text-3xl font-extrabold">Forgot your password?</h1>
-      <p className="mt-2 text-sm text-gray-600">
+      <p className="mt-2 text-sm ink-muted">
         Enter your email and we&apos;ll send a link to choose a new password.
       </p>
       {sent ? (
@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
       ) : (
         <form onSubmit={handleSubmit} className="mt-6 space-y-3">
           <label className="block text-sm">
-            <span className="text-gray-700">Email</span>
+            <span className="text-gum-black">Email</span>
             <Input
               type="email"
               value={email}

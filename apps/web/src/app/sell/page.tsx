@@ -15,7 +15,7 @@ export default function SellPage() {
             <input
               type="text"
               placeholder="e.g. Aurora UI Kit"
-              className="mt-1 w-full rounded-xl border-2 border-gum-black bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-gum-pink"
+              className="mt-1 w-full rounded-xl border-2 border-gum-black bg-gum-cream px-4 py-3 outline-none focus:ring-2 focus:ring-gum-pink"
             />
           </label>
           <label className="block">
@@ -23,7 +23,7 @@ export default function SellPage() {
             <input
               type="number"
               placeholder="49.00"
-              className="mt-1 w-full rounded-xl border-2 border-gum-black bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-gum-pink"
+              className="mt-1 w-full rounded-xl border-2 border-gum-black bg-gum-cream px-4 py-3 outline-none focus:ring-2 focus:ring-gum-pink"
             />
           </label>
           <button

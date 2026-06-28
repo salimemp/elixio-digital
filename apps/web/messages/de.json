@@ -278,5 +278,24 @@
     "validation": "Bitte überprüfe das Formular auf Fehler",
     "network": "Netzwerkfehler. Bitte erneut versuchen.",
     "rate_limited": "Zu viele Anfragen. Bitte langsamer."
+  },
+  "footer": {
+    "tagline": "Der Marktplatz, auf dem Kreative und Käufer sich ohne Plattform-Steuerkopfschmerzen treffen.",
+    "product": "Produkt",
+    "blog": "Blog",
+    "stats": "Statistiken",
+    "account": "Konto",
+    "legal": "Rechtliches",
+    "privacy": "Datenschutzerklärung",
+    "terms": "Nutzungsbedingungen",
+    "cookies": "Cookie-Richtlinie",
+    "rights": "Alle Rechte vorbehalten."
+  },
+  "cookie": {
+    "title": "Wir verwenden Cookies",
+    "body": "Elixio Digital verwendet eine minimale Anzahl essentieller Cookies für Authentifizierung, Spracheinstellung und Theme. Wir verfolgen Sie nicht im Web und verkaufen Ihre Daten nicht.",
+    "read_more": "Unsere Cookie-Richtlinie lesen",
+    "accept": "Akzeptieren",
+    "decline": "Ablehnen"
   }
 }

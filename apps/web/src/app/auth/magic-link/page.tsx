@@ -27,7 +27,7 @@ function MagicLinkClient() {
   }, [params, auth, router]);
 
   return (
-    <p className="text-sm text-gray-600">
+    <p className="text-sm ink-muted">
       {error ?? "Signing you in…"}
     </p>
   );
@@ -37,7 +37,7 @@ export default function MagicLinkPage() {
   return (
     <main className="mx-auto max-w-md px-6 py-12">
       <h1 className="text-3xl font-extrabold">Magic link sign-in</h1>
-      <Suspense fallback={<p className="mt-4 text-sm text-gray-600">Loading…</p>}>
+      <Suspense fallback={<p className="mt-4 text-sm ink-muted">Loading…</p>}>
         <MagicLinkClient />
       </Suspense>
     </main>

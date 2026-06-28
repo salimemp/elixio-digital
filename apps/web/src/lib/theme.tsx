@@ -118,10 +118,29 @@ function applyTheme(state: ThemeState, systemDark: boolean): "light" | "dark" {
   document.documentElement.classList.toggle("dark", effective === "dark");
   document.documentElement.dataset.theme = effective;
   document.documentElement.dataset.brand = state.brand;
-  // Apply brand palette as CSS variables
+
+  // Apply brand palette FIRST as CSS variables on <html>.
+  // Then apply mode-specific overrides (dark mode variants for cream + ink)
+  // LAST so they win in dark mode. Order matters: inline styles always win
+  // over class selectors, so the dark overrides need to be applied AFTER the
+  // brand palette would otherwise overwrite them.
   const tokens = PALETTES[state.brand] ?? PALETTES.default;
   for (const [key, value] of Object.entries(tokens)) {
     document.documentElement.style.setProperty(key, value);
+  }
+
+  // Mode-specific overrides. In dark mode, swap cream → near-black and
+  // ink → near-white. These values intentionally mirror the .dark
+  // selector in globals.css so the theme is consistent regardless of
+  // whether the dark class was applied via React or pre-hydration script.
+  if (effective === "dark") {
+    document.documentElement.style.setProperty("--gum-cream", "#0a0a0a");
+    document.documentElement.style.setProperty("--surface", "#0a0a0a");
+    document.documentElement.style.setProperty("--surface-muted", "#171717");
+    document.documentElement.style.setProperty("--surface-subtle", "#0f0f0f");
+    document.documentElement.style.setProperty("--ink", "#fafafa");
+    document.documentElement.style.setProperty("--ink-muted", "#d4d4d4");
+    document.documentElement.style.setProperty("--ink-subtle", "#a3a3a3");
   }
   return effective;
 }

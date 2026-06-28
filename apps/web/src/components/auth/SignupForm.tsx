@@ -108,7 +108,7 @@ export function SignupForm({ signupType }: Props) {
           {typeLabel}
         </span>
       </h1>
-      <p className="mt-2 text-sm text-gray-600">
+      <p className="mt-2 text-sm ink-muted">
         {signupType === "creator"
           ? "Sell templates, design files, code, music, 3D — keep more of every sale. 5% platform fee, no monthly minimums."
           : "Discover and buy from thousands of independent creators. New drops every week."}
@@ -118,7 +118,7 @@ export function SignupForm({ signupType }: Props) {
         <button
           type="button"
           onClick={() => auth.beginOAuth("google")}
-          className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 hover:bg-gray-50"
+          className="flex items-center justify-center gap-2 rounded-lg border border-gum-black/20 bg-gum-cream px-4 py-2.5 text-sm font-semibold text-gum-black hover:bg-gum-cream"
         >
           <GoogleIcon className="h-4 w-4" />
           Google
@@ -126,14 +126,14 @@ export function SignupForm({ signupType }: Props) {
         <button
           type="button"
           onClick={() => auth.beginOAuth("github")}
-          className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 hover:bg-gray-50"
+          className="flex items-center justify-center gap-2 rounded-lg border border-gum-black/20 bg-gum-cream px-4 py-2.5 text-sm font-semibold text-gum-black hover:bg-gum-cream"
         >
           <GitHubIcon className="h-4 w-4" />
           GitHub
         </button>
       </div>
 
-      <div className="my-6 flex items-center gap-3 text-xs uppercase tracking-wide text-gray-500">
+      <div className="my-6 flex items-center gap-3 text-xs uppercase tracking-wide ink-muted">
         <div className="h-px flex-1 bg-gray-200" />
         or with email
         <div className="h-px flex-1 bg-gray-200" />
@@ -189,7 +189,7 @@ export function SignupForm({ signupType }: Props) {
           />
           <p
             id="password-rules"
-            className="mt-2 text-xs text-gray-500"
+            className="mt-2 text-xs ink-muted"
           >
             Must include 1 letter, 1 number, and 1 special character.
           </p>
@@ -217,26 +217,26 @@ export function SignupForm({ signupType }: Props) {
               : "Create buyer account"}
         </Button>
 
-        <p className="text-center text-xs text-gray-500">
+        <p className="text-center text-xs ink-muted">
           By signing up, you agree to our Terms and Privacy Policy. We&apos;ll
           send a verification email before you can sell or buy.
         </p>
       </form>
 
-      <p className="mt-8 text-center text-sm text-gray-600">
+      <p className="mt-8 text-center text-sm ink-muted">
         Already have an account?{" "}
         <Link href="/auth/login" className="font-bold text-gum-purple underline">
           Sign in
         </Link>
       </p>
 
-      <p className="mt-4 text-center text-sm text-gray-500">
+      <p className="mt-4 text-center text-sm ink-muted">
         {signupType === "creator" ? (
           <>
             Just here to buy?{" "}
             <Link
               href="/auth/register/buyer"
-              className="font-semibold text-gray-700 underline"
+              className="font-semibold text-gum-black underline"
             >
               Switch to Buyer signup
             </Link>
@@ -246,7 +246,7 @@ export function SignupForm({ signupType }: Props) {
             Want to sell?{" "}
             <Link
               href="/auth/register/creator"
-              className="font-semibold text-gray-700 underline"
+              className="font-semibold text-gum-black underline"
             >
               Switch to Creator signup
             </Link>
@@ -255,7 +255,7 @@ export function SignupForm({ signupType }: Props) {
       </p>
 
       {verifyEmail && (
-        <p className="mt-4 text-center text-xs text-gray-500">
+        <p className="mt-4 text-center text-xs ink-muted">
           Verification email sent to {verifyEmail}
         </p>
       )}

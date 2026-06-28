@@ -26,7 +26,7 @@ function VerifyEmailClient() {
   }, [params, router]);
 
   return (
-    <p className="text-sm text-gray-600">
+    <p className="text-sm ink-muted">
       {error ?? "Verifying your email…"}
     </p>
   );
@@ -36,7 +36,7 @@ export default function VerifyEmailPage() {
   return (
     <main className="mx-auto max-w-md px-6 py-12">
       <h1 className="text-3xl font-extrabold">Verifying email</h1>
-      <Suspense fallback={<p className="mt-4 text-sm text-gray-600">Loading…</p>}>
+      <Suspense fallback={<p className="mt-4 text-sm ink-muted">Loading…</p>}>
         <VerifyEmailClient />
       </Suspense>
     </main>

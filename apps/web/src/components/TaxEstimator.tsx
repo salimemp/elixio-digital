@@ -91,7 +91,7 @@ export function TaxEstimator({
             setRegion("");
             setResult(null);
           }}
-          className="rounded-xl border-2 border-gum-black bg-white px-3 py-2 text-sm"
+          className="rounded-xl border-2 border-gum-black bg-gum-cream px-3 py-2 text-sm"
         >
           <option value="">{t("checkout.country")}…</option>
           {COUNTRIES.map((c) => (
@@ -105,7 +105,7 @@ export function TaxEstimator({
             value={region}
             onChange={(e) => setRegion(e.target.value.toUpperCase())}
             placeholder={country === "US" ? "CA, NY, TX…" : country === "CA" ? "ON, QC, BC…" : "SP, RJ, MG…"}
-            className="rounded-xl border-2 border-gum-black bg-white px-3 py-2 text-sm uppercase placeholder:normal-case"
+            className="rounded-xl border-2 border-gum-black bg-gum-cream px-3 py-2 text-sm uppercase placeholder:normal-case"
           />
         )}
       </div>

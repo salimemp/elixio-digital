@@ -34,7 +34,7 @@ export function ThemeSwitcher() {
         onClick={() => setOpen((o) => !o)}
         aria-label={t("theme.select")}
         aria-expanded={open}
-        className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-gum-black bg-white hover:bg-gum-cream"
+        className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-gum-black bg-gum-cream hover:bg-gum-cream"
         title={`${t("theme.select")}: ${mode} / ${BRAND_LABELS[brand]}`}
       >
         {/* Show sun/moon based on effective mode */}

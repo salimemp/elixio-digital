@@ -31,7 +31,7 @@ function VerifyEmailPromptClient() {
 
   return (
     <>
-      <p className="mt-2 text-sm text-gray-600">
+      <p className="mt-2 text-sm ink-muted">
         We sent a verification link to <strong>{email}</strong>. Click the link in that email to finish setting up your account.
       </p>
       {sent && <p className="mt-4 text-sm text-green-700">Verification email re-sent.</p>}
@@ -41,7 +41,7 @@ function VerifyEmailPromptClient() {
           {loading ? "Sending…" : "Resend verification email"}
         </Button>
       </div>
-      <p className="mt-6 text-xs text-gray-500">
+      <p className="mt-6 text-xs ink-muted">
         You can browse Elixio Digital without verifying, but you won&apos;t be able to publish or purchase until you do.
       </p>
     </>
@@ -52,7 +52,7 @@ export default function VerifyEmailPromptPage() {
   return (
     <main className="mx-auto max-w-md px-6 py-12">
       <h1 className="text-3xl font-extrabold">Verify your email</h1>
-      <Suspense fallback={<p className="mt-4 text-sm text-gray-600">Loading…</p>}>
+      <Suspense fallback={<p className="mt-4 text-sm ink-muted">Loading…</p>}>
         <VerifyEmailPromptClient />
       </Suspense>
     </main>

@@ -42,7 +42,7 @@ export function Navbar() {
           <NavbarLink href="/explore" accent="bg-gum-pink" textColor="text-gum-black">
             {t("nav.explore")}
           </NavbarLink>
-          <NavbarLink href="/library" accent="bg-white" textColor="text-gum-black">
+          <NavbarLink href="/library" accent="bg-gum-cream" textColor="text-gum-black">
             {t("nav.library")}
           </NavbarLink>
         </div>

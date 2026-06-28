@@ -91,7 +91,7 @@ export default function BlogPostPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <nav className="mb-8 text-sm font-semibold text-gray-600">
+      <nav className="mb-8 text-sm font-semibold ink-muted">
         <Link href="/blog" className="hover:text-gum-purple">
           ← All posts
         </Link>
@@ -99,7 +99,7 @@ export default function BlogPostPage({
 
       <article>
         <header className="mb-8 border-b-2 border-gum-black pb-8">
-          <div className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wide text-gray-600">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wide ink-muted">
             <time dateTime={post.publishedAt}>
               {formatDate(post.publishedAt)}
             </time>
@@ -116,9 +116,9 @@ export default function BlogPostPage({
             {post.title}
           </h1>
           {post.description && (
-            <p className="mt-4 text-xl text-gray-700">{post.description}</p>
+            <p className="mt-4 text-xl text-gum-black">{post.description}</p>
           )}
-          <p className="mt-4 text-sm text-gray-500">
+          <p className="mt-4 text-sm ink-muted">
             By <strong>{post.author}</strong>
             {post.wordCount ? ` · ${post.wordCount.toLocaleString()} words` : ""}
           </p>
@@ -136,7 +136,7 @@ export default function BlogPostPage({
           <h2 className="text-2xl font-extrabold">
             Ready to sell your digital work?
           </h2>
-          <p className="mt-2 text-gray-700">
+          <p className="mt-2 text-gum-black">
             Elixio is a creator-first marketplace with the lowest fees in the
             industry. Set up your storefront in under 5 minutes.
           </p>
