@@ -17,10 +17,10 @@ export default async function ExplorePage() {
   return (
     <main className="min-h-screen bg-gum-cream px-6 py-10">
       <section className="mx-auto mb-10 max-w-7xl rounded-3xl border-2 border-gum-black bg-gum-mint p-8 text-center shadow-gum">
-        <h1 className="mb-3 text-4xl font-extrabold text-gum-black md:text-5xl">
+        <h1 className="mb-3 text-4xl font-extrabold ink-default md:text-5xl">
           Discover digital assets
         </h1>
-        <p className="mx-auto max-w-2xl text-lg text-gum-black">
+        <p className="mx-auto max-w-2xl text-lg ink-default">
           Templates, mockups, code, music, and more from independent creators.
         </p>
       </section>

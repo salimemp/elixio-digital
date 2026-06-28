@@ -12,8 +12,8 @@ export default function CreatorDashboardPage() {
       <section className="mx-auto max-w-7xl">
         <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-4xl font-extrabold text-gum-black">Creator Dashboard</h1>
-            <p className="mt-1 text-gum-black">
+            <h1 className="text-4xl font-extrabold ink-default">Creator Dashboard</h1>
+            <p className="mt-1 ink-default">
               Revenue, top assets, conversion, cohort retention.
             </p>
           </div>

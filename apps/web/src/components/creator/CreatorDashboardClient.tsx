@@ -80,7 +80,7 @@ export function CreatorDashboardClient({
               className={`rounded-full px-3 py-1 text-sm font-bold transition ${
                 range === r
                   ? "bg-gum-black text-white"
-                  : "text-gum-black hover:bg-gum-cream"
+                  : "ink-default hover:bg-gum-cream"
               }`}
             >
               {r}
@@ -228,15 +228,15 @@ export function CreatorDashboardClient({
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <a href="/sell" className="gum-card text-center hover:bg-gum-yellow">
           <h3 className="text-lg font-bold">Create asset</h3>
-          <p className="mt-1 text-sm text-gum-black">Upload + list a new product.</p>
+          <p className="mt-1 text-sm ink-default">Upload + list a new product.</p>
         </a>
         <a href="/dashboard/bulk" className="gum-card text-center hover:bg-gum-cyan">
           <h3 className="text-lg font-bold">Bulk operations</h3>
-          <p className="mt-1 text-sm text-gum-black">Update prices, tags, or publish many assets at once.</p>
+          <p className="mt-1 text-sm ink-default">Update prices, tags, or publish many assets at once.</p>
         </a>
         <a href="/studio" className="gum-card text-center hover:bg-gum-pink">
           <h3 className="text-lg font-bold">Studio</h3>
-          <p className="mt-1 text-sm text-gum-black">AI tools — listing copywriter, asset critique, sales coach.</p>
+          <p className="mt-1 text-sm ink-default">AI tools — listing copywriter, asset critique, sales coach.</p>
         </a>
       </div>
     </div>

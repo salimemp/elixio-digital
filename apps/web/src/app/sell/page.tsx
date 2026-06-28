@@ -6,12 +6,12 @@ export default function SellPage() {
           <span className="mb-4 inline-block rounded-full border-2 border-gum-black bg-gum-yellow px-4 py-1 text-sm font-bold uppercase">
             Creator Flow
           </span>
-          <h1 className="text-4xl font-extrabold text-gum-black">List a new asset</h1>
+          <h1 className="text-4xl font-extrabold ink-default">List a new asset</h1>
         </div>
 
         <form className="gum-card space-y-4">
           <label className="block">
-            <span className="text-sm font-bold text-gum-black">Title</span>
+            <span className="text-sm font-bold ink-default">Title</span>
             <input
               type="text"
               placeholder="e.g. Aurora UI Kit"
@@ -19,7 +19,7 @@ export default function SellPage() {
             />
           </label>
           <label className="block">
-            <span className="text-sm font-bold text-gum-black">Price (USD)</span>
+            <span className="text-sm font-bold ink-default">Price (USD)</span>
             <input
               type="number"
               placeholder="49.00"

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function CookiesPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
-      <h1 className="mb-2 text-4xl font-extrabold text-gum-black">Cookie Policy</h1>
+      <h1 className="mb-2 text-4xl font-extrabold ink-default">Cookie Policy</h1>
       <p className="mb-8 text-sm ink-muted">Last updated: 28 June 2026</p>
 
       <Section title="What is a cookie?">
@@ -27,13 +27,13 @@ export default function CookiesPage() {
         <table className="my-4 w-full border-collapse">
           <thead>
             <tr className="border-b-2 border-gum-black">
-              <th className="py-2 text-left font-extrabold text-gum-black">Name</th>
-              <th className="py-2 text-left font-extrabold text-gum-black">Purpose</th>
-              <th className="py-2 text-left font-extrabold text-gum-black">Type</th>
-              <th className="py-2 text-left font-extrabold text-gum-black">Duration</th>
+              <th className="py-2 text-left font-extrabold ink-default">Name</th>
+              <th className="py-2 text-left font-extrabold ink-default">Purpose</th>
+              <th className="py-2 text-left font-extrabold ink-default">Type</th>
+              <th className="py-2 text-left font-extrabold ink-default">Duration</th>
             </tr>
           </thead>
-          <tbody className="text-gum-black">
+          <tbody className="ink-default">
             <tr className="border-b border-gum-black/20">
               <td className="py-2"><code>elixio_access_token</code></td>
               <td className="py-2">Authenticated API requests</td>
@@ -137,8 +137,8 @@ export default function CookiesPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mb-8 rounded-2xl border-2 border-gum-black bg-gum-cream p-6 shadow-[0_6px_0_0_#111]">
-      <h2 className="mb-3 text-2xl font-extrabold text-gum-black">{title}</h2>
-      <div className="space-y-3 text-gum-black">{children}</div>
+      <h2 className="mb-3 text-2xl font-extrabold ink-default">{title}</h2>
+      <div className="space-y-3 ink-default">{children}</div>
     </section>
   );
 }

@@ -50,7 +50,7 @@ export default function MfaVerifyPage() {
       </p>
       <form onSubmit={handleSubmit} className="mt-6 space-y-3">
         <label className="block text-sm">
-          <span className="text-gum-black">Code</span>
+          <span className="ink-default">Code</span>
           <Input
             value={code}
             onChange={(e) => setCode(e.target.value)}

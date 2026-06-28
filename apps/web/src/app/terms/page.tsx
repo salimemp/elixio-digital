@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
-      <h1 className="mb-2 text-4xl font-extrabold text-gum-black">Terms of Service</h1>
+      <h1 className="mb-2 text-4xl font-extrabold ink-default">Terms of Service</h1>
       <p className="mb-8 text-sm ink-muted">
         Last updated: 28 June 2026 · Effective immediately
       </p>
@@ -249,8 +249,8 @@ export default function TermsPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mb-8 rounded-2xl border-2 border-gum-black bg-gum-cream p-6 shadow-[0_6px_0_0_#111]">
-      <h2 className="mb-3 text-2xl font-extrabold text-gum-black">{title}</h2>
-      <div className="space-y-3 text-gum-black">{children}</div>
+      <h2 className="mb-3 text-2xl font-extrabold ink-default">{title}</h2>
+      <div className="space-y-3 ink-default">{children}</div>
     </section>
   );
 }

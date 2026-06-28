@@ -33,7 +33,7 @@ export function StudioClient() {
             className={`flex-1 rounded-full px-4 py-2 text-sm font-bold transition ${
               tab === t.id
                 ? "bg-gum-black text-white"
-                : "text-gum-black hover:bg-gum-cream"
+                : "ink-default hover:bg-gum-cream"
             }`}
           >
             {t.label}
@@ -146,17 +146,17 @@ function CopywriterPanel() {
           </div>
 
           <div>
-            <p className="text-sm font-bold text-gum-black">Short pitch</p>
+            <p className="text-sm font-bold ink-default">Short pitch</p>
             <p className="text-sm">{out.shortPitch}</p>
           </div>
 
           <div>
-            <p className="text-sm font-bold text-gum-black">Description</p>
+            <p className="text-sm font-bold ink-default">Description</p>
             <p className="whitespace-pre-wrap text-sm">{out.description}</p>
           </div>
 
           <div>
-            <p className="text-sm font-bold text-gum-black">Tags</p>
+            <p className="text-sm font-bold ink-default">Tags</p>
             <div className="mt-1 flex flex-wrap gap-1">
               {out.tags.map((t) => (
                 <span key={t} className="rounded-full bg-gum-yellow px-2 py-1 text-xs font-bold">
@@ -167,7 +167,7 @@ function CopywriterPanel() {
           </div>
 
           <div>
-            <p className="text-sm font-bold text-gum-black">Suggested price</p>
+            <p className="text-sm font-bold ink-default">Suggested price</p>
             <p className="text-2xl font-extrabold text-gum-purple">
               ${(out.suggestedPriceCents / 100).toFixed(2)}
             </p>
@@ -175,7 +175,7 @@ function CopywriterPanel() {
           </div>
 
           <div>
-            <p className="text-sm font-bold text-gum-black">Social caption</p>
+            <p className="text-sm font-bold ink-default">Social caption</p>
             <p className="text-sm">{out.socialCaption}</p>
           </div>
 
@@ -277,7 +277,7 @@ function CritiquePanel() {
           </div>
 
           <div>
-            <p className="text-sm font-bold text-gum-black">Strengths</p>
+            <p className="text-sm font-bold ink-default">Strengths</p>
             <ul className="ml-4 list-disc text-sm">
               {out.strengths.map((s, i) => (
                 <li key={i}>{s}</li>
@@ -287,7 +287,7 @@ function CritiquePanel() {
 
           {out.issues.length > 0 && (
             <div>
-              <p className="text-sm font-bold text-gum-black">Issues</p>
+              <p className="text-sm font-bold ink-default">Issues</p>
               <div className="space-y-2">
                 {out.issues.map((iss, i) => (
                   <div key={i} className="rounded-2xl border-2 border-gum-black bg-gum-cream p-2">
@@ -303,7 +303,7 @@ function CritiquePanel() {
                       {iss.severity}
                     </span>
                     <p className="text-sm">{iss.description}</p>
-                    <p className="mt-1 text-xs text-gum-black">
+                    <p className="mt-1 text-xs ink-default">
                       <span className="font-bold">Fix:</span> {iss.fix}
                     </p>
                   </div>
@@ -313,7 +313,7 @@ function CritiquePanel() {
           )}
 
           <div>
-            <p className="text-sm font-bold text-gum-black">Composition</p>
+            <p className="text-sm font-bold ink-default">Composition</p>
             <div className="grid grid-cols-2 gap-2">
               {Object.entries(out.composition).map(([k, v]) => (
                 <div key={k} className="rounded-2xl bg-gum-cream p-2">
@@ -326,7 +326,7 @@ function CritiquePanel() {
 
           {out.recommendations.length > 0 && (
             <div>
-              <p className="text-sm font-bold text-gum-black">Recommendations</p>
+              <p className="text-sm font-bold ink-default">Recommendations</p>
               <ul className="ml-4 list-disc text-sm">
                 {out.recommendations.map((r, i) => (
                   <li key={i}>{r}</li>
@@ -397,7 +397,7 @@ function SalesCoachPanel() {
                         ? "bg-green-200 text-green-900"
                         : ins.type === "warning"
                         ? "bg-red-200 text-red-900"
-                        : "bg-gum-mint text-gum-black"
+                        : "bg-gum-mint ink-default"
                     }`}
                   >
                     {ins.type}

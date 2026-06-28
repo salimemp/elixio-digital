@@ -42,7 +42,7 @@ export function Navbar() {
           <NavbarLink href="/explore" accent="bg-gum-pink" textColor="text-gum-black">
             {t("nav.explore")}
           </NavbarLink>
-          <NavbarLink href="/library" accent="bg-gum-cream" textColor="text-gum-black">
+          <NavbarLink href="/library" accent="bg-gum-cream" textColor="ink-default">
             {t("nav.library")}
           </NavbarLink>
         </div>
@@ -64,7 +64,7 @@ export function Navbar() {
           <ThemeSwitcher />
           <Link
             href="/auth/login"
-            className="rounded-full border-2 border-gum-black px-4 py-2 text-sm font-semibold text-gum-black hover:bg-gum-mint"
+            className="rounded-full border-2 border-gum-black px-4 py-2 text-sm font-semibold ink-default hover:bg-gum-mint"
           >
             {t("nav.sign_in")}
           </Link>
@@ -175,7 +175,7 @@ function SignupDropdown() {
             <Link
               href="/auth/register"
               role="menuitem"
-              className="block rounded-lg px-3 py-2 text-sm font-semibold text-gum-black hover:bg-gum-mint"
+              className="block rounded-lg px-3 py-2 text-sm font-semibold ink-default hover:bg-gum-mint"
             >
               {t("auth.create_account")} →
             </Link>

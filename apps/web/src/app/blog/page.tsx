@@ -41,7 +41,7 @@ export default function BlogIndexPage() {
           Guides for{" "}
           <span className="text-gum-purple">digital creators</span>
         </h1>
-        <p className="mt-4 max-w-2xl text-xl text-gum-black">
+        <p className="mt-4 max-w-2xl text-xl ink-default">
           How to sell your digital work, what platforms pay creators the most,
           and how to grow an audience that buys. Updated weekly.
         </p>
@@ -63,7 +63,7 @@ export default function BlogIndexPage() {
                   {post.categories.slice(0, 3).map((cat) => (
                     <span
                       key={cat}
-                      className="rounded-full bg-gum-mint px-2 py-0.5 text-gum-black"
+                      className="rounded-full bg-gum-mint px-2 py-0.5 ink-default"
                     >
                       {cat}
                     </span>
@@ -77,7 +77,7 @@ export default function BlogIndexPage() {
                     {post.title}
                   </Link>
                 </h2>
-                <p className="mt-3 text-gum-black">{post.excerpt}</p>
+                <p className="mt-3 ink-default">{post.excerpt}</p>
                 <div className="mt-4">
                   <Link
                     href={`/blog/${post.slug}`}

@@ -118,7 +118,7 @@ export function CreatorOverviewPanel({
               className={`rounded-full px-3 py-1 text-sm font-bold transition ${
                 range === r
                   ? "bg-gum-black text-white"
-                  : "text-gum-black hover:bg-gum-cream"
+                  : "ink-default hover:bg-gum-cream"
               }`}
             >
               {r}

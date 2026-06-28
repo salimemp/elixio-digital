@@ -35,7 +35,7 @@ function ResetPasswordForm() {
   return (
     <form onSubmit={handleSubmit} className="mt-6 space-y-3">
       <label className="block text-sm">
-        <span className="text-gum-black">New password (min 8 chars)</span>
+        <span className="ink-default">New password (min 8 chars)</span>
         <Input
           type="password"
           value={password}

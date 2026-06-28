@@ -22,7 +22,7 @@ export default async function AssetDetailPage({
   return (
     <main className="p-6">
       <h1 className="mb-4 text-3xl font-bold">{asset.title}</h1>
-      <p className="mb-4 text-gum-black">{asset.description}</p>
+      <p className="mb-4 ink-default">{asset.description}</p>
       <p className="font-semibold">
         {(asset.priceCents / 100).toFixed(2)} {asset.currency}
       </p>

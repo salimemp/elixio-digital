@@ -17,7 +17,7 @@ import { useI18n } from "@/lib/i18n-client";
  *   - User clicks "Read more" → link goes to /cookies page.
  *   - Both choices are equally prominent (no dark patterns).
  *
- * Theme safety: uses bg-gum-cream + text-gum-black so it adapts to mode.
+ * Theme safety: uses bg-gum-cream + ink-default so it adapts to mode.
  */
 export function CookieBanner() {
   const { t } = useI18n();
@@ -63,10 +63,10 @@ export function CookieBanner() {
     >
       <div className="mx-auto flex max-w-4xl flex-col gap-4 rounded-2xl border-2 border-gum-black bg-gum-cream p-5 shadow-[0_6px_0_0_#111] md:flex-row md:items-center md:gap-6">
         <div className="flex-1">
-          <p className="text-base font-extrabold text-gum-black">
+          <p className="text-base font-extrabold ink-default">
             {t("cookie.title")}
           </p>
-          <p className="mt-1 text-sm text-gum-black">
+          <p className="mt-1 text-sm ink-default">
             {t("cookie.body")}{" "}
             <Link
               href="/cookies"
@@ -96,7 +96,7 @@ export function CookieBanner() {
           <button
             type="button"
             onClick={() => decide("declined")}
-            className="rounded-full border-2 border-gum-black bg-gum-cream px-4 py-2 text-sm font-bold text-gum-black transition hover:bg-gum-mint"
+            className="rounded-full border-2 border-gum-black bg-gum-cream px-4 py-2 text-sm font-bold ink-default transition hover:bg-gum-mint"
           >
             {t("cookie.decline")}
           </button>

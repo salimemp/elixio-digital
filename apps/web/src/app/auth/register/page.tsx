@@ -26,7 +26,7 @@ export default function RegisterChooserPage() {
             For Buyers
           </span>
           <h2 className="mt-4 text-2xl font-extrabold">I want to buy digital work</h2>
-          <p className="mt-2 text-gum-black">
+          <p className="mt-2 ink-default">
             Discover, preview, and buy from thousands of independent
             creators. New drops every week across templates, design files,
             code, music, 3D, and more.
@@ -50,7 +50,7 @@ export default function RegisterChooserPage() {
             For Creators
           </span>
           <h2 className="mt-4 text-2xl font-extrabold">I want to sell my work</h2>
-          <p className="mt-2 text-gum-black">
+          <p className="mt-2 ink-default">
             Keep more of every sale. 5% platform fee, no monthly minimums,
             no listing fees. Set up your storefront in under 5 minutes.
           </p>

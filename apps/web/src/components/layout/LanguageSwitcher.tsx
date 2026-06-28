@@ -41,7 +41,7 @@ export function LanguageSwitcher() {
         aria-label={t("language.switch_to")}
         aria-expanded={open}
         aria-haspopup="menu"
-        className="flex items-center gap-1.5 rounded-full border-2 border-gum-black bg-gum-cream px-3 py-1.5 text-sm font-bold text-gum-black hover:bg-gum-cream"
+        className="flex items-center gap-1.5 rounded-full border-2 border-gum-black bg-gum-cream px-3 py-1.5 text-sm font-bold ink-default hover:bg-gum-cream"
       >
         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4">
           <circle cx="10" cy="10" r="7.5" />
@@ -56,7 +56,7 @@ export function LanguageSwitcher() {
           className="absolute right-0 z-50 mt-2 max-h-[480px] w-72 overflow-y-auto rounded-2xl border-2 border-gum-black bg-gum-cream shadow-[0_6px_0_0_#111]"
         >
           <div className="border-b-2 border-gum-black bg-gum-cream px-3 py-2">
-            <p className="text-xs font-bold uppercase tracking-wide text-gum-black">
+            <p className="text-xs font-bold uppercase tracking-wide ink-default">
               {t("language.select")}
             </p>
             <p className="mt-0.5 text-xs ink-muted">
@@ -83,7 +83,7 @@ export function LanguageSwitcher() {
           </div>
 
           <div className="border-t-2 border-gum-black bg-gum-yellow/30 px-2 py-2">
-            <p className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-gum-black">
+            <p className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider ink-default">
               {t("language.needs_review")}
             </p>
             {rest.map((code) => (

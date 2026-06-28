@@ -106,7 +106,7 @@ export default function BlogPostPage({
             {post.categories.slice(0, 3).map((cat) => (
               <span
                 key={cat}
-                className="rounded-full bg-gum-mint px-2 py-0.5 text-gum-black"
+                className="rounded-full bg-gum-mint px-2 py-0.5 ink-default"
               >
                 {cat}
               </span>
@@ -116,7 +116,7 @@ export default function BlogPostPage({
             {post.title}
           </h1>
           {post.description && (
-            <p className="mt-4 text-xl text-gum-black">{post.description}</p>
+            <p className="mt-4 text-xl ink-default">{post.description}</p>
           )}
           <p className="mt-4 text-sm ink-muted">
             By <strong>{post.author}</strong>
@@ -136,7 +136,7 @@ export default function BlogPostPage({
           <h2 className="text-2xl font-extrabold">
             Ready to sell your digital work?
           </h2>
-          <p className="mt-2 text-gum-black">
+          <p className="mt-2 ink-default">
             Elixio is a creator-first marketplace with the lowest fees in the
             industry. Set up your storefront in under 5 minutes.
           </p>

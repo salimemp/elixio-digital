@@ -79,7 +79,7 @@ export default function LoginPage() {
         <button
           type="button"
           onClick={() => auth.beginOAuth("google")}
-          className="flex items-center justify-center gap-2 rounded-lg border border-gum-black/20 bg-gum-cream px-4 py-2.5 text-sm font-semibold text-gum-black hover:bg-gum-cream"
+          className="flex items-center justify-center gap-2 rounded-lg border border-gum-black/20 bg-gum-cream px-4 py-2.5 text-sm font-semibold ink-default hover:bg-gum-cream"
         >
           <GoogleIcon size={18} />
           Google
@@ -102,7 +102,7 @@ export default function LoginPage() {
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-3">
         <label className="block text-sm">
-          <span className="text-gum-black">Email</span>
+          <span className="ink-default">Email</span>
           <Input
             type="email"
             value={email}
@@ -113,7 +113,7 @@ export default function LoginPage() {
           />
         </label>
         <label className="block text-sm">
-          <span className="text-gum-black">Password</span>
+          <span className="ink-default">Password</span>
           <Input
             type="password"
             value={password}

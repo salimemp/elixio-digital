@@ -49,7 +49,7 @@ const StatCard = ({ stat }: { stat: Stat }) => (
     <p className="text-xs font-bold uppercase tracking-wide ink-muted">
       {stat.label}
     </p>
-    <p className="mt-2 text-4xl font-extrabold tracking-tight text-gum-black">
+    <p className="mt-2 text-4xl font-extrabold tracking-tight ink-default">
       {stat.value}
     </p>
     {stat.hint && (
@@ -165,7 +165,7 @@ export default async function StatsPage() {
           Elixio in{" "}
           <span className="text-gum-purple">numbers</span>
         </h1>
-        <p className="mt-4 max-w-2xl text-xl text-gum-black">
+        <p className="mt-4 max-w-2xl text-xl ink-default">
           We show the numbers, not just the marketing. Updated every 60 seconds
           from our production database.
         </p>
@@ -207,7 +207,7 @@ export default async function StatsPage() {
       <footer className="mt-16 border-t-2 border-gum-black pt-8">
         <div className="gum-card">
           <h2 className="text-2xl font-extrabold">Why we share this</h2>
-          <p className="mt-2 text-gum-black">
+          <p className="mt-2 ink-default">
             Every other marketplace hides its numbers. We don&apos;t. If
             you&apos;re a creator thinking about switching, you should be able
             to see exactly what kind of growth we&apos;re getting — and judge

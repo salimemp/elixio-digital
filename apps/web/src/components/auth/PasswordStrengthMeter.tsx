@@ -122,7 +122,7 @@ export function PasswordStrengthMeter({ strength, pwned, password }: Props) {
               </summary>
               <div
                 role="tooltip"
-                className="absolute left-0 top-full z-20 mt-1 w-72 max-w-xs rounded-lg border-2 border-gum-black bg-gum-cream p-2 text-left text-[11px] font-normal leading-snug text-gum-black shadow-[0_4px_0_0_#111]"
+                className="absolute left-0 top-full z-20 mt-1 w-72 max-w-xs rounded-lg border-2 border-gum-black bg-gum-cream p-2 text-left text-[11px] font-normal leading-snug ink-default shadow-[0_4px_0_0_#111]"
               >
                 <span className="font-bold">Why we require this: </span>
                 {rule.why}

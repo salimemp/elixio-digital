@@ -118,7 +118,7 @@ export function SignupForm({ signupType }: Props) {
         <button
           type="button"
           onClick={() => auth.beginOAuth("google")}
-          className="flex items-center justify-center gap-2 rounded-lg border border-gum-black/20 bg-gum-cream px-4 py-2.5 text-sm font-semibold text-gum-black hover:bg-gum-cream"
+          className="flex items-center justify-center gap-2 rounded-lg border border-gum-black/20 bg-gum-cream px-4 py-2.5 text-sm font-semibold ink-default hover:bg-gum-cream"
         >
           <GoogleIcon className="h-4 w-4" />
           Google
@@ -126,7 +126,7 @@ export function SignupForm({ signupType }: Props) {
         <button
           type="button"
           onClick={() => auth.beginOAuth("github")}
-          className="flex items-center justify-center gap-2 rounded-lg border border-gum-black/20 bg-gum-cream px-4 py-2.5 text-sm font-semibold text-gum-black hover:bg-gum-cream"
+          className="flex items-center justify-center gap-2 rounded-lg border border-gum-black/20 bg-gum-cream px-4 py-2.5 text-sm font-semibold ink-default hover:bg-gum-cream"
         >
           <GitHubIcon className="h-4 w-4" />
           GitHub
@@ -236,7 +236,7 @@ export function SignupForm({ signupType }: Props) {
             Just here to buy?{" "}
             <Link
               href="/auth/register/buyer"
-              className="font-semibold text-gum-black underline"
+              className="font-semibold ink-default underline"
             >
               Switch to Buyer signup
             </Link>
@@ -246,7 +246,7 @@ export function SignupForm({ signupType }: Props) {
             Want to sell?{" "}
             <Link
               href="/auth/register/creator"
-              className="font-semibold text-gum-black underline"
+              className="font-semibold ink-default underline"
             >
               Switch to Creator signup
             </Link>

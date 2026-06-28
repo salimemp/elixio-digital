@@ -57,7 +57,7 @@ export function ThemeSwitcher() {
         >
           {/* Mode selector */}
           <div className="border-b-2 border-gum-black bg-gum-cream px-3 py-2">
-            <p className="text-xs font-bold uppercase tracking-wide text-gum-black">
+            <p className="text-xs font-bold uppercase tracking-wide ink-default">
               {t("theme.select")}
             </p>
           </div>
@@ -69,7 +69,7 @@ export function ThemeSwitcher() {
                 role="menuitemradio"
                 aria-checked={mode === m}
                 onClick={() => setMode(m)}
-                className={`flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-xs font-bold text-gum-black transition ${
+                className={`flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-xs font-bold ink-default transition ${
                   mode === m ? "bg-gum-yellow" : "hover:bg-gum-mint"
                 }`}
               >
@@ -81,7 +81,7 @@ export function ThemeSwitcher() {
 
           {/* Brand palette selector */}
           <div className="border-t-2 border-gum-black px-3 py-2">
-            <p className="mb-2 text-xs font-bold uppercase tracking-wide text-gum-black">
+            <p className="mb-2 text-xs font-bold uppercase tracking-wide ink-default">
               {t("theme.brand")}
             </p>
             <div className="grid grid-cols-4 gap-2">
@@ -93,7 +93,7 @@ export function ThemeSwitcher() {
                   aria-checked={brand === b}
                   onClick={() => setBrand(b)}
                   title={BRAND_LABELS[b]}
-                  className={`flex flex-col items-center gap-1 rounded-xl p-2 text-gum-black transition ${
+                  className={`flex flex-col items-center gap-1 rounded-xl p-2 ink-default transition ${
                     brand === b ? "bg-gum-yellow" : "hover:bg-gum-mint"
                   }`}
                 >

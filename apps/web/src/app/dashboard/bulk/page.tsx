@@ -11,8 +11,8 @@ export default function BulkOpsPage() {
       <section className="mx-auto max-w-5xl">
         <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-4xl font-extrabold text-gum-black">Bulk operations</h1>
-            <p className="mt-1 text-gum-black">
+            <h1 className="text-4xl font-extrabold ink-default">Bulk operations</h1>
+            <p className="mt-1 ink-default">
               Update many assets at once. Non-delete operations can be rolled back.
             </p>
           </div>
