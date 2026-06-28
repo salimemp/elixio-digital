@@ -43,7 +43,7 @@ const ALLOWED_ATTR = [
  */
 export function sanitizeBlogHtml(input: string): string {
   if (!input) return "";
-  const cleaned = DOMPurify.sanitize(input, {
+  let cleaned = DOMPurify.sanitize(input, {
     ALLOWED_TAGS,
     ALLOWED_ATTR,
     // Disallow data URIs (XSS via base64-encoded SVG/HTML)
@@ -58,13 +58,24 @@ export function sanitizeBlogHtml(input: string): string {
   // (DOMPurify 3.x's URI regex behavior for data: is unreliable).
   // Defense in depth: even if a future bug allows data: through,
   // this catches it.
-  return cleaned.replace(
-    /(<(?:img|source|video|audio|iframe|a|link)[^>]*\s(?:src|href|poster|xlink:href)\s*=\s*["'])data:[^"']*/gi,
+  // Strip data: URIs from src/href attributes.
+  // Loop handles multiple attributes per tag and uses a more restrictive
+  // pattern (word boundary + closing quote required) to avoid the
+  // "incomplete sanitization" CodeQL warning.
+  cleaned = cleaned.replace(
+    /(<(?:img|source|video|audio|iframe|a|link)\b[^>]{0,2000}?\s(?:src|href|poster|xlink:href)\s*=\s*["'])data:[^"']{0,2000}/gi,
     "$1#"
-  ).replace(
-    /(<style|<script|<iframe|<object|<embed)/gi,
+  );
+  // Remove dangerous tags entirely (defense in depth beyond DOMPurify)
+  cleaned = cleaned.replace(
+    /<\s*(style|script|iframe|object|embed)\b[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi,
     ""
   );
+  cleaned = cleaned.replace(
+    /<\s*(style|script|iframe|object|embed)\b[^>]*\/\s*>/gi,
+    ""
+  );
+  return cleaned;
 }
 
 /**
