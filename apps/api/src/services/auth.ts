@@ -309,24 +309,24 @@ export async function login(
   // if the email send errors). Only fires on the first login from a new
   // country to avoid alert fatigue.
   if (isNewLocation && geo) {
-    try {
-      const template = newLocationTemplate({
-        displayName: user.displayName,
-        ip: geo.ip,
-        location: formatLocation(geo),
-        userAgent: ua ?? "Unknown",
-        time: new Date(),
-      });
-      await sendEmail({
+    const template = newLocationTemplate({
+      displayName: user.displayName,
+      ip: geo.ip,
+      location: formatLocation(geo),
+      userAgent: ua ?? "Unknown",
+      time: new Date(),
+    });
+    // fireAndForget: returns immediately, sendEmail retries 3x internally
+    // (1s, 4s, 16s backoff), logs failures. Login is never blocked.
+    void sendEmail(
+      {
         to: user.email,
         subject: template.subject,
         html: template.html,
         text: template.text,
-      });
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error("[login] new-location email failed:", err);
-    }
+      },
+      { fireAndForget: true }
+    );
   }
 
   return issueSession(user, signer, { mfaPending: user.mfaEnabled });

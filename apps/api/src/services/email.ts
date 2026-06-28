@@ -10,25 +10,114 @@ export interface EmailMessage {
   text: string;
 }
 
-export async function sendEmail(msg: EmailMessage): Promise<void> {
-  if (!resend) {
-    // Dev fallback: log to stdout so developers can copy the link
-    // from their terminal.
-    console.log(`\n📧 [DEV EMAIL] to=${msg.to} subject=${msg.subject}`);
-    console.log(msg.text);
-    console.log("");
-    return;
+export interface EmailSendResult {
+  ok: boolean;
+  messageId?: string;
+  error?: string;
+  attempts: number;
+}
+
+/**
+ * Send an email via Resend with built-in retry + backoff.
+ *
+ * **Today:** in-process queue with 3 attempts (1s, 4s, 16s).
+ * **Phase 2:** swap for BullMQ + Redis (Upstash free tier) when payouts
+ * land and we need durable queue / DLQ. The `sendEmail` signature stays
+ * the same so the call sites don't change.
+ *
+ * For user-initiated transactional emails (verify, password reset, magic
+ * link), the caller awaits — the user is already blocked on the response
+ * and the link is the deliverable.
+ *
+ * For fire-and-forget security alerts (new-location login notification),
+ * pass `{ fireAndForget: true }` and the call returns immediately; failures
+ * are logged but don't propagate. This is the recommended setting for
+ * anything that shouldn't fail the parent request.
+ */
+export async function sendEmail(
+  msg: EmailMessage,
+  options: { fireAndForget?: boolean; maxAttempts?: number } = {}
+): Promise<EmailSendResult> {
+  const maxAttempts = options.maxAttempts ?? 3;
+  const fireAndForget = options.fireAndForget ?? false;
+
+  const work = async (): Promise<EmailSendResult> => {
+    if (!resend) {
+      // Dev fallback: log to stdout so developers can copy the link.
+      console.log(`\n📧 [DEV EMAIL] to=${msg.to} subject=${msg.subject}`);
+      console.log(msg.text);
+      console.log("");
+      return { ok: true, attempts: 0 };
+    }
+
+    let lastError: string | undefined;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const result = await resend.emails.send({
+          from: env.EMAIL_FROM,
+          to: msg.to,
+          subject: msg.subject,
+          html: msg.html,
+          text: msg.text,
+        });
+        if ("error" in result && result.error) {
+          lastError = result.error.message;
+          // 4xx (validation errors) won't succeed on retry — bail early.
+          if (isClientError(result.error.message)) {
+            return { ok: false, error: lastError, attempts: attempt };
+          }
+        } else {
+          return { ok: true, messageId: "id" in result ? (result as { id?: string }).id : undefined, attempts: attempt };
+        }
+      } catch (err) {
+        lastError = err instanceof Error ? err.message : String(err);
+        // Network errors / 5xx → retry with backoff
+      }
+
+      if (attempt < maxAttempts) {
+        const delayMs = 1000 * Math.pow(4, attempt - 1); // 1s, 4s, 16s
+        await sleep(delayMs);
+      }
+    }
+
+    return { ok: false, error: lastError, attempts: maxAttempts };
+  };
+
+  if (fireAndForget) {
+    // Fire-and-forget: log failures but don't propagate.
+    work()
+      .then((r) => {
+        if (!r.ok) {
+          // eslint-disable-next-line no-console
+          console.error(
+            `[email] FAILED after ${r.attempts} attempts to=${msg.to} subject="${msg.subject}": ${r.error}`
+          );
+        } else if (env.NODE_ENV !== "production") {
+          // eslint-disable-next-line no-console
+          console.log(
+            `[email] sent to=${msg.to} attempts=${r.attempts} messageId=${r.messageId ?? "n/a"}`
+          );
+        }
+      })
+      .catch((err) => {
+        // Should never happen — work() catches its own errors.
+        // eslint-disable-next-line no-console
+        console.error("[email] unexpected fire-and-forget error:", err);
+      });
+    // Return immediately with a placeholder result.
+    return { ok: true, attempts: 0 };
   }
-  const result = await resend.emails.send({
-    from: env.EMAIL_FROM,
-    to: msg.to,
-    subject: msg.subject,
-    html: msg.html,
-    text: msg.text,
-  });
-  if ("error" in result && result.error) {
-    throw new Error(`Resend failed: ${result.error.message}`);
-  }
+
+  return work();
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+function isClientError(message: string): boolean {
+  // Resend returns these for things like invalid recipient, blocked domain, etc.
+  return /invalid|validation|422|400|401|403|not.?found/i.test(message);
 }
 
 export function verifyEmailTemplate(args: { verifyUrl: string }): EmailMessage {

@@ -38,6 +38,21 @@ export interface TaxCalculationResult {
 }
 
 /**
+ * Round UP to the nearest cent, but snap values that are within float-precision
+ * tolerance of an integer to that integer (avoids `Math.ceil(100000 * 0.28) = 28001`
+ * because `100000 * 0.28 = 28000.000000000004` due to IEEE 754).
+ *
+ * - 42.20775 → 43 (round UP for tax authority favor)
+ * - 28000.000000000004 → 28000 (snap, not ceil)
+ * - 0.05 → 1 (ceil of fractional cent)
+ */
+function roundUpToCent(x: number): number {
+  const rounded = Math.round(x);
+  if (Math.abs(x - rounded) < 1e-9) return rounded;
+  return Math.ceil(x);
+}
+
+/**
  * Compute tax for a purchase based on the buyer's billing address.
  *
  * Algorithm:
@@ -119,8 +134,11 @@ export async function calculateTax(
       rate,
       baseCents,
       // Round UP to the nearest cent so we don't under-collect on
-      // fractional cents. (5.5% × $9.99 = $0.5495 → round to $0.55)
-      amountCents: Math.ceil((baseCents * rate) / 100),
+      // fractional cents. (5.5% × $9.99 = 55¢ → exact; 4.225% × $9.99 = 42.2¢ → 43¢)
+      // rate is a decimal (e.g. 0.0725 for 7.25%); baseCents is in cents.
+      // Correct formula: baseCents * rate (NO additional /100).
+      // roundUpToCent() handles float-precision noise (e.g. 100000 * 0.28).
+      amountCents: roundUpToCent(baseCents * rate),
     },
   ];
 
@@ -141,7 +159,7 @@ export async function calculateTax(
         region: pisCofins.region || null,
         rate: Number(pisCofins.rate),
         baseCents,
-        amountCents: Math.ceil((baseCents * Number(pisCofins.rate)) / 100),
+        amountCents: roundUpToCent(baseCents * Number(pisCofins.rate)),
       });
     }
   }

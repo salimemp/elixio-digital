@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "main": "expo-router/entry",
+  "_react_version_note": "Mobile declares react@19 (Expo SDK 56 minimum), but root pnpm.overrides pins the whole monorepo to react@18.3.1 because Next.js 14.x requires React 18 and the web app is live. See ../../docs/PHASE-2-UPGRADE.md for the React 19 + Next 15 + Expo 57 migration plan.",
+  "_typescript_version_note": "Mobile was on TS 6.0.3 (bleeding edge). Now aligned to TS 5.9.3 via root pnpm.overrides for monorepo consistency. See ../../docs/PHASE-2-UPGRADE.md for the TS 6 migration plan.",
   "scripts": {
     "dev": "expo start",
     "build": "expo export --platform all",
@@ -36,6 +38,6 @@
     "@expo/metro-runtime": "~56.0.15",
     "@react-native/metro-config": "0.85.3",
     "@types/react": "~19.2.2",
-    "typescript": "~6.0.3"
+    "typescript": "~5.9.3"
   }
 }
