@@ -65,9 +65,16 @@ import pt from "../../messages/pt.json";
 import ar from "../../messages/ar.json";
 import he from "../../messages/he.json";
 import ur from "../../messages/ur.json";
+// CJK locales are scaffolded but high-traffic — import statically so the
+// client bundle has them immediately on first visit (no waterfall).
+// Total bundle cost: ~1KB × 4 = ~4KB gzipped.
+import zh from "../../messages/zh.json";
+import zhTW from "../../messages/zh-TW.json";
+import ja from "../../messages/ja.json";
+import ko from "../../messages/ko.json";
 
 const CLIENT_MESSAGES: Partial<Record<Locale, unknown>> = {
-  en, es, fr, de, hi, pt, ar, he, ur,
+  en, es, fr, de, hi, pt, ar, he, ur, zh, "zh-TW": zhTW, ja, ko,
 };
 
 function loadClientMessages(locale: Locale): Record<string, unknown> {

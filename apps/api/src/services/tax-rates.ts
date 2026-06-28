@@ -12,15 +12,20 @@
  * selling into high-locality-tax jurisdictions (e.g. Louisiana 9.55%)
  * should know to update via admin UI or direct DB write before launch.
  *
- * What this covers (8 regions, ~200 rates):
+ * What this covers (41+ countries, 127 rates):
  *   US  — all 50 states + DC + standard state-level sales tax rates
  *   EU  — 27 member states, standard VAT
  *   UK  — 20% standard VAT
  *   IN  — 4 GST slabs (5/12/18/28%) + 0.5% compensation cess where applicable
  *   CA  — 5% federal GST + 13 provincial rates (5 GST-only + 5 HST + 3 with PST + QC QST)
  *   AU  — 10% GST
- *   JP  — 10% consumption tax (national; reduced 8% for food/beverages not modeled here)
+ *   JP  — consumption tax (10% standard + 8% reduced for food/beverages)
+ *   CN  — VAT (13% standard + 9% reduced + 6% services + 3% small-scale)
+ *   KR  — 10% VAT (single rate)
  *   BR  — 17% ICMS (state avg) + 7.65% PIS/COFINS
+ *   GCC: UAE 5%, Saudi Arabia 15%, Oman 5%, Bahrain 10%, Kuwait 0%, Qatar 0%
+ *   IL  — 18% VAT
+ *   Plus Switzerland 8.1%, Singapore 9%, Norway 25%, Hong Kong 0%
  *
  * What's intentionally NOT covered in this seed:
  *   - Reduced rates (food, books, children's clothing, etc.)
@@ -186,8 +191,34 @@ export const TAX_RATES: RateRow[] = [
   // ─── Australia ────────────────────────────────────────────────
   { country: "AU", region: "", label: "Australia (GST)", kind: "gst", rate: 0.10, currency: "AUD" },
 
+  // ─── China — VAT (Shui E增) ───────────────────────────
+  // Effective from 1 May 2016 reform. Multi-slab structure similar to
+  // EU reduced rates. Standard rate covers most goods and services;
+  // 9% covers necessities; 6% covers modern services; 3% is for
+  // small-scale taxpayers (general VAT payers with low turnover).
+  //
+  // B2C digital services: foreign providers selling to Chinese consumers
+  // must register with the State Taxation Administration (STA) and
+  // collect VAT. Marketplace facilitator (us) is responsible per
+  // circular 税总函〔2018〕59号.
+  //
+  // We model the slabs via region discriminator like India IN-GST-N.
+  { country: "CN", region: "CN-VAT-13", label: "China (VAT 13% — standard)", kind: "vat", rate: 0.13, currency: "CNY", description: "Most goods, manufacturing, sales, labor services" },
+  { country: "CN", region: "CN-VAT-9",  label: "China (VAT 9% — reduced)",  kind: "vat", rate: 0.09, currency: "CNY", description: "Food, books, newspapers, transportation, postal, telecom, construction, real estate" },
+  { country: "CN", region: "CN-VAT-6",  label: "China (VAT 6% — services)", kind: "vat", rate: 0.06, currency: "CNY", description: "Value-added services (logistics, consulting, tech, financial, lifestyle)" },
+  { country: "CN", region: "CN-VAT-3",  label: "China (VAT 3% — small-scale)", kind: "vat", rate: 0.03, currency: "CNY", description: "Small-scale taxpayers (turnover < ¥500K per quarter)" },
+
   // ─── Japan ─────────────────────────────────────────────────────
-  { country: "JP", region: "", label: "Japan (consumption tax)", kind: "consumption", rate: 0.10, currency: "JPY" },
+  // Consumption tax (消費税). Standard rate raised from 8% to 10%
+  // on 1 October 2019 (alongside introduction of reduced 8% rate
+  // for food/beverages and newspaper subscriptions).
+  { country: "JP", region: "JP-CTAX-10", label: "Japan (consumption tax 10% — standard)", kind: "consumption", rate: 0.10, currency: "JPY", description: "Standard rate — most goods and services" },
+  { country: "JP", region: "JP-CTAX-8",  label: "Japan (consumption tax 8% — reduced)",  kind: "consumption", rate: 0.08, currency: "JPY", description: "Reduced rate — food/beverages (eat-in/takeout exempt) and newspaper subscriptions (≥2x/week)" },
+
+  // ─── Korea (Republic of Korea) ─────────────────────────────
+  // Value-added tax (부가세). Single rate since 1977.
+  // Administered by National Tax Service (NTS 국세청).
+  { country: "KR", region: "", label: "Korea (VAT 10%)", kind: "vat", rate: 0.10, currency: "KRW" },
 
   // ─── Brazil — ICMS + PIS/COFINS ───────────────────────────────
   { country: "BR", region: "", label: "Brazil (PIS/COFINS federal)", kind: "pis_cofins", rate: 0.0765, currency: "BRL" },

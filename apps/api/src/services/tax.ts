@@ -92,6 +92,35 @@ export async function calculateTax(
     }
   }
 
+  // For China: same pattern as India — region discriminator is the
+  // VAT slab (CN-VAT-13 = 13% standard). Accept "CN-VAT-13", "VAT-13",
+  // or bare "13" and normalize.
+  if (country === "CN") {
+    if (region && region.startsWith("CN-VAT")) {
+      normalizedRegion = region;
+    } else if (gstSlab) {
+      const num = gstSlab.replace(/[^0-9]/g, "");
+      if (num) normalizedRegion = `CN-VAT-${num}`;
+    } else if (region && /^[0-9]+$/.test(region)) {
+      normalizedRegion = `CN-VAT-${region}`;
+    } else {
+      // Default to 13% (standard) when no slab provided
+      normalizedRegion = "CN-VAT-13";
+    }
+  }
+
+  // For Japan: consumption tax has standard (10%) + reduced (8%) slabs.
+  // Default to 10% (most goods/services).
+  if (country === "JP") {
+    if (region && region.startsWith("JP-CTAX")) {
+      normalizedRegion = region;
+    } else if (region && /^[0-9]+$/.test(region)) {
+      normalizedRegion = `JP-CTAX-${region}`;
+    } else {
+      normalizedRegion = "JP-CTAX-10";
+    }
+  }
+
   // Try region-specific first (or IN-GST-N for India)
   let regionRow = null;
   if (normalizedRegion) {

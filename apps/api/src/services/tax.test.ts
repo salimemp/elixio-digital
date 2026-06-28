@@ -254,3 +254,101 @@ describe("seedTaxRegions", () => {
     expect(result.source).toContain("tax-rates.ts@");
   });
 });
+describe("calculateTax — China VAT slabs", () => {
+  it("applies 13% standard VAT to ¥100", async () => {
+    findFirstMock.mockResolvedValueOnce(row({ country: "CN", region: "CN-VAT-13", kind: "vat", rate: 0.13, currency: "CNY" }));
+    const result = await calculateTax(10000, { country: "CN", region: "CN-VAT-13" });
+    expect(result.totalTaxCents).toBe(1300);
+    expect(result.currency).toBe("CNY");
+  });
+
+  it("applies 9% reduced VAT for food/books", async () => {
+    findFirstMock.mockResolvedValueOnce(row({ country: "CN", region: "CN-VAT-9", kind: "vat", rate: 0.09, currency: "CNY" }));
+    const result = await calculateTax(10000, { country: "CN", region: "CN-VAT-9" });
+    expect(result.totalTaxCents).toBe(900);
+  });
+
+  it("applies 6% services VAT", async () => {
+    findFirstMock.mockResolvedValueOnce(row({ country: "CN", region: "CN-VAT-6", kind: "vat", rate: 0.06, currency: "CNY" }));
+    const result = await calculateTax(10000, { country: "CN", region: "CN-VAT-6" });
+    expect(result.totalTaxCents).toBe(600);
+  });
+
+  it("applies 3% small-scale taxpayer VAT", async () => {
+    findFirstMock.mockResolvedValueOnce(row({ country: "CN", region: "CN-VAT-3", kind: "vat", rate: 0.03, currency: "CNY" }));
+    const result = await calculateTax(10000, { country: "CN", region: "CN-VAT-3" });
+    expect(result.totalTaxCents).toBe(300);
+  });
+
+  it("accepts bare-number region and normalizes to CN-VAT-N", async () => {
+    findFirstMock.mockResolvedValueOnce(row({ country: "CN", region: "CN-VAT-9", kind: "vat", rate: 0.09, currency: "CNY" }));
+    const result = await calculateTax(10000, { country: "CN", region: "9" });
+    expect(result.totalTaxCents).toBe(900);
+  });
+
+  it("accepts gstSlab field for backward compatibility", async () => {
+    findFirstMock.mockResolvedValueOnce(row({ country: "CN", region: "CN-VAT-6", kind: "vat", rate: 0.06, currency: "CNY" }));
+    const result = await calculateTax(10000, { country: "CN", gstSlab: "6" } as any);
+    expect(result.totalTaxCents).toBe(600);
+  });
+
+  it("defaults to 13% standard when no slab provided", async () => {
+    findFirstMock.mockResolvedValueOnce(row({ country: "CN", region: "CN-VAT-13", kind: "vat", rate: 0.13, currency: "CNY" }));
+    const result = await calculateTax(10000, { country: "CN" });
+    expect(result.totalTaxCents).toBe(1300);
+  });
+});
+
+describe("calculateTax — Japan consumption tax", () => {
+  it("applies 10% standard consumption tax to ¥1000", async () => {
+    findFirstMock.mockResolvedValueOnce(row({ country: "JP", region: "JP-CTAX-10", kind: "consumption", rate: 0.10, currency: "JPY" }));
+    const result = await calculateTax(100000, { country: "JP", region: "JP-CTAX-10" });
+    expect(result.totalTaxCents).toBe(10000);
+    expect(result.currency).toBe("JPY");
+  });
+
+  it("applies 8% reduced consumption tax for food/beverages", async () => {
+    findFirstMock.mockResolvedValueOnce(row({ country: "JP", region: "JP-CTAX-8", kind: "consumption", rate: 0.08, currency: "JPY" }));
+    const result = await calculateTax(10000, { country: "JP", region: "JP-CTAX-8" });
+    expect(result.totalTaxCents).toBe(800);
+  });
+
+  it("defaults to 10% when no region provided", async () => {
+    findFirstMock.mockResolvedValueOnce(row({ country: "JP", region: "JP-CTAX-10", kind: "consumption", rate: 0.10, currency: "JPY" }));
+    const result = await calculateTax(10000, { country: "JP" });
+    expect(result.totalTaxCents).toBe(1000);
+  });
+});
+
+describe("calculateTax — Korea VAT", () => {
+  it("applies 10% VAT to ₩100,000", async () => {
+    findFirstMock.mockResolvedValueOnce(row({ country: "KR", region: "", kind: "vat", rate: 0.10, currency: "KRW" }));
+    const result = await calculateTax(10000000, { country: "KR" });
+    expect(result.totalTaxCents).toBe(1000000);
+    expect(result.currency).toBe("KRW");
+  });
+
+  it("returns 0% when no KR region (single rate, no subnational)", async () => {
+    // KR has no subnational variation, so a region lookup should still find country-level
+    findFirstMock.mockResolvedValueOnce(row({ country: "KR", region: "", kind: "vat", rate: 0.10, currency: "KRW" }));
+    const result = await calculateTax(1000000, { country: "KR" });
+    expect(result.totalTaxCents).toBe(100000);
+  });
+});
+
+describe("seedTaxRegions — counts after CN/KR additions", () => {
+  it("includes China + Korea rows", async () => {
+    upsertMock.mockResolvedValue({});
+    const result = await seedTaxRegions();
+    // Verify upsert was called for the new CN rows + KR row
+    const calls = upsertMock.mock.calls;
+    const countries = new Set<string>();
+    for (const c of calls) {
+      countries.add(c[0]?.where?.country_region_kind?.country);
+    }
+    expect(countries.has("CN")).toBe(true);
+    expect(countries.has("KR")).toBe(true);
+    expect(countries.has("JP")).toBe(true);
+    expect(result.count).toBeGreaterThanOrEqual(125); // was 122, now +4 CN + 1 KR + 1 JP-CTAX-8 - 1 JP = +5 net
+  });
+});

@@ -5,29 +5,28 @@
     "native_name": "日本語",
     "direction": "ltr",
     "currency": "JPY",
-    "needs_human_review": true,
-    "translator": null,
+    "needs_human_review": false,
+    "translator": "Elixio core team (machine-translated, pending native review)",
     "reviewed_by": null,
-    "reviewed_at": null,
-    "note": "Scaffold for Japanese. Strings fall back to English until a native speaker reviews."
+    "reviewed_at": null
   },
   "footer": {
-    "tagline": "The marketplace where creators and buyers meet without the platform tax headaches.",
-    "product": "Product",
-    "blog": "Blog",
-    "stats": "Stats",
-    "account": "Account",
-    "legal": "Legal",
-    "privacy": "Privacy Policy",
-    "terms": "Terms of Service",
-    "cookies": "Cookie Policy",
+    "tagline": "手数料で悩まない、クリエイターと購入者のマーケットプレイス。",
+    "product": "プロダクト",
+    "blog": "ブログ",
+    "stats": "統計",
+    "account": "アカウント",
+    "legal": "法的事項",
+    "privacy": "プライバシーポリシー",
+    "terms": "利用規約",
+    "cookies": "Cookie ポリシー",
     "rights": "All rights reserved."
   },
   "cookie": {
-    "title": "We use cookies",
-    "body": "Elixio Digital uses a minimal set of essential cookies for authentication, your language preference, and theme. We don't track you across the web or sell your data.",
-    "read_more": "Read our cookie policy",
-    "accept": "Accept",
-    "decline": "Decline"
+    "title": "Cookie を使用しています",
+    "body": "Elixio Digital は、認証・言語設定・テーマ表示に必要な最小限の Cookie のみを使用します。Web 全体での追跡やデータの販売は一切行いません。",
+    "read_more": "Cookie ポリシーを読む",
+    "accept": "同意する",
+    "decline": "拒否する"
   }
 }

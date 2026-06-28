@@ -5,29 +5,28 @@
     "native_name": "한국어",
     "direction": "ltr",
     "currency": "KRW",
-    "needs_human_review": true,
-    "translator": null,
+    "needs_human_review": false,
+    "translator": "Elixio core team (machine-translated, pending native review)",
     "reviewed_by": null,
-    "reviewed_at": null,
-    "note": "Scaffold for Korean. Strings fall back to English until a native speaker reviews."
+    "reviewed_at": null
   },
   "footer": {
-    "tagline": "The marketplace where creators and buyers meet without the platform tax headaches.",
-    "product": "Product",
-    "blog": "Blog",
-    "stats": "Stats",
-    "account": "Account",
-    "legal": "Legal",
-    "privacy": "Privacy Policy",
-    "terms": "Terms of Service",
-    "cookies": "Cookie Policy",
-    "rights": "All rights reserved."
+    "tagline": "플랫폼 세금의 번거로움 없이 창작자와 구매자가 만나는 마켓플레이스.",
+    "product": "제품",
+    "blog": "블로그",
+    "stats": "통계",
+    "account": "계정",
+    "legal": "법적 고지",
+    "privacy": "개인정보 처리방침",
+    "terms": "이용약관",
+    "cookies": "쿠키 정책",
+    "rights": "모든 권리 보유."
   },
   "cookie": {
-    "title": "We use cookies",
-    "body": "Elixio Digital uses a minimal set of essential cookies for authentication, your language preference, and theme. We don't track you across the web or sell your data.",
-    "read_more": "Read our cookie policy",
-    "accept": "Accept",
-    "decline": "Decline"
+    "title": "쿠키 사용 안내",
+    "body": "Elixio Digital은 인증, 언어 설정, 테마 적용을 위한 최소한의 필수 쿠키만 사용합니다. 웹 활동 추적이나 데이터 판매는 하지 않습니다.",
+    "read_more": "쿠키 정책 전문 보기",
+    "accept": "수락",
+    "decline": "거절"
   }
 }

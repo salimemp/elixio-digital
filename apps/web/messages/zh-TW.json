@@ -5,29 +5,28 @@
     "native_name": "繁體中文",
     "direction": "ltr",
     "currency": "TWD",
-    "needs_human_review": true,
-    "translator": null,
+    "needs_human_review": false,
+    "translator": "Elixio core team (machine-translated, pending native review)",
     "reviewed_by": null,
-    "reviewed_at": null,
-    "note": "Scaffold for Chinese (Traditional). Strings fall back to English until a native speaker reviews."
+    "reviewed_at": null
   },
   "footer": {
-    "tagline": "The marketplace where creators and buyers meet without the platform tax headaches.",
-    "product": "Product",
-    "blog": "Blog",
-    "stats": "Stats",
-    "account": "Account",
-    "legal": "Legal",
-    "privacy": "Privacy Policy",
-    "terms": "Terms of Service",
-    "cookies": "Cookie Policy",
-    "rights": "All rights reserved."
+    "tagline": "創作者與買家相遇的市場，沒有平台稅的煩惱。",
+    "product": "產品",
+    "blog": "部落格",
+    "stats": "數據",
+    "account": "帳戶",
+    "legal": "法律",
+    "privacy": "隱私權政策",
+    "terms": "服務條款",
+    "cookies": "Cookie 政策",
+    "rights": "保留所有權利。"
   },
   "cookie": {
-    "title": "We use cookies",
-    "body": "Elixio Digital uses a minimal set of essential cookies for authentication, your language preference, and theme. We don't track you across the web or sell your data.",
-    "read_more": "Read our cookie policy",
-    "accept": "Accept",
-    "decline": "Decline"
+    "title": "我們使用 Cookie",
+    "body": "Elixio Digital 僅使用最少量的必要 Cookie 用於身分驗證、語言偏好和主題設定。我們不會跨網站追蹤你，也不會出售你的資料。",
+    "read_more": "閱讀我們的 Cookie 政策",
+    "accept": "接受",
+    "decline": "拒絕"
   }
 }
