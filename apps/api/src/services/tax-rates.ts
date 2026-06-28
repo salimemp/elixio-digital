@@ -147,6 +147,26 @@ export const TAX_RATES: RateRow[] = [
   { country: "IN", region: "IN-GST-18", label: "India (GST 18% — standard)",  kind: "gst", rate: 0.18, currency: "INR", description: "Most goods including digital products" },
   { country: "IN", region: "IN-GST-28", label: "India (GST 28% — demerit)",   kind: "gst", rate: 0.28, currency: "INR", description: "Demerit goods: luxury, tobacco, gambling" },
 
+  // ─── Israel (VAT) ────────────────────────────────────────────
+  // Israel Tax Authority (ITA). Standard rate raised from 17% to 18%
+  // effective 1 January 2025 (Budget 2025 amendment). One of the
+  // highest VAT rates in the developed world.
+  //
+  // Digital services: since 2017, foreign providers selling B2C
+  // digital services to Israeli consumers must register with the
+  // ITA and collect VAT on every transaction. The marketplace
+  // facilitator (us) is responsible for collection per Israeli law.
+  //
+  // There are reduced rates (e.g. 0% for certain exports, fresh
+  // produce historically) but they don't apply to digital services,
+  // so we only ship the standard rate. No subnational VAT in Israel.
+  //
+  // Note: There was a temporary surtax (1%-3%) discussed in 2023 to
+  // fund the war effort, but it was never enacted as a consumption
+  // tax — it was a corporate income tax adjustment. Track ITA
+  // announcements for any future changes to the consumer rate.
+  { country: "IL", region: "", label: "Israel (VAT)", kind: "vat", rate: 0.18, currency: "ILS" },
+
   // ─── Canada — federal GST + provincial ───────────────────────
   { country: "CA", region: "", label: "Canada (federal GST)", kind: "gst", rate: 0.05, currency: "CAD" },
   { country: "CA", region: "CA-AB", label: "Alberta (GST only)", kind: "gst", rate: 0.05, currency: "CAD" },

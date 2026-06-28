@@ -17,7 +17,7 @@ import { ThemeSwitcher } from "./ThemeSwitcher";
 export function Navbar() {
   const { t } = useI18n();
   return (
-    <header className="sticky top-0 z-50 border-b-2 border-gum-black bg-white">
+    <header className="sticky top-0 z-50 border-b-2 border-gum-black bg-gum-cream">
       <nav className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-3">
         <Link
           href="/"
@@ -32,17 +32,17 @@ export function Navbar() {
             priority
             className="h-8 w-8"
           />
-          <span className="text-xl font-extrabold tracking-tight">{t("common.app_name")}</span>
+          <span className="text-xl font-extrabold tracking-tight text-white">{t("common.app_name")}</span>
         </Link>
 
         <div className="hidden items-center gap-2 md:flex">
           <span className="rounded-full bg-gum-mint px-3 py-1 text-xs font-bold uppercase tracking-wide text-gum-black">
             {t("nav.buyer_tag")}
           </span>
-          <NavbarLink href="/explore" accent="bg-gum-pink">
+          <NavbarLink href="/explore" accent="bg-gum-pink" textColor="text-gum-black">
             {t("nav.explore")}
           </NavbarLink>
-          <NavbarLink href="/library" accent="bg-white">
+          <NavbarLink href="/library" accent="bg-white" textColor="text-gum-black">
             {t("nav.library")}
           </NavbarLink>
         </div>
@@ -51,10 +51,10 @@ export function Navbar() {
           <span className="rounded-full bg-gum-yellow px-3 py-1 text-xs font-bold uppercase tracking-wide text-gum-black">
             {t("nav.creator_tag")}
           </span>
-          <NavbarLink href="/dashboard" accent="bg-gum-yellow">
+          <NavbarLink href="/dashboard" accent="bg-gum-yellow" textColor="text-gum-black">
             {t("nav.dashboard")}
           </NavbarLink>
-          <NavbarLink href="/sell" accent="bg-gum-cyan">
+          <NavbarLink href="/sell" accent="bg-gum-cyan" textColor="text-gum-black">
             {t("nav.start_selling")}
           </NavbarLink>
         </div>
@@ -64,7 +64,7 @@ export function Navbar() {
           <ThemeSwitcher />
           <Link
             href="/auth/login"
-            className="rounded-full border-2 border-gum-black px-4 py-2 text-sm font-semibold hover:bg-gum-cream"
+            className="rounded-full border-2 border-gum-black px-4 py-2 text-sm font-semibold text-gum-black hover:bg-gum-mint"
           >
             {t("nav.sign_in")}
           </Link>
@@ -128,7 +128,7 @@ function SignupDropdown() {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 z-10 mt-2 w-72 origin-top-right rounded-2xl border-2 border-gum-black bg-white shadow-[0_6px_0_0_#111]"
+          className="absolute right-0 z-10 mt-2 w-72 origin-top-right rounded-2xl border-2 border-gum-black bg-gum-cream shadow-[0_6px_0_0_#111]"
         >
           <div className="p-2">
             <Link
@@ -146,7 +146,7 @@ function SignupDropdown() {
                 <span className="block text-sm font-extrabold leading-tight">
                   {t("auth.register_buyer_title")}
                 </span>
-                <span className="mt-0.5 block text-xs text-gray-600">
+                <span className="mt-0.5 block text-xs ink-muted">
                   {t("asset.description")}
                 </span>
               </span>
@@ -166,7 +166,7 @@ function SignupDropdown() {
                 <span className="block text-sm font-extrabold leading-tight">
                   {t("auth.register_creator_title")}
                 </span>
-                <span className="mt-0.5 block text-xs text-gray-600">
+                <span className="mt-0.5 block text-xs ink-muted">
                   {t("sell.subtitle")}
                 </span>
               </span>
@@ -175,7 +175,7 @@ function SignupDropdown() {
             <Link
               href="/auth/register"
               role="menuitem"
-              className="block rounded-lg px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gum-cream"
+              className="block rounded-lg px-3 py-2 text-sm font-semibold text-gum-black hover:bg-gum-mint"
             >
               {t("auth.create_account")} →
             </Link>
@@ -189,16 +189,18 @@ function SignupDropdown() {
 function NavbarLink({
   href,
   accent,
+  textColor = "text-gum-black",
   children,
 }: {
   href: string;
   accent: string;
+  textColor?: string;
   children: React.ReactNode;
 }) {
   return (
     <Link
       href={href}
-      className={`rounded-full border-2 border-gum-black px-4 py-2 text-sm font-semibold shadow-[0_3px_0_0_#111] transition-transform active:translate-y-[3px] active:shadow-none ${accent}`}
+      className={`rounded-full border-2 border-gum-black px-4 py-2 text-sm font-semibold shadow-[0_3px_0_0_#111] transition-transform active:translate-y-[3px] active:shadow-none ${accent} ${textColor}`}
     >
       {children}
     </Link>
