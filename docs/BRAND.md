@@ -67,6 +67,25 @@ The app's interior palette remains untouched:
 | `gum/yellow` | `#f1e05a` | Highlight, "new" |
 | `gum/black` | `#111111` | Strokes, headings |
 
+## App brand palettes (user-selectable)
+
+The web app lets users pick from 4 brand palettes (3 modes × 4 palettes = 12 combinations). All 4 palettes share the same semantic token names (`--gum-pink`, `--gum-purple`, etc.) — only the rendered hex values change.
+
+| Token | default | sunset | ocean | forest |
+| --- | --- | --- | --- | --- |
+| `--gum-pink` | `#ff90e8` | `#ff6b9d` | `#4facfe` | `#d299ff` |
+| `--gum-purple` | `#7b61ff` | `#ff4757` | `#5c6bc0` | `#5d3fd3` |
+| `--gum-yellow` | `#f1e05a` | `#ffa502` | `#00f2fe` | `#c8e265` |
+| `--gum-cyan` | `#23a6d5` | `#ff6348` | `#00b4db` | `#26ae60` |
+| `--gum-mint` | `#96f7d6` | `#ffdd59` | `#43e97b` | `#7bed9f` |
+| `--gum-tangerine` | `#ff9f43` | `#ff793f` | `#38f9d7` | `#ffa940` |
+| `--gum-black` | `#111111` | `#1a0e0a` | `#0c1e3d` | `#0d1f1a` |
+| `--gum-cream` | `#fffdf5` | `#fff7ed` | `#f0f9ff` | `#f4faf4` |
+
+**Usage**: Don't reference individual hex values from this table in components. Always use the semantic Tailwind utilities (`bg-gum-pink`, `text-gum-purple`) or the CSS variables directly (`var(--gum-pink)`). Adding a new palette = adding an entry to `PALETTES` in `apps/web/src/lib/theme.tsx`.
+
+See [`docs/THEME.md`](./THEME.md) for the theme switching architecture.
+
 ## Don'ts
 
 - Don't stretch the mark out of proportion. Maintain 1:1.

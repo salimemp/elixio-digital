@@ -6,17 +6,20 @@ This is the master deployment guide. Read it first, then follow the per-platform
 | --- | --- | --- |
 | 0 | [Pre-flight](./deploy/00-preflight.md) | Domain, accounts, secrets checklist |
 | 1 | [Railway (API + Postgres)](./deploy/01-railway.md) | The Fastify API + managed Postgres |
-| 2 | [Cloudflare Pages (Web)](./deploy/02-cloudflare-pages.md) | The Next.js web app |
+| 2 | [Vercel (Web)](./deploy/02-vercel.md) | The Next.js web app (current process) |
 | 3 | [EAS (Mobile)](./deploy/03-eas.md) | iOS + Android builds |
 | 4 | [DNS + domain](./deploy/04-dns-domain.md) | `elixiodigital.com` → Pages, `api.elixiodigital.com` → Railway |
 | 5 | [Secrets](./deploy/05-secrets.md) | What goes in GitHub Secrets vs Railway vs Cloudflare |
 
 ## Architecture (after deploy)
 
+> Cloudflare still fronts everything (DNS + CDN + DDoS), but the web app itself runs on Vercel. Cloudflare Pages was tried and abandoned (see `deploy/02-cloudflare-pages.md` for why).
+
+
 ```
                        ┌────────────────────┐
-                       │  Cloudflare Pages  │
-                       │  elixiodigital.com    │
+                       │      Vercel         │
+                       │  elixiodigital.com │
                        │  (Next.js 14 web)  │
                        └─────────┬──────────┘
                                  │ HTTPS
@@ -51,7 +54,7 @@ This is the master deployment guide. Read it first, then follow the per-platform
 | Service | Plan | $/mo |
 | --- | --- | ---: |
 | Railway (API + Postgres) | Hobby $5 + usage | 5–20 |
-| Cloudflare Pages | Free | 0 |
+| Vercel | Hobby (free tier) | 0 |
 | Cloudflare R2 | Free ≤ 10 GB | 0–5 |
 | Resend | Free ≤ 3k/mo | 0 |
 | EAS Build (production) | $99/mo (free for dev) | 0–99 |

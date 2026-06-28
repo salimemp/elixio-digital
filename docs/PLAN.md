@@ -402,12 +402,28 @@ Core entities:
 
 ## 16. Delivery Roadmap
 
-See [`ROADMAP.md`](./ROADMAP.md) for the phased plan. Summary:
+See [`ROADMAP.md`](./ROADMAP.md) for the phased plan with current status.
 
-- **Phase 0 — Foundation (current):** monorepo, config, plan, placeholder UI, DB schema, API skeleton.
-- **Phase 1 — MVP (P0):** auth, asset CRUD, search, checkout, delivery, reviews, dashboards, admin basics.
-- **Phase 2 — V1 (P1):** Stripe Connect payouts, OAuth/2FA, collections, full-text search, analytics, notifications, marketing tools.
-- **Phase 3 — V2 (P2):** recommendations, subscriptions/memberships, affiliate program, custom domains, localization.
+**Snapshot (28 June 2026)**:
+
+- **Phase 0 — Foundation:** ✅ done (Q4 2025)
+- **Phase 1 — MVP:** ~85% done. Auth + asset CRUD + creator tools + buyer library + dashboards + admin basics all live. **Blocked on Stripe integration** (~5% of MVP remaining).
+- **Phase 2 — V1:** ~30% done. AI tools (Gemini), bulk ops, OAuth, MFA TOTP, WebAuthn passkeys, full-text search, creator analytics are all shipped. Remaining: Stripe Connect payouts, push notifications, real-time search index.
+- **Phase 3 — V2:** ~5% done. Bundles (shipped as creator tool), i18n with 42 locales (shipped). Remaining: recommendations, subscriptions/memberships, affiliate program, custom domains.
+
+**Key implementation deltas vs original plan**:
+
+- ✅ Auth: Email + password (bcrypt 12) + MFA TOTP + WebAuthn passkeys + OAuth (Google/GitHub) + magic link — all shipped
+- ✅ 42 locales at launch (vs planned ~10)
+- ✅ 127 tax rates across 41 countries with multi-slab normalization (IN-GST-N, CN-VAT-N, JP-CTAX-N) — originally planned as external Stripe Tax integration
+- ✅ AI tools (Gemini 1.5 Flash) — originally planned for V2/V3
+- ✅ Bulk ops with rollback — shipped early
+- ❌ Stripe Connect payouts — deferred to V1 (was planned for V1)
+- ❌ Real-time search index (Meilisearch) — still using Postgres FTS (sufficient at current scale)
+- ❌ Push notifications — deferred
+- ❌ Sentry error monitoring — deferred
+
+See [`ROADMAP.md`](./ROADMAP.md) for the complete milestone tracker.
 
 ---
 

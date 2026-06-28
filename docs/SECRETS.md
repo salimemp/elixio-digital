@@ -2,7 +2,11 @@
 
 This doc is the single source of truth for **which secrets go where** in Elixio Digital's CI/CD. Update it the moment you add a new workflow that reads a secret.
 
-> **Rule:** Secrets never live in workflow files, never in `.env` files, never in PR descriptions. They live in **GitHub → Settings → Secrets and variables → Actions** (or in a future secret manager like Doppler / 1Password CLI). Workflows reference them as `${{ secrets.NAME }}`.
+> **Rule:** Secrets never live in workflow files, never in `.env` files, never in PR descriptions. They live in **GitHub → Settings → Secrets and variables → Actions**, **Railway → Variables**, or **Vercel → Environment Variables**. Workflows reference them as `${{ secrets.NAME }}`.
+
+## Local dev secrets
+
+Local dev secrets live in `apps/api/.env`. Copy from `apps/api/.env.example` and fill in. The `.env` file is gitignored. Never commit real secrets.
 
 ---
 
@@ -19,12 +23,15 @@ This doc is the single source of truth for **which secrets go where** in Elixio 
 | --- | --- | --- |
 | `ELIXIO_API_URL` | web CI, mobile CI | Base URL of the deployed API. CI uses a placeholder; production uses the real Cloudflare+Railway URL. |
 | `ELIXIO_ADMIN_TOKEN` | admin scripts (publish, seed, migrate) | Long-lived **refresh token** for an admin user. Pair with `ELIXIO_ADMIN_EMAIL` only if the token is too short-lived. See §3 for the refresh pattern. |
-| `CLOUDFLARE_API_TOKEN` | web deploy, DNS automation | Token scoped to **Cloudflare Pages: Edit** + **DNS: Edit** for `elixiodigital.com`. |
-| `CLOUDFLARE_ACCOUNT_ID` | web deploy | Account ID of the Cloudflare account hosting the Pages project. |
+| `CLOUDFLARE_API_TOKEN` | DNS automation, R2 bucket management | Token scoped to **DNS: Edit** + **R2: Edit** for `elixiodigital.com`. Web deploys go to Vercel (no token needed). |
+| `CLOUDFLARE_ACCOUNT_ID` | R2 bucket, future Workers | Account ID of the Cloudflare account. |
 | `RAILWAY_TOKEN` | api deploy | Railway API token with `project:deploy` scope. |
 | `RAILWAY_PROJECT_ID` | api deploy | Project ID of the API service on Railway. |
 | `EAS_TOKEN` | mobile CI (future) | Expo Access Token for non-interactive `eas build` from CI. |
-| `RESEND_API_KEY` | api production | Resend API key for transactional email. |
+| `RESEND_API_KEY` | api production | Resend API key for transactional email. Free ≤ 3k/mo. |
+| `GEMINI_API_KEY` | api production | Google Gemini API key for AI tools. Free tier sufficient at MVP. |
+| `ELIXIO_MFA_KEY_ENCRYPTION_KEY` | api production | 32-byte random base64 for AES-256-GCM encryption of TOTP secrets and OAuth tokens. **Generate with**: `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"` |
+| `JWT_SECRET` | api production | Random string ≥ 32 chars. **Generate with**: `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"` |
 
 ## 3. The `ELIXIO_ADMIN_TOKEN` pattern (long-lived service token)
 
