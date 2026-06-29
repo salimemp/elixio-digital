@@ -68,7 +68,7 @@ export default function PrivacyPage() {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
       const token = localStorage.getItem("elixio_access_token");
-      const res = await fetch(`${apiUrl}/users/me/export`, {
+      const res = await fetch(`${apiUrl}/v1/users/me/export`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

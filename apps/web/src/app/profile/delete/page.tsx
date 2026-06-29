@@ -52,7 +52,7 @@ export default function DeletePage() {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
       const token = localStorage.getItem("elixio_access_token");
-      const res = await fetch(`${apiUrl}/users/me/delete`, {
+      const res = await fetch(`${apiUrl}/v1/users/me/delete`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
