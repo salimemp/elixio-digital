@@ -52,7 +52,7 @@ export default function AccountSettingsPage() {
 
       const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
       const token = typeof window !== "undefined" ? localStorage.getItem("elixio_access_token") : null;
-      const res = await fetch(`${apiUrl}/v1/users/me`, {
+      const res = await fetch(`${apiUrl}/users/me`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

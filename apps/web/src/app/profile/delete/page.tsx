@@ -13,7 +13,7 @@ import { ProfileShell, SectionHeader, SettingsCard } from "@/components/profile/
  *   1. Plain-language warning about what gets deleted and what doesn't
  *   2. User types the literal string "DELETE" to confirm intent
  *   3. Password re-entry as second factor (only if password-authed)
- *   4. POST /v1/users/me/delete → soft-delete with 30-day grace, email
+ *   4. POST /users/me/delete → soft-delete with 30-day grace, email
  *      confirmation of the deletion request.
  *   5. User is logged out + redirected to home with a banner.
  *
@@ -52,7 +52,7 @@ export default function DeletePage() {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
       const token = localStorage.getItem("elixio_access_token");
-      const res = await fetch(`${apiUrl}/v1/users/me/delete`, {
+      const res = await fetch(`${apiUrl}/users/me/delete`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

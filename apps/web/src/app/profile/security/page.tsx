@@ -15,6 +15,8 @@ export default function SecurityPage() {
   const { t } = useI18n();
   const { user } = useAuth();
 
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
+
   if (!user) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-10 ink-muted">
@@ -80,18 +82,18 @@ export default function SecurityPage() {
         description={t("profile.security.oauth.subtitle")}
       >
         <div className="flex gap-2">
-          <Link
-            href="/api/v1/auth/oauth/google/begin"
+          <a
+            href={`${apiUrl}/auth/oauth/google/begin`}
             className="gum-btn-secondary text-sm"
           >
             Google
-          </Link>
-          <Link
-            href="/api/v1/auth/oauth/github/begin"
+          </a>
+          <a
+            href={`${apiUrl}/auth/oauth/github/begin`}
             className="gum-btn-secondary text-sm"
           >
             GitHub
-          </Link>
+          </a>
         </div>
       </SettingsCard>
 

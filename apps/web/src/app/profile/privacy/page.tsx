@@ -10,7 +10,7 @@ import { ProfileShell, SectionHeader, SettingsCard } from "@/components/profile/
  *
  *   1. **Data export** (GDPR Art. 15, CCPA Right to Know, PIPEDA 4.9) —
  *      request a downloadable JSON archive of all your data. Async via
- *      the backend's `/v1/users/me/export` endpoint; download link is
+ *      the backend's `/users/me/export` endpoint; download link is
  *      emailed.
  *   2. **Cookie consent** — change/withdraw consent for non-essential
  *      cookies. (Stored client-side; same as the bottom banner.)
@@ -68,7 +68,7 @@ export default function PrivacyPage() {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
       const token = localStorage.getItem("elixio_access_token");
-      const res = await fetch(`${apiUrl}/v1/users/me/export`, {
+      const res = await fetch(`${apiUrl}/users/me/export`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
