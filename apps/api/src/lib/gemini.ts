@@ -88,6 +88,51 @@ export async function generate(
 }
 
 /**
+ * Embed a batch of texts using Gemini's `text-embedding-004` model.
+ *
+ * Returns one 768-dim vector per input text, in the same order.
+ * Used by the chatbot's RAG indexer.
+ *
+ * Batches input into groups of 100 (the API's per-call limit) and
+ * makes concurrent calls. Returns zero-vectors on failure (caller
+ * falls back to keyword retrieval).
+ */
+const EMBED_MODEL = "text-embedding-004";
+const EMBED_BATCH_SIZE = 100;
+
+export async function embedTexts(texts: string[]): Promise<number[][]> {
+  if (texts.length === 0) return [];
+  const c = getClient();
+  const model = c.getGenerativeModel({ model: EMBED_MODEL });
+
+  const batches: string[][] = [];
+  for (let i = 0; i < texts.length; i += EMBED_BATCH_SIZE) {
+    batches.push(texts.slice(i, i + EMBED_BATCH_SIZE));
+  }
+
+  const results = await Promise.all(
+    batches.map(async (batch) => {
+      const res = await model.batchEmbedContents({
+        requests: batch.map((text) => ({
+          content: { role: "user", parts: [{ text }] },
+        })),
+      });
+      return res.embeddings.map((e) => e.values ?? []);
+    }),
+  );
+
+  return results.flat();
+}
+
+/**
+ * Embed a single text. Convenience wrapper.
+ */
+export async function embedText(text: string): Promise<number[]> {
+  const [vec] = await embedTexts([text]);
+  return vec ?? [];
+}
+
+/**
  * Persist a completed AI job to ai_generations table.
  */
 export async function recordAIGeneration(input: {

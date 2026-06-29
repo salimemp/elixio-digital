@@ -1,0 +1,30 @@
+{
+  "routes": [
+    { "path": "/", "title": "Home", "description": "Landing page with the Elixio marketplace overview.", "section": "main" },
+    { "path": "/explore", "title": "Explore", "description": "Browse all digital assets for sale. Filter by category, price, rating.", "section": "main" },
+    { "path": "/library", "title": "Library", "description": "Your purchased assets and download history. Buyers only.", "section": "main" },
+    { "path": "/sell", "title": "Start Selling", "description": "Information about becoming a creator and the selling workflow.", "section": "main" },
+    { "path": "/stats", "title": "Public Stats", "description": "Live marketplace stats: total assets, creators, sales, GMV. Updates every 60 seconds.", "section": "main" },
+    { "path": "/docs", "title": "Documentation", "description": "Comprehensive documentation: architecture, security, tax, i18n, theme, deployment, testing.", "section": "main" },
+    { "path": "/blog", "title": "Blog", "description": "Articles about digital products, selling tips, marketplace trends. Auto-published twice a week.", "section": "main" },
+    { "path": "/chat", "title": "Help Chat", "description": "Fullscreen AI assistant trained on Elixio's knowledge base. Ask anything about the platform.", "section": "main" },
+    { "path": "/dashboard", "title": "Creator Dashboard", "description": "Revenue, top assets, conversion, cohort retention. Creators only.", "section": "creator" },
+    { "path": "/studio", "title": "AI Studio", "description": "AI tools for creators: listing copywriter, asset critique, sales coach, metadata SEO. Creators only.", "section": "creator" },
+    { "path": "/dashboard/bulk", "title": "Bulk Operations", "description": "Update many assets at once. Creators only.", "section": "creator" },
+    { "path": "/profile", "title": "Your Profile", "description": "Manage your account, security, notifications, privacy, and data.", "section": "profile" },
+    { "path": "/profile/account", "title": "Account Settings", "description": "Edit your display name, bio, and avatar URL.", "section": "profile" },
+    { "path": "/profile/security", "title": "Security Settings", "description": "Manage password, MFA, passkeys, OAuth accounts, active sessions.", "section": "profile" },
+    { "path": "/profile/notifications", "title": "Notification Preferences", "description": "Choose which emails you receive: order receipts, security alerts, product updates, marketing.", "section": "profile" },
+    { "path": "/profile/privacy", "title": "Privacy and Data", "description": "Export your data, manage cookie consent, exercise your GDPR/CCPA rights.", "section": "profile" },
+    { "path": "/profile/delete", "title": "Delete Account", "description": "Permanently delete your account. 30-day grace period.", "section": "profile" },
+    { "path": "/auth/login", "title": "Sign In", "description": "Sign in with email + password, magic link, Google, GitHub, or passkey.", "section": "auth" },
+    { "path": "/auth/register", "title": "Create Account", "description": "Choose buyer or creator signup.", "section": "auth" },
+    { "path": "/auth/register/buyer", "title": "Buyer Signup", "description": "Create a buyer account to purchase digital products.", "section": "auth" },
+    { "path": "/auth/register/creator", "title": "Creator Signup", "description": "Create a creator account to sell your digital products.", "section": "auth" },
+    { "path": "/auth/reset-password", "title": "Reset Password", "description": "Set a new password if you forgot your current one.", "section": "auth" },
+    { "path": "/auth/mfa-setup", "title": "Set Up 2FA", "description": "Enable two-factor authentication with an authenticator app.", "section": "auth" },
+    { "path": "/privacy", "title": "Privacy Policy", "description": "How we collect, use, and protect your data. GDPR-compliant.", "section": "legal" },
+    { "path": "/terms", "title": "Terms of Service", "description": "The legal agreement between you and Elixio Digital.", "section": "legal" },
+    { "path": "/cookies", "title": "Cookie Policy", "description": "What cookies we use and why.", "section": "legal" }
+  ]
+}

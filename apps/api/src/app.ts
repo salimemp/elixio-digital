@@ -18,6 +18,7 @@ import { creatorAnalyticsRoutes } from "./routes/creator-analytics.js";
 import { creatorAIRoutes } from "./routes/creator-ai.js";
 import { creatorToolsRoutes } from "./routes/creator-tools.js";
 import { bulkOpsRoutes } from "./routes/creator-bulk.js";
+import { chatRoutes } from "./routes/chat.js";
 import { downloadRoutes } from "./routes/downloads.js";
 import { taxRoutes } from "./routes/tax.js";
 
@@ -136,6 +137,9 @@ export async function buildApp(): Promise<FastifyInstance> {
 
     // Tax routes — public calculate/list, admin-only re-seed
     await api.register(taxRoutes, { prefix: "/tax" });
+
+    // Chatbot — public RAG over the platform's own knowledge base
+    await api.register(chatRoutes, { prefix: "/chat" });
   }, { prefix: "/v1" });
 
   return app;

@@ -109,3 +109,69 @@ body {
 [dir="rtl"] .flex-row-rtl-flip {
   flex-direction: row-reverse;
 }
+
+/* ---------------------------------------------------------------------------
+   Accessibility (a11y) styles
+   - High-contrast mode (data-contrast="more"): stronger borders, brighter ink
+   - Reduced motion (data-motion="reduce"): kill transitions/animations
+   - sr-only: standard screen-reader-only utility (also in Tailwind but
+     redefined here for components that don't import the plugin)
+   --------------------------------------------------------------------------- */
+
+[data-contrast="more"] {
+  --gum-black: #000000;
+  --ink: #000000;
+  --ink-muted: #1a1a1a;
+  --ink-subtle: #404040;
+  --gum-cream: #ffffff;
+  --surface: #ffffff;
+  --surface-muted: #f0f0f0;
+}
+[data-contrast="more"].dark {
+  --ink: #ffffff;
+  --ink-muted: #e5e5e5;
+  --ink-subtle: #cccccc;
+  --gum-cream: #000000;
+  --surface: #000000;
+}
+[data-contrast="more"] *:focus-visible {
+  outline: 3px solid #ff6b00 !important;
+  outline-offset: 2px !important;
+}
+[data-contrast="more"] .gum-card,
+[data-contrast="more"] .gum-btn,
+[data-contrast="more"] button,
+[data-contrast="more"] a {
+  border-width: 3px !important;
+}
+
+[data-motion="reduce"] *,
+[data-motion="reduce"] *::before,
+[data-motion="reduce"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Respect the system-level preference too (not just our toggle) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

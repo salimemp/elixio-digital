@@ -9,6 +9,9 @@ import { AuthProvider } from "../lib/auth";
 import { I18nProvider } from "../lib/i18n-client";
 import { ThemeProvider } from "../lib/theme";
 import { DEFAULT_LOCALE, resolveLocaleFromCookie, type Locale } from "../lib/i18n";
+import { LiveRegions } from "../lib/a11y";
+import { A11yToolbar } from "../components/a11y/A11yToolbar";
+import { ChatWidget } from "../components/chat/ChatWidget";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -110,10 +113,29 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <ThemeProvider>
           <I18nProvider initialLocale={locale}>
             <AuthProvider>
+              {/* Skip-to-content link: first focusable element on every page.
+                  Hidden by default; appears on focus. */}
+              <a
+                href="#main-content"
+                className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:border-2 focus:border-gum-black focus:bg-gum-yellow focus:px-4 focus:py-2 focus:text-sm focus:font-extrabold focus:text-gum-black focus:shadow-[0_3px_0_0_#111]"
+              >
+                Skip to main content
+              </a>
+
               <Navbar />
-              <main className="flex-1">{children}</main>
+              <main id="main-content" className="flex-1" tabIndex={-1}>
+                {children}
+              </main>
               <Footer />
               <CookieBanner />
+
+              {/* A11y + chat widgets — bottom-left / bottom-right, don't
+                  overlap. Hidden in print. */}
+              <A11yToolbar />
+              <ChatWidget />
+
+              {/* Live regions for screen reader announcements */}
+              <LiveRegions />
             </AuthProvider>
           </I18nProvider>
         </ThemeProvider>
