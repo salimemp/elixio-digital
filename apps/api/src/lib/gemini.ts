@@ -23,7 +23,12 @@ function getClient(): GoogleGenerativeAI {
   return client;
 }
 
-const DEFAULT_MODEL = "gemini-1.5-flash";
+/**
+ * Explicit versioned model name. The alias `gemini-1.5-flash` resolves
+ * server-side to `-latest`, which 404s on some API keys (regional SKU
+ * availability differences). Pinning to `-001` gives a stable URL.
+ */
+const DEFAULT_MODEL = "gemini-1.5-flash-001";
 
 export interface GenerateOptions {
   /** Higher = more creative. Default 0.4 (factual listing copy). */

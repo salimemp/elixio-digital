@@ -266,8 +266,27 @@ export async function answerQuestion(query: ChatQuery): Promise<ChatResponse> {
       maxOutputTokens: 1024,
     });
     text = responseText;
-  } catch (e) {
-    logger.warn({ err: e }, "generation failed");
+  } catch (e: any) {
+    // Dump the full error response so we can see exactly what Google's
+    // API is telling us (model name vs API permission vs key scope).
+    logger.warn(
+      {
+        err: e?.message,
+        status: e?.status,
+        statusText: e?.statusText,
+        // Google's API errors often include a `errorDetails` array with
+        // the real reason — capture it if present.
+        details:
+          (e?.response?.data as Record<string, unknown> | undefined)
+            ?.errorDetails ?? (e?.response?.data as Record<string, unknown> | undefined),
+        // Some SDK versions expose the response body differently.
+        body:
+          typeof e?.response?.data === "string"
+            ? e.response.data.slice(0, 500)
+            : undefined,
+      },
+      "generation failed"
+    );
     if (fallback) {
       return {
         text: "I'm having trouble connecting to my knowledge base. Please try the /docs page or contact support@elixiodigital.com.",
