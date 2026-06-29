@@ -4,7 +4,6 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { promises as fs } from "node:fs";
 
 const embedTextsMock = vi.fn();
 vi.mock("../lib/gemini.js", () => ({
