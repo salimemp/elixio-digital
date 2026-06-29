@@ -19,7 +19,7 @@ const sendMock = vi.fn(async (cmd) => {
   };
 });
 
-const getSignedUrlMock = vi.fn(async (client, cmd, opts) => {
+const getSignedUrlMock = vi.fn(async (_client, cmd, opts) => {
   const key = `${cmd.constructor.name}-${cmd.input?.Key ?? cmd.input?.Bucket ?? ""}`;
   const url = `https://test-r2.cloudflarestorage.com/elixio-test/${encodeURIComponent(cmd.input?.Key ?? "x")}?X-Amz-Signature=test&expires=${opts.expiresIn}`;
   signedUrls[key] = url;
@@ -62,7 +62,6 @@ vi.mock("@aws-sdk/s3-request-presigner", () => ({
 // ELIXIO_MFA_KEY_ENCRYPTION_KEY) too, even though the storage
 // service doesn't use them, because env.ts validates the whole
 // schema on parse.
-const ORIGINAL_ENV = { ...process.env };
 process.env.DATABASE_URL = process.env.DATABASE_URL ?? "postgres://test:test@localhost:5432/test";
 process.env.JWT_SECRET = process.env.JWT_SECRET ?? "x".repeat(40);
 process.env.ELIXIO_MFA_KEY_ENCRYPTION_KEY = process.env.ELIXIO_MFA_KEY_ENCRYPTION_KEY ?? "x".repeat(44);
@@ -198,8 +197,6 @@ describe("generateDownloadUrl", () => {
   it("uses public CDN URL when CLOUDFLARE_R2_PUBLIC_URL is set (and not forced signed)", async () => {
     process.env.CLOUDFLARE_R2_PUBLIC_URL = "https://cdn.elixiodigital.com";
     // Re-import env so the new value is picked up
-    const { env: envWithPublic } = await import("../config/env.js");
-    // Force a re-evaluation by touching the module cache
     vi.resetModules();
     const storageMod = await import("./storage.js");
     const result = await storageMod.generateDownloadUrl({ key: "media/x/thumb.jpg" });
