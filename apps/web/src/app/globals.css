@@ -175,3 +175,29 @@ body {
   white-space: nowrap;
   border: 0;
 }
+/* ---------------------------------------------------------------------------
+   Launch badge pulse animation
+   - Soft 1.6s pulse on the indicator dot
+   - Respects prefers-reduced-motion (existing @media block above
+     already nullifies animation-duration; this is a no-op fallback
+     in case the rule order changes)
+   - Add the class .animate-launch-pulse to a span/div to use
+   --------------------------------------------------------------------------- */
+@keyframes launch-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+.animate-launch-pulse {
+  animation: launch-pulse 1.6s ease-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-launch-pulse {
+    animation: none;
+  }
+}

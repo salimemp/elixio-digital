@@ -186,5 +186,9 @@
     "aura_feature6_body": "Aura's knowledge base is the entire Elixio documentation, FAQ, and feature guides. It knows what we know, in 42 languages.",
     "final_cta_title": "Ready when you are.",
     "final_cta_subtitle": "Six minutes well spent. Now go build something, or pick up something great."
+  },
+  "home": {
+    "launch_badge": "🚀 곧 출시",
+    "launch_aria": "Elixio 곧 출시"
   }
 }

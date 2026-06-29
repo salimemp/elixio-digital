@@ -61,7 +61,9 @@
     "feature_market_title": "Commercialiser",
     "feature_market_text": "Touchez les acheteurs avec la recherche, les collections et les liens partageables.",
     "feature_sell_title": "Vendre",
-    "feature_sell_text": "Paiement, licences et livraison instantanée, tout est géré."
+    "feature_sell_text": "Paiement, licences et livraison instantanée, tout est géré.",
+    "launch_badge": "🚀 Bientôt disponible",
+    "launch_aria": "Elixio arrive bientôt"
   },
   "nav": {
     "explore": "Explorer",

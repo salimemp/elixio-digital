@@ -61,7 +61,9 @@
     "feature_market_title": "Comercializar",
     "feature_market_text": "Alcance compradores com busca, coleções e links compartilháveis.",
     "feature_sell_title": "Vender",
-    "feature_sell_text": "Checkout, licenciamento e entrega instantânea, tudo resolvido."
+    "feature_sell_text": "Checkout, licenciamento e entrega instantânea, tudo resolvido.",
+    "launch_badge": "🚀 Em breve",
+    "launch_aria": "Elixio será lançado em breve"
   },
   "nav": {
     "explore": "Explorar",

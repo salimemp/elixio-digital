@@ -61,7 +61,9 @@
     "feature_market_title": "سوّق",
     "feature_market_text": "اوصل إلى المشترين عبر البحث والمجموعات والروابط القابلة للمشاركة.",
     "feature_sell_title": "بِع",
-    "feature_sell_text": "الدفع والترخيص والتسليم الفوري، كلها مُدارة."
+    "feature_sell_text": "الدفع والترخيص والتسليم الفوري، كلها مُدارة.",
+    "launch_badge": "🚀 قريباً",
+    "launch_aria": "إليكسو ستطلق قريباً"
   },
   "nav": {
     "explore": "استكشاف",

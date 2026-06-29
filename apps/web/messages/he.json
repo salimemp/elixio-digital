@@ -61,7 +61,9 @@
     "feature_market_title": "שווק",
     "feature_market_text": "הגע לקונים באמצעות חיפוש, אוספים וקישורים לשיתוף.",
     "feature_sell_title": "מכור",
-    "feature_sell_text": "תשלום, רישוי ומשלוח מיידי — הכל מנוהל."
+    "feature_sell_text": "תשלום, רישוי ומשלוח מיידי — הכל מנוהל.",
+    "launch_badge": "🚀 בקרוב",
+    "launch_aria": "Elixio יושק בקרוב"
   },
   "nav": {
     "explore": "גילוי",

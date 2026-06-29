@@ -13,6 +13,28 @@ export default function HomePage() {
 
   return (
     <main className="flex min-h-[calc(100vh-72px)] flex-col items-center justify-center px-6 py-20 text-center">
+      {/* ----------------------------------------------------------------
+          TEMPORARY: "Launching Soon" caption.
+          To remove: delete this whole <div> and the `home.launch_badge`
+          + `home.launch_aria` keys from en.json (and locale files).
+          Date added: 2026-06-29. Remove when public launch happens.
+      ---------------------------------------------------------------- */}
+      <span
+        role="status"
+        aria-label={t("home.launch_aria")}
+        className="mb-3 inline-flex items-center gap-2 rounded-full border-2 border-gum-black bg-gum-purple px-4 py-1.5 text-xs font-extrabold uppercase tracking-wide text-white shadow-[0_3px_0_0_#111]"
+      >
+        <span
+          aria-hidden="true"
+          className="relative inline-flex h-2 w-2"
+        >
+          <span className="absolute inset-0 animate-launch-pulse rounded-full bg-gum-yellow" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-gum-yellow" />
+        </span>
+        {t("home.launch_badge")}
+      </span>
+      {/* END TEMPORARY */}
+
       <span className="mb-6 inline-block rounded-full border-2 border-gum-black bg-gum-yellow px-4 py-1 text-sm font-bold uppercase tracking-wide">
         {t("home.badge")}
       </span>
