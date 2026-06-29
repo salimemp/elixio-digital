@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7b61ff"/>
+      <stop offset="100%" stop-color="#5d3fd3"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f1e05a" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#f1e05a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+
+  <!-- Glow behind content -->
+  <circle cx="960" cy="540" r="600" fill="url(#glow)"/>
+
+  <!-- Decorative shapes -->
+  <circle cx="200" cy="200" r="80" fill="#ff90e8" opacity="0.6"/>
+  <circle cx="1720" cy="880" r="120" fill="#96f7d6" opacity="0.5"/>
+  <circle cx="200" cy="880" r="60" fill="#f1e05a" opacity="0.5"/>
+  <circle cx="1720" cy="200" r="40" fill="#23a6d5" opacity="0.6"/>
+
+  <!-- Spark emoji (Aura) -->
+  <text x="960" y="500" text-anchor="middle" font-family="Apple Color Emoji,Segoe UI Emoji,sans-serif" font-size="220">✨</text>
+
+  <!-- Title -->
+  <text x="960" y="640" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-weight="800" font-size="96" fill="white">Elixio Digital</text>
+  <text x="960" y="720" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-weight="600" font-size="36" fill="#f1e05a">The marketplace that works</text>
+
+  <!-- Subtitle / scene tags -->
+  <text x="960" y="850" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-weight="500" font-size="24" fill="white" opacity="0.8">6:30 · 10 scenes · 42 languages</text>
+</svg>
