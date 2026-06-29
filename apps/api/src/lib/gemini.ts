@@ -18,7 +18,14 @@ function getClient(): GoogleGenerativeAI {
     );
   }
   if (!client) {
-    client = new GoogleGenerativeAI(env.GEMINI_API_KEY);
+    client = new GoogleGenerativeAI(env.GEMINI_API_KEY, {
+      // Force v1 instead of the SDK default v1beta. Gemini 1.5+ models
+      // (including gemini-1.5-flash-001, gemini-2.0-flash, and
+      // text-embedding-004) are now served from /v1; /v1beta returns
+      // 404 for many of them. Both generateContent and embedContent
+      // are supported on v1, so a single client-wide override is safe.
+      apiVersion: "v1",
+    });
   }
   return client;
 }
