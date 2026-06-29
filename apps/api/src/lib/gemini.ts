@@ -1,27 +1,14 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Prisma } from "@prisma/client";
 import { env } from "../config/env.js";
 import { prisma } from "../lib/prisma.js";
 
 /**
- * Gemini client wrapper. Single point of configuration for the model
- * name, default temperature, and safety settings. If GEMINI_API_KEY is
- * not set, the helpers below throw a clear error rather than crashing
- * with an opaque 401 from the SDK.
+ * Gemini REST helpers. We bypass the @google/generative-ai SDK
+ * entirely — it sends the wrong API version (v1beta by default,
+ * which 404s on current models) and the wrong field-name casing
+ * (systemInstruction camelCase, which v1 rejects). Raw fetch
+ * gives us full control over the wire format.
  */
-let client: GoogleGenerativeAI | null = null;
-
-function getClient(): GoogleGenerativeAI {
-  if (!env.GEMINI_API_KEY) {
-    throw new Error(
-      "GEMINI_API_KEY not set in Railway dashboard. AI features are disabled until it is."
-    );
-  }
-  if (!client) {
-    client = new GoogleGenerativeAI(env.GEMINI_API_KEY);
-  }
-  return client;
-}
 
 /**
  * Current default. Gemini 1.5 models (gemini-1.5-flash, -001, -8b,
@@ -56,58 +43,86 @@ export interface GenerationRecord {
  * Run a prompt. Returns the raw text response. Caller is responsible
  * for JSON parsing if jsonMode=true.
  */
-export async function generate(
+export /**
+ * Run a prompt against the Gemini REST API. Uses raw `fetch` instead
+ * of the SDK because:
+ *
+ *   1. The SDK's default URL is v1beta, which doesn't support the
+ *      current model names on 2026-era API keys.
+ *   2. The SDK sends `systemInstruction` (camelCase) at the top level,
+ *      which the v1 API rejects — it expects `system_instruction`
+ *      (snake_case).
+ *   3. The SDK has no way to override the field name casing.
+ *
+ * Raw fetch gives us full control over the wire format. ~30 lines of
+ * code, no SDK quirks to fight.
+ */
+async function generate(
   systemPrompt: string,
   userPrompt: string,
   options: GenerateOptions = {}
 ): Promise<{ text: string; record: GenerationRecord }> {
-  const c = getClient();
-  const model = c.getGenerativeModel(
-    {
-      model: options.model ?? DEFAULT_MODEL,
-      generationConfig: {
-        temperature: options.temperature ?? 0.4,
-        maxOutputTokens: options.maxOutputTokens ?? 2048,
-        responseMimeType: options.jsonMode ? "application/json" : undefined,
-      },
+  if (!env.GEMINI_API_KEY) {
+    throw new Error(
+      "GEMINI_API_KEY not set in Railway dashboard. AI features are disabled until it is."
+    );
+  }
+
+  const model = options.model ?? DEFAULT_MODEL;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${env.GEMINI_API_KEY}`;
+
+  const body: Record<string, unknown> = {
+    // v1beta accepts BOTH `system_instruction` (snake) and
+    // `systemInstruction` (camel); v1 only accepts snake_case.
+    // Using snake_case works for both.
+    system_instruction: {
+      parts: [{ text: systemPrompt }],
     },
-    {
-      // Gemini 1.5+ models (gemini-1.5-flash-001, gemini-2.0-flash,
-      // text-embedding-004) are served from /v1; the SDK default v1beta
-      // returns 404 for them. Forcing v1 makes generateContent and
-      // embedContent both work.
-      apiVersion: "v1",
-    }
-  );
-
-  const result = await model.generateContent({
-    // Inline the system prompt as the first content entry instead of
-    // using a top-level `systemInstruction` / `system_instruction` field.
-    // The wire format changed between API versions: v1beta accepts
-    // `systemInstruction` (camelCase) at the top level, but v1 only
-    // accepts `system_instruction` (snake_case), which the SDK does not
-    // emit automatically. Passing system as a role:system content entry
-    // is portable across v1 and v1beta.
     contents: [
-      { role: "system", parts: [{ text: systemPrompt }] },
-      { role: "user", parts: [{ text: userPrompt }] },
+      {
+        role: "user",
+        parts: [{ text: userPrompt }],
+      },
     ],
-  });
-  const response = await result.response;
-  const text = response.text();
-  const usage = response.usageMetadata;
+    generationConfig: {
+      temperature: options.temperature ?? 0.4,
+      maxOutputTokens: options.maxOutputTokens ?? 2048,
+      ...(options.jsonMode ? { responseMimeType: "application/json" } : {}),
+    },
+  };
 
-  // Gemini 1.5 Flash 8b pricing: free tier; 0.075/M input, 0.3/M output
-  // on the paid tier. Cost is negligible on free tier; we record 0.
-  const costUsd = 0;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const errBody = await res.text().catch(() => "");
+    throw new Error(
+      `Gemini API ${res.status} ${res.statusText}: ${errBody.slice(0, 500)}`
+    );
+  }
+
+  const data = (await res.json()) as {
+    candidates?: Array<{
+      content?: { parts?: Array<{ text?: string }> };
+    }>;
+    usageMetadata?: {
+      promptTokenCount?: number;
+      candidatesTokenCount?: number;
+    };
+  };
+
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 
   return {
     text,
     record: {
-      modelName: options.model ?? DEFAULT_MODEL,
-      tokensIn: usage?.promptTokenCount ?? 0,
-      tokensOut: usage?.candidatesTokenCount ?? 0,
-      costUsd,
+      modelName: model,
+      tokensIn: data.usageMetadata?.promptTokenCount ?? 0,
+      tokensOut: data.usageMetadata?.candidatesTokenCount ?? 0,
+      costUsd: 0,
     },
   };
 }
@@ -129,13 +144,20 @@ export async function generate(
 const EMBED_MODEL = "gemini-embedding-001";
 const EMBED_BATCH_SIZE = 100;
 
+/**
+ * Embed a batch of texts using the raw REST API (same reasoning as
+ * `generate()` above — bypass the SDK's URL / field-name quirks).
+ *
+ * The endpoint is `batchEmbedContents` on the v1beta API. Takes up to
+ * 100 texts per call and returns one 768-dim vector per text.
+ */
 export async function embedTexts(texts: string[]): Promise<number[][]> {
   if (texts.length === 0) return [];
-  const c = getClient();
-  const model = c.getGenerativeModel(
-    { model: EMBED_MODEL },
-    { apiVersion: "v1" }
-  );
+  if (!env.GEMINI_API_KEY) {
+    throw new Error("GEMINI_API_KEY not set");
+  }
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${EMBED_MODEL}:batchEmbedContents?key=${env.GEMINI_API_KEY}`;
 
   const batches: string[][] = [];
   for (let i = 0; i < texts.length; i += EMBED_BATCH_SIZE) {
@@ -144,12 +166,26 @@ export async function embedTexts(texts: string[]): Promise<number[][]> {
 
   const results = await Promise.all(
     batches.map(async (batch) => {
-      const res = await model.batchEmbedContents({
-        requests: batch.map((text) => ({
-          content: { role: "user", parts: [{ text }] },
-        })),
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          requests: batch.map((text) => ({
+            model: `models/${EMBED_MODEL}`,
+            content: { role: "user", parts: [{ text }] },
+          })),
+        }),
       });
-      return res.embeddings.map((e) => e.values ?? []);
+      if (!res.ok) {
+        const errBody = await res.text().catch(() => "");
+        throw new Error(
+          `Gemini embed ${res.status} ${res.statusText}: ${errBody.slice(0, 500)}`
+        );
+      }
+      const data = (await res.json()) as {
+        embeddings?: Array<{ values?: number[] }>;
+      };
+      return (data.embeddings ?? []).map((e) => e.values ?? []);
     }),
   );
 
