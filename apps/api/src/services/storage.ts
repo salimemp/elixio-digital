@@ -118,6 +118,19 @@ async function getS3Client(): Promise<any> {
         accessKeyId: env.CLOUDFLARE_R2_ACCESS_KEY_ID,
         secretAccessKey: env.CLOUDFLARE_R2_SECRET_ACCESS_KEY,
       },
+      // The AWS SDK v3 defaults to requestChecksumCalculation:
+      // "WHEN_SUPPORTED", which silently adds `x-amz-sdk-checksum-algorithm`
+      // and `x-amz-checksum-crc32` query params to presigned URLs. Cloudflare
+      // R2 reads those URL params and enforces the checksum, but the value
+      // baked into the URL is the CRC32 of an EMPTY payload — so any actual
+      // upload body fails with SignatureDoesNotMatch.
+      //
+      // Setting this to "WHEN_REQUIRED" means the SDK only adds the
+      // checksum when the destination service requires it. R2 does not,
+      // so the query params are omitted and PUTs work with any body.
+      requestChecksumCalculation: "WHEN_REQUIRED",
+      // Same logic for response integrity check on GETs.
+      responseChecksumValidation: "WHEN_REQUIRED",
     });
   })();
   return _clientPromise;
