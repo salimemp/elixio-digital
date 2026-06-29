@@ -37,7 +37,8 @@ export async function chatRoutes(app: FastifyInstance): Promise<void> {
   });
 
   /**
-   * POST /v1/chat
+   * POST /chat (becomes /v1/chat when the parent registers with that
+   * prefix).
    *
    * Public (no auth required) — anyone can ask questions about the
    * platform. Rate-limited via the global @fastify/rate-limit plugin
@@ -46,7 +47,7 @@ export async function chatRoutes(app: FastifyInstance): Promise<void> {
    * Body: { question, locale?, history?, topK?, stream? }
    * Returns: { text, sources[], fallback }
    */
-  app.post("/chat", async (request, reply) => {
+  app.post("/", async (request, reply) => {
     const input = chatRequestSchema.parse(request.body);
 
     if (input.stream) {
@@ -71,13 +72,13 @@ export async function chatRoutes(app: FastifyInstance): Promise<void> {
   });
 
   /**
-   * GET /v1/chat/health
+   * GET /chat/health
    *
    * Returns index status + a flag indicating whether Gemini is
    * configured. Useful for the widget to show a "knowledge base
    * loading" state.
    */
-  app.get("/chat/health", async () => {
+  app.get("/health", async () => {
     const index = getKbIndex();
     return {
       kbReady: index !== null,
@@ -88,13 +89,13 @@ export async function chatRoutes(app: FastifyInstance): Promise<void> {
   });
 
   /**
-   * POST /v1/chat/feedback
+   * POST /chat/feedback
    *
    * Accepts thumbs-up/down + free-text. Stored for product review;
    * not surfaced in the UI yet. No auth required (anonymous feedback
    * is fine for V1).
    */
-  app.post("/chat/feedback", async (request) => {
+  app.post("/feedback", async (request) => {
     const input = feedbackSchema.parse(request.body);
     // For now, log + 200. Phase 2: persist to a `chat_feedback` table
     // and surface in admin analytics.
