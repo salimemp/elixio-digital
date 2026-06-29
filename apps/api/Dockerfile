@@ -26,6 +26,9 @@ COPY packages/shared/package.json ./packages/shared/package.json
 RUN pnpm install --frozen-lockfile --prod
 COPY --from=build /app/apps/api/dist ./dist
 COPY --from=build /app/apps/api/prisma ./prisma
+# Copy the chatbot knowledge base. The KB indexer reads this directory
+# at startup; without it the index is empty.
+COPY --from=build /app/apps/api/src/data /app/dist/apps/api/src/data
 # Copy the generated Prisma client. `prisma generate` puts the
 # runtime artifacts at /app/node_modules/.prisma/client/ in the build
 # stage; the @prisma/client wrapper requires it via a relative path.
