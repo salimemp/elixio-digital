@@ -18,14 +18,7 @@ function getClient(): GoogleGenerativeAI {
     );
   }
   if (!client) {
-    client = new GoogleGenerativeAI(env.GEMINI_API_KEY, {
-      // Force v1 instead of the SDK default v1beta. Gemini 1.5+ models
-      // (including gemini-1.5-flash-001, gemini-2.0-flash, and
-      // text-embedding-004) are now served from /v1; /v1beta returns
-      // 404 for many of them. Both generateContent and embedContent
-      // are supported on v1, so a single client-wide override is safe.
-      apiVersion: "v1",
-    });
+    client = new GoogleGenerativeAI(env.GEMINI_API_KEY);
   }
   return client;
 }
@@ -67,14 +60,23 @@ export async function generate(
   options: GenerateOptions = {}
 ): Promise<{ text: string; record: GenerationRecord }> {
   const c = getClient();
-  const model = c.getGenerativeModel({
-    model: options.model ?? DEFAULT_MODEL,
-    generationConfig: {
-      temperature: options.temperature ?? 0.4,
-      maxOutputTokens: options.maxOutputTokens ?? 2048,
-      responseMimeType: options.jsonMode ? "application/json" : undefined,
+  const model = c.getGenerativeModel(
+    {
+      model: options.model ?? DEFAULT_MODEL,
+      generationConfig: {
+        temperature: options.temperature ?? 0.4,
+        maxOutputTokens: options.maxOutputTokens ?? 2048,
+        responseMimeType: options.jsonMode ? "application/json" : undefined,
+      },
     },
-  });
+    {
+      // Gemini 1.5+ models (gemini-1.5-flash-001, gemini-2.0-flash,
+      // text-embedding-004) are served from /v1; the SDK default v1beta
+      // returns 404 for them. Forcing v1 makes generateContent and
+      // embedContent both work.
+      apiVersion: "v1",
+    }
+  );
 
   const result = await model.generateContent({
     contents: [{ role: "user", parts: [{ text: userPrompt }] }],
@@ -115,7 +117,10 @@ const EMBED_BATCH_SIZE = 100;
 export async function embedTexts(texts: string[]): Promise<number[][]> {
   if (texts.length === 0) return [];
   const c = getClient();
-  const model = c.getGenerativeModel({ model: EMBED_MODEL });
+  const model = c.getGenerativeModel(
+    { model: EMBED_MODEL },
+    { apiVersion: "v1" }
+  );
 
   const batches: string[][] = [];
   for (let i = 0; i < texts.length; i += EMBED_BATCH_SIZE) {
