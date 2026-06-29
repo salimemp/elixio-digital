@@ -79,8 +79,17 @@ export async function generate(
   );
 
   const result = await model.generateContent({
-    contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-    systemInstruction: { role: "system", parts: [{ text: systemPrompt }] },
+    // Inline the system prompt as the first content entry instead of
+    // using a top-level `systemInstruction` / `system_instruction` field.
+    // The wire format changed between API versions: v1beta accepts
+    // `systemInstruction` (camelCase) at the top level, but v1 only
+    // accepts `system_instruction` (snake_case), which the SDK does not
+    // emit automatically. Passing system as a role:system content entry
+    // is portable across v1 and v1beta.
+    contents: [
+      { role: "system", parts: [{ text: systemPrompt }] },
+      { role: "user", parts: [{ text: userPrompt }] },
+    ],
   });
   const response = await result.response;
   const text = response.text();
