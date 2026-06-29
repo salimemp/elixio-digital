@@ -51,9 +51,6 @@ importers:
       '@fastify/sensible':
         specifier: ^5
         version: 5.6.0
-      '@google/generative-ai':
-        specifier: ^0.24.1
-        version: 0.24.1
       '@napi-rs/canvas':
         specifier: ^1.0.1
         version: 1.0.1
@@ -1598,10 +1595,6 @@ packages:
 
   '@fastify/sensible@5.6.0':
     resolution: {integrity: sha512-Vq6Z2ZQy10GDqON+hvLF52K99s9et5gVVxTul5n3SIAf0Kq5QjPRUKkAMT3zPAiiGvoHtS3APa/3uaxfDgCODQ==}
-
-  '@google/generative-ai@0.24.1':
-    resolution: {integrity: sha512-MqO+MLfM6kjxcKoy0p1wRzG3b4ZZXtPI+z2IE26UogS2Cm/XHO+7gGRBh6gcJsOiIVoH93UwKvW4HdgiOZCy9Q==}
-    engines: {node: '>=18.0.0'}
 
   '@hexagon/base64@1.1.28':
     resolution: {integrity: sha512-lhqDEAvWixy3bZ+UOYbPwUbBkwBq5C1LAJ/xPC8Oi+lL54oyakv/npbA0aU2hgCsx/1NUd4IBvV03+aUBWxerw==}
@@ -8420,8 +8413,6 @@ snapshots:
       http-errors: 2.0.1
       type-is: 1.6.18
       vary: 1.1.2
-
-  '@google/generative-ai@0.24.1': {}
 
   '@hexagon/base64@1.1.28': {}
 
