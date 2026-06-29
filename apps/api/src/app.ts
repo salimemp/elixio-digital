@@ -103,28 +103,40 @@ export async function buildApp(): Promise<FastifyInstance> {
   await registerErrorHandler(app);
   await registerAuth(app, { secret: env.JWT_SECRET });
 
+  // Health is at the root — `/health` (not `/v1/health`) so Railway's
+  // healthcheck at `/health` keeps working and external monitors don't
+  // need to know our version.
   await app.register(healthRoutes, { prefix: "/health" });
-  await app.register(authRoutes, { prefix: "/auth" });
-  await app.register(userRoutes, { prefix: "/users" });
-  await app.register(storefrontRoutes, { prefix: "/storefronts" });
-  await app.register(assetRoutes, { prefix: "/assets" });
-  await app.register(categoryRoutes, { prefix: "/categories" });
-  await app.register(statsRoutes, { prefix: "/stats" });
 
-  // Creator-only routes — strict role enforcement at the route level
-  // (each route uses preHandler [app.authenticate, app.requireCreator]).
-  // Defense in depth: the service layer also re-checks ownership.
-  await app.register(creatorAnalyticsRoutes, { prefix: "/creator/analytics" });
-  await app.register(creatorAIRoutes, { prefix: "/creator/ai" });
-  await app.register(creatorToolsRoutes, { prefix: "/creator/tools" });
-  await app.register(bulkOpsRoutes, { prefix: "/creator/bulk" });
+  // All API routes are namespaced under `/v1`. The frontend has been
+  // calling `/v1/...` since day one (see apps/web/src/lib/api.ts and
+  // apps/web/src/lib/auth.tsx), but the backend was registering them
+  // without the prefix. This caused every cross-origin fetch to 404.
+  // Fix: wrap the API routes in a single `/v1` prefix using a child
+  // Fastify instance so each sub-route gets `/v1/<prefix>`.
+  await app.register(async (api) => {
+    await api.register(authRoutes, { prefix: "/auth" });
+    await api.register(userRoutes, { prefix: "/users" });
+    await api.register(storefrontRoutes, { prefix: "/storefronts" });
+    await api.register(assetRoutes, { prefix: "/assets" });
+    await api.register(categoryRoutes, { prefix: "/categories" });
+    await api.register(statsRoutes, { prefix: "/stats" });
 
-  // Buyer-only routes — purchase, downloads, library. Each gated by
-  // app.requireBuyer (DB re-check, not just JWT flag).
-  await app.register(downloadRoutes, { prefix: "/downloads" });
+    // Creator-only routes — strict role enforcement at the route level
+    // (each route uses preHandler [app.authenticate, app.requireCreator]).
+    // Defense in depth: the service layer also re-checks ownership.
+    await api.register(creatorAnalyticsRoutes, { prefix: "/creator/analytics" });
+    await api.register(creatorAIRoutes, { prefix: "/creator/ai" });
+    await api.register(creatorToolsRoutes, { prefix: "/creator/tools" });
+    await api.register(bulkOpsRoutes, { prefix: "/creator/bulk" });
 
-  // Tax routes — public calculate/list, admin-only re-seed
-  await app.register(taxRoutes, { prefix: "/tax" });
+    // Buyer-only routes — purchase, downloads, library. Each gated by
+    // app.requireBuyer (DB re-check, not just JWT flag).
+    await api.register(downloadRoutes, { prefix: "/downloads" });
+
+    // Tax routes — public calculate/list, admin-only re-seed
+    await api.register(taxRoutes, { prefix: "/tax" });
+  }, { prefix: "/v1" });
 
   return app;
 }
