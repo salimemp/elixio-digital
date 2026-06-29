@@ -22,7 +22,6 @@
     "@fastify/jwt": "^8",
     "@fastify/rate-limit": "^9.1.0",
     "@fastify/sensible": "^5",
-    "@google/generative-ai": "^0.24.1",
     "@napi-rs/canvas": "^1.0.1",
     "@prisma/client": "^5.16",
     "@simplewebauthn/server": "^13.3.2",

@@ -94,6 +94,9 @@ model User {
   analyticsSnapshots AnalyticsSnapshot[]
   bulkOperations    BulkOperation[]
 
+  // Chat feedback (Aura)
+  chatFeedback      ChatFeedback[]
+
   emailVerifications EmailVerification[]
   passwordResets     PasswordResetToken[]
   magicLinks         MagicLinkToken[]
@@ -747,4 +750,40 @@ model TaxLineItem {
 
   @@index([orderId])
   @@map("tax_line_items")
+}
+
+// ── Chat feedback (Aura) ──────────────────────────────────────
+//
+// One row per thumbs-up/down vote from the ChatWidget. Used for
+// product analytics + quality monitoring (which KB chunks get
+// voted up vs down? which languages have the lowest satisfaction?).
+//
+// Anonymous feedback is fine — userId is nullable. We do NOT log
+// raw IP addresses here (GDPR data-minimization); the request IP
+// is only kept in the request log for 7 days.
+//
+// Question and answer are stored truncated (2k / 8k chars max) to
+// keep the table small. For analytics we typically just need the
+// first 500 chars to identify the topic.
+enum ChatFeedbackRating {
+  up
+  down
+}
+
+model ChatFeedback {
+  id        String             @id @default(uuid()) @db.Uuid
+  userId    String?            @db.Uuid
+  question  String
+  answer    String
+  rating    ChatFeedbackRating
+  comment   String?
+  locale    String             @default("en")
+  createdAt DateTime           @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([rating, createdAt])
+  @@index([userId, createdAt])
+  @@map("chat_feedback")
 }

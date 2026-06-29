@@ -3,6 +3,7 @@ import { z } from "zod";
 import { answerQuestion, answerQuestionStream } from "../services/chatbot.js";
 import { buildKbIndex, getKbIndex } from "../services/chatbot-kb.js";
 import { env } from "../config/env.js";
+import { prisma } from "../lib/prisma.js";
 
 const chatMessageSchema = z.object({
   role: z.enum(["user", "assistant"]),
@@ -89,92 +90,47 @@ export async function chatRoutes(app: FastifyInstance): Promise<void> {
   });
 
   /**
-   * GET /chat/diag
-   *
-   * Diagnostic endpoint — lists models available to the configured
-   * Gemini API key. Returns both the raw model list (name + supported
-   * methods) AND the result of a real test call to detect if the key
-   * is rate-limited, region-restricted, or has the API disabled.
-   *
-   * Temporary (Phase 1 only). Will be removed once Aura is stable.
-   */
-  app.get("/diag", async () => {
-    if (!env.GEMINI_API_KEY) {
-      return { error: "GEMINI_API_KEY not set" };
-    }
-
-    const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${env.GEMINI_API_KEY}`;
-    let listResult: unknown = null;
-    let listError: string | null = null;
-    try {
-      const r = await fetch(url);
-      const body = await r.json();
-      if (!r.ok) {
-        listError = `${r.status} ${r.statusText} — ${JSON.stringify(body).slice(0, 300)}`;
-      } else {
-        // Slim the response — just names + supported methods.
-        const models = (body as { models?: Array<{ name: string; supportedGenerationMethods?: string[] }> }).models ?? [];
-        listResult = models.map((m) => ({
-          name: m.name,
-          methods: m.supportedGenerationMethods ?? [],
-        }));
-      }
-    } catch (e: any) {
-      listError = e?.message ?? String(e);
-    }
-
-    // Also test a real generate call with each known model name.
-    const candidates = [
-      "gemini-1.5-flash",
-      "gemini-1.5-flash-001",
-      "gemini-1.5-flash-8b",
-      "gemini-1.5-pro",
-      "gemini-pro",
-      "gemini-2.0-flash",
-      "gemini-2.0-flash-exp",
-    ];
-    const probeResults: Record<string, string> = {};
-    await Promise.all(
-      candidates.map(async (m) => {
-        const probeUrl = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${env.GEMINI_API_KEY}`;
-        try {
-          const r = await fetch(probeUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ role: "user", parts: [{ text: "hi" }] }],
-            }),
-          });
-          const body = await r.json();
-          probeResults[m] = r.ok
-            ? `OK (${(body as { candidates?: unknown[] }).candidates?.length ?? 0} candidates)`
-            : `${r.status} — ${JSON.stringify(body).slice(0, 200)}`;
-        } catch (e: any) {
-          probeResults[m] = `ERR — ${e?.message ?? String(e)}`;
-        }
-      })
-    );
-
-    return {
-      keyConfigured: true,
-      keyPrefix: env.GEMINI_API_KEY.slice(0, 6) + "...",
-      listResult,
-      listError,
-      probeResults,
-    };
-  });
-
-  /**
    * POST /chat/feedback
    *
-   * Accepts thumbs-up/down + free-text. Stored for product review;
-   * not surfaced in the UI yet. No auth required (anonymous feedback
-   * is fine for V1).
+   * Accepts thumbs-up/down + free-text. Persisted to chat_feedback
+   * table for product analytics: which KB chunks get voted up vs
+   * down, which languages have lowest satisfaction, etc.
+   *
+   * No auth required — anonymous feedback is fine for V1. We do
+   * NOT log IP addresses here (GDPR data-minimization).
    */
   app.post("/feedback", async (request) => {
     const input = feedbackSchema.parse(request.body);
-    // For now, log + 200. Phase 2: persist to a `chat_feedback` table
-    // and surface in admin analytics.
+
+    // If the request includes a valid bearer token, attribute the
+    // feedback to that user. Otherwise anonymous.
+    let userId: string | null = null;
+    if (request.headers.authorization) {
+      try {
+        await request.jwtVerify();
+        userId = (request.user as { userId?: string }).userId ?? null;
+      } catch {
+        // Invalid/expired token — treat as anonymous.
+      }
+    }
+
+    try {
+      await prisma.chatFeedback.create({
+        data: {
+          userId,
+          question: input.question.slice(0, 2000),
+          answer: input.answer.slice(0, 8000),
+          rating: input.rating,
+          comment: input.comment ?? null,
+          locale: input.locale ?? "en",
+        },
+      });
+    } catch (e) {
+      // Don't fail the user-visible feedback flow on a DB hiccup —
+      // log it for ops to investigate.
+      app.log.warn({ err: e }, "[chat] feedback persistence failed");
+    }
+
     app.log.info(
       {
         rating: input.rating,
@@ -182,6 +138,7 @@ export async function chatRoutes(app: FastifyInstance): Promise<void> {
         answerLength: input.answer.length,
         hasComment: !!input.comment,
         locale: input.locale,
+        attributedToUser: !!userId,
       },
       "[chat] feedback",
     );

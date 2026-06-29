@@ -182,42 +182,61 @@ Return JSON with:
   const startedAt = Date.now();
   let result: { text: string; record: GenerationRecord };
   try {
-    // We need the multimodal model for image critique. Reuse the
-    // helper but inline the call to attach image parts.
-    const { GoogleGenerativeAI } = await import("@google/generative-ai");
+    // Multimodal image critique. Bypasses the SDK for the same reason
+    // as `generate()` in lib/gemini.ts — the SDK sends wrong field
+    // names + wrong API version. Raw fetch with snake_case wire format.
     const { env } = await import("../config/env.js");
     if (!env.GEMINI_API_KEY) throw new Error("GEMINI_API_KEY not set");
-    const model = new GoogleGenerativeAI(env.GEMINI_API_KEY).getGenerativeModel(
-      {
-        model: "gemini-2.5-flash", // multimodal; supports image inputs
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${env.GEMINI_API_KEY}`;
+
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: systemPrompt }] },
+        contents: [
+          {
+            role: "user",
+            parts: [
+              { text: userPrompt },
+              {
+                file_data: {
+                  mime_type: "image/jpeg",
+                  file_uri: input.imageUrl,
+                },
+              },
+            ],
+          },
+        ],
         generationConfig: {
           temperature: 0.5,
           maxOutputTokens: 2000,
           responseMimeType: "application/json",
         },
-      },
-      { apiVersion: "v1" }
-    );
-    const r = await model.generateContent({
-      // Inline system prompt as first content entry — works on v1 + v1beta.
-      contents: [
-        { role: "system", parts: [{ text: systemPrompt }] },
-        {
-          role: "user",
-          parts: [
-            { text: userPrompt },
-            { fileData: { mimeType: "image/jpeg", fileUri: input.imageUrl } },
-          ],
-        },
-      ],
+      }),
     });
-    const response = await r.response;
+
+    if (!res.ok) {
+      const errBody = await res.text().catch(() => "");
+      throw new Error(`Gemini ${res.status} ${res.statusText}: ${errBody.slice(0, 500)}`);
+    }
+
+    const data = (await res.json()) as {
+      candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+      usageMetadata?: {
+        promptTokenCount?: number;
+        candidatesTokenCount?: number;
+      };
+    };
+
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
     result = {
-      text: response.text(),
+      text,
       record: {
         modelName: "gemini-2.5-flash",
-        tokensIn: response.usageMetadata?.promptTokenCount ?? 0,
-        tokensOut: response.usageMetadata?.candidatesTokenCount ?? 0,
+        tokensIn: data.usageMetadata?.promptTokenCount ?? 0,
+        tokensOut: data.usageMetadata?.candidatesTokenCount ?? 0,
         costUsd: 0,
       },
     };
