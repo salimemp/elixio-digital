@@ -208,3 +208,95 @@ describe("history threading", () => {
     expect(userPrompt).toContain("What about templates?");
   });
 });
+describe("Aura branding", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("system prompt identifies the assistant as Aura", async () => {
+    const chunks: FakeChunk[] = [
+      { id: "0", content: "test", embedding: vec(1.0), metadata: { source: "x" } },
+    ];
+    getKbIndexMock.mockReturnValue({ chunks, sourceCount: 1 });
+    embedTextMock.mockResolvedValueOnce(vec(1.0));
+    generateMock.mockResolvedValueOnce({
+      text: "Hi!",
+      record: { modelName: "x", tokensIn: 0, tokensOut: 0, costUsd: 0 },
+    });
+
+    await answerQuestion({ question: "Hello", locale: "en" });
+    const systemPrompt = generateMock.mock.calls[0][0];
+    expect(systemPrompt).toContain("Aura");
+  });
+
+  it("system prompt uses localized greeting for the user's language", async () => {
+    const chunks: FakeChunk[] = [
+      { id: "0", content: "test", embedding: vec(1.0), metadata: { source: "x" } },
+    ];
+    getKbIndexMock.mockReturnValue({ chunks, sourceCount: 1 });
+    embedTextMock.mockResolvedValueOnce(vec(1.0));
+    generateMock.mockResolvedValueOnce({
+      text: "Bonjour",
+      record: { modelName: "x", tokensIn: 0, tokensOut: 0, costUsd: 0 },
+    });
+
+    await answerQuestion({ question: "Salut", locale: "fr" });
+    const systemPrompt = generateMock.mock.calls[0][0];
+    // French greeting should mention "Aura" and French words
+    expect(systemPrompt).toContain("Aura");
+    expect(systemPrompt).toMatch(/French/i);
+  });
+
+  it("system prompt includes localized fallback message", async () => {
+    // No relevant chunks
+    const chunks: FakeChunk[] = [
+      { id: "0", content: "unrelated", embedding: vec(0.0), metadata: { source: "x" } },
+    ];
+    getKbIndexMock.mockReturnValue({ chunks, sourceCount: 1 });
+    embedTextMock.mockResolvedValueOnce(vec(0.0));
+    generateMock.mockResolvedValueOnce({
+      text: "I don't know.",
+      record: { modelName: "x", tokensIn: 0, tokensOut: 0, costUsd: 0 },
+    });
+
+    await answerQuestion({ question: "what?", locale: "es" });
+    const systemPrompt = generateMock.mock.calls[0][0];
+    expect(systemPrompt).toContain("Aura");
+    // The Spanish fallback string should be in the prompt
+    expect(systemPrompt).toMatch(/docs|ayuda|seguro/i);
+  });
+
+  it("system prompt mentions Aura is for Elixio", async () => {
+    const chunks: FakeChunk[] = [
+      { id: "0", content: "test", embedding: vec(1.0), metadata: { source: "x" } },
+    ];
+    getKbIndexMock.mockReturnValue({ chunks, sourceCount: 1 });
+    embedTextMock.mockResolvedValueOnce(vec(1.0));
+    generateMock.mockResolvedValueOnce({
+      text: "Hi",
+      record: { modelName: "x", tokensIn: 0, tokensOut: 0, costUsd: 0 },
+    });
+
+    await answerQuestion({ question: "Hi", locale: "en" });
+    const systemPrompt = generateMock.mock.calls[0][0];
+    expect(systemPrompt).toContain("Elixio");
+  });
+
+  it("supports RTL locales (Arabic, Hebrew, Urdu) in prompt construction", async () => {
+    const chunks: FakeChunk[] = [
+      { id: "0", content: "test", embedding: vec(1.0), metadata: { source: "x" } },
+    ];
+    getKbIndexMock.mockReturnValue({ chunks, sourceCount: 1 });
+    embedTextMock.mockResolvedValueOnce(vec(1.0));
+    generateMock.mockResolvedValueOnce({
+      text: "مرحبا",
+      record: { modelName: "x", tokensIn: 0, tokensOut: 0, costUsd: 0 },
+    });
+
+    await answerQuestion({ question: "مرحبا", locale: "ar" });
+    const systemPrompt = generateMock.mock.calls[0][0];
+    expect(systemPrompt).toContain("Aura");
+    // Arabic greeting contains "Aura" in Arabic script
+    expect(systemPrompt).toContain("أورا");
+  });
+});

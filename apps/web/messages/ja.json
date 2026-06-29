@@ -28,5 +28,25 @@
     "read_more": "Cookie ポリシーを読む",
     "accept": "同意する",
     "decline": "拒否する"
+  },
+  "chat": {
+    "name": "Aura",
+    "tagline": "あなたの Elixio アシスタント",
+    "title": "Aura",
+    "subtitle": "Elixio について何でも聞いてください。Aura はドキュメントで訓練され、42 言語を話します。",
+    "welcome_title": "こんにちは！Aura です。",
+    "welcome_body": "Elixio について何でも聞いてください — 機能、価格、アカウントの問題、アクセシビリティ。入力、音声、または読み上げで回答を受け取れます。",
+    "welcome_body_long": "私は Aura、Elixio のアシスタントです。ドキュメント、FAQ、機能ガイドをすべて読んでいるので、購入、販売、アカウント設定、アクセシビリティ、トラブルシューティングについて何でも聞いてください。入力、音声（マイクボタン）、または読み上げモードで回答を聞くことができます。",
+    "thinking": "Aura 考え中…",
+    "voice_mode_on": "音声モードオン",
+    "voice_mode_off": "音声モードオフ",
+    "voice_mode_description": "回答を読み上げる",
+    "voice_continuous_on": "常に聞いています",
+    "voice_continuous_off": "押して話す",
+    "voice_continuous_description": "質問を話すと、Aura が大声で答えます。繰り返せます",
+    "voice_speaking": "Aura 話しています…",
+    "voice_listening": "聞いています…",
+    "voice_no_support": "このブラウザは音声をサポートしていません。Chrome、Edge、または Safari を試してください。",
+    "input_hint": "Enter で送信。Shift+Enter で改行。🎤 で音声。"
   }
 }

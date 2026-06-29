@@ -38,6 +38,10 @@ compliant. You can export or delete your account at any time from
 
 ## How do I get help?
 
-You can ask the Elixio assistant (the chat bubble at the bottom-left
-of every page), email support@elixiodigital.com, or read the docs at
+You can ask Aura, the Elixio AI assistant (the chat bubble at the
+bottom-right of every page, or open the fullscreen chat at /chat).
+Aura is trained on all of Elixio's documentation, FAQ, and feature
+guides, and can answer in 42 languages. You can type, speak (using
+the microphone button), or have Aura read responses aloud. For issues
+Aura can't solve, email support@elixiodigital.com. The docs are at
 /docs.

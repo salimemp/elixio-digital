@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n-client";
 import { useStt } from "@/lib/stt";
+import { useTts } from "@/lib/tts";
 import { useAnnouncer } from "@/lib/a11y";
 
 interface ChatMessage {
@@ -23,21 +24,24 @@ interface ChatSource {
   excerpt: string;
 }
 
+const VOICE_MODE_KEY = "elixio_voice_mode_fullscreen";
+
 /**
  * Fullscreen chat page at /chat. Reuses the same backend as the
  * floating widget but with a wider layout, a left-side rail showing
- * suggested topics, and persistent history (localStorage).
- *
- * Designed for desktop-first use. Mobile falls back to the floating
- * widget for a better touch experience.
+ * suggested topics, and persistent history (localStorage). Includes
+ * the full voice mode + continuous voice conversation features.
  */
 export default function ChatPage() {
   const { t, locale } = useI18n();
   const { announce } = useAnnouncer();
   const stt = useStt();
+  const tts = useTts();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
+  const [voiceMode, setVoiceMode] = useState(false);
+  const [continuousMode, setContinuousMode] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const STORAGE_KEY = "elixio_chat_history_v1";
 
@@ -45,6 +49,16 @@ export default function ChatPage() {
     if (typeof window === "undefined") return;
     try {
       setMessages(JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"));
+    } catch {
+      /* ignore */
+    }
+    try {
+      const stored = localStorage.getItem(VOICE_MODE_KEY);
+      if (stored === "on") setVoiceMode(true);
+      if (stored === "continuous") {
+        setVoiceMode(true);
+        setContinuousMode(true);
+      }
     } catch {
       /* ignore */
     }
@@ -60,8 +74,57 @@ export default function ChatPage() {
   }, [messages]);
 
   useEffect(() => {
+    try {
+      if (continuousMode) localStorage.setItem(VOICE_MODE_KEY, "continuous");
+      else if (voiceMode) localStorage.setItem(VOICE_MODE_KEY, "on");
+      else localStorage.setItem(VOICE_MODE_KEY, "off");
+    } catch {
+      /* ignore */
+    }
+  }, [voiceMode, continuousMode]);
+
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streaming]);
+
+  // Auto-speak the latest assistant message when voice mode is on.
+  useEffect(() => {
+    if (!voiceMode || streaming) return;
+    const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant" && !m.pending);
+    if (!lastAssistant) return;
+    const lastSpokenId = (window as { __elixioLastSpoken?: string }).__elixioLastSpoken;
+    if (lastSpokenId === lastAssistant.id) return;
+    (window as { __elixioLastSpoken?: string }).__elixioLastSpoken = lastAssistant.id;
+    tts.speak(lastAssistant.content, { lang: locale });
+  }, [messages, streaming, voiceMode, tts, locale]);
+
+  // Continuous voice: after TTS finishes, listen for next question.
+  useEffect(() => {
+    if (!continuousMode) return;
+    if (tts.state === "idle" && !streaming && !stt.listening) {
+      stt.reset();
+      stt.start({ lang: locale, continuous: true });
+    }
+  }, [continuousMode, tts.state, streaming, stt, locale]);
+
+  // Auto-send the STT transcript in continuous mode
+  useEffect(() => {
+    if (!continuousMode) return;
+    if (!input.trim() || streaming) return;
+    const t = setTimeout(() => {
+      if (input.trim() && !streaming) {
+        void send();
+      }
+    }, 1000);
+    return () => clearTimeout(t);
+  }, [input, continuousMode, streaming]);
+
+  // Pull STT transcript into input while listening
+  useEffect(() => {
+    if (stt.listening && stt.transcript) {
+      setInput(stt.transcript);
+    }
+  }, [stt.transcript, stt.listening]);
 
   const send = useCallback(async () => {
     const text = input.trim();
@@ -76,6 +139,7 @@ export default function ChatPage() {
     setMessages((prev) => [...prev, userMsg, aiMsg]);
     setInput("");
     setStreaming(true);
+    (window as { __elixioLastSpoken?: string }).__elixioLastSpoken = undefined;
     announce(t("chat.thinking"));
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
@@ -154,6 +218,30 @@ export default function ChatPage() {
     [send],
   );
 
+  const toggleVoiceMode = () => {
+    if (continuousMode) {
+      setContinuousMode(false);
+      setVoiceMode(false);
+      tts.stop();
+      stt.abort();
+    } else if (voiceMode) {
+      setVoiceMode(false);
+      tts.stop();
+    } else {
+      setVoiceMode(true);
+    }
+  };
+
+  const toggleContinuous = () => {
+    if (continuousMode) {
+      setContinuousMode(false);
+      stt.abort();
+    } else {
+      setContinuousMode(true);
+      setVoiceMode(true);
+    }
+  };
+
   const suggestions = [
     t("chat.suggestion_pricing"),
     t("chat.suggestion_become_creator"),
@@ -212,9 +300,58 @@ export default function ChatPage() {
       {/* Main chat column */}
       <main className="flex min-h-[600px] flex-1 flex-col overflow-hidden rounded-2xl border-2 border-gum-black bg-gum-cream shadow-[0_6px_0_0_#111]">
         <header className="flex items-center justify-between border-b-2 border-gum-black bg-gum-purple px-5 py-3 text-white">
-          <h1 className="text-lg font-extrabold">{t("chat.title")}</h1>
-          <p className="text-xs opacity-80">{t("chat.subtitle")}</p>
+          <div className="flex items-center gap-3">
+            <span aria-hidden="true" className="flex h-10 w-10 items-center justify-center rounded-full bg-gum-yellow text-lg">
+              ✨
+            </span>
+            <div>
+              <h1 className="text-lg font-extrabold leading-tight">{t("chat.name")}</h1>
+              <p className="text-xs opacity-80">{t("chat.tagline")}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={toggleVoiceMode}
+              aria-pressed={voiceMode}
+              aria-label={voiceMode ? t("chat.voice_mode_off") : t("chat.voice_mode_on")}
+              title={t("chat.voice_mode_description")}
+              className={`rounded-lg p-2 text-sm ${voiceMode ? "bg-gum-yellow text-gum-black" : "hover:bg-white/20"}`}
+            >
+              🔊
+            </button>
+            <button
+              type="button"
+              onClick={toggleContinuous}
+              aria-pressed={continuousMode}
+              aria-label={continuousMode ? t("chat.voice_continuous_off") : t("chat.voice_continuous_on")}
+              title={t("chat.voice_continuous_description")}
+              disabled={!stt.supported}
+              className={`rounded-lg p-2 text-sm disabled:opacity-30 ${continuousMode ? "bg-gum-yellow text-gum-black" : "hover:bg-white/20"}`}
+            >
+              🎙️
+            </button>
+          </div>
         </header>
+
+        {/* Voice status bar */}
+        {(voiceMode || stt.listening || tts.state === "speaking") && (
+          <div className="flex items-center justify-center gap-2 border-b border-gum-black/10 bg-gum-yellow/30 px-3 py-1.5 text-xs">
+            {tts.state === "speaking" && (
+              <span className="flex items-center gap-1 font-bold text-gum-black">
+                <span aria-hidden>🗣️</span> {t("chat.voice_speaking")}
+              </span>
+            )}
+            {stt.listening && (
+              <span className="flex items-center gap-1 font-bold text-red-700">
+                <span aria-hidden>🎤</span> {t("chat.voice_listening")}
+              </span>
+            )}
+            {continuousMode && tts.state !== "speaking" && !stt.listening && (
+              <span className="ink-muted">{t("chat.voice_continuous_description")}</span>
+            )}
+          </div>
+        )}
 
         <div className="flex-1 space-y-3 overflow-y-auto p-5" aria-live="polite">
           {messages.length === 0 ? (
@@ -235,6 +372,11 @@ export default function ChatPage() {
                       : "border-2 border-gum-black/20 bg-white"
                   }`}
                 >
+                  {m.role === "assistant" && (
+                    <p className="mb-1 text-[10px] font-extrabold uppercase tracking-wide text-gum-purple">
+                      {t("chat.name")} ✨
+                    </p>
+                  )}
                   <p className="whitespace-pre-wrap">{m.content || (m.pending ? "…" : "")}</p>
                   {m.sources && m.sources.length > 0 && (
                     <ul className="mt-3 space-y-1 border-t border-gum-black/10 pt-2 text-xs">
@@ -252,6 +394,18 @@ export default function ChatPage() {
                       ))}
                     </ul>
                   )}
+                  {m.role === "assistant" && !m.pending && (
+                    <div className="mt-2 flex items-center gap-2 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => tts.speak(m.content, { lang: locale })}
+                        aria-label={t("chat.voice_mode_on")}
+                        className="rounded px-1.5 py-0.5 hover:bg-gum-mint"
+                      >
+                        🔊 {t("chat.voice_mode_on")}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))
@@ -268,7 +422,7 @@ export default function ChatPage() {
               rows={3}
               aria-label={t("chat.input_label")}
               placeholder={t("chat.input_placeholder")}
-              disabled={streaming}
+              disabled={streaming || (continuousMode && stt.listening)}
               className="flex-1 resize-none rounded-xl border-2 border-gum-black bg-white px-3 py-2 text-sm ink-default focus:outline-none focus-visible:ring-2 focus-visible:ring-gum-purple disabled:opacity-50"
             />
             <div className="flex flex-col gap-1">

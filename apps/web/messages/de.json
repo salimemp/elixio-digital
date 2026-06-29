@@ -297,5 +297,25 @@
     "read_more": "Unsere Cookie-Richtlinie lesen",
     "accept": "Akzeptieren",
     "decline": "Ablehnen"
+  },
+  "chat": {
+    "name": "Aura",
+    "tagline": "Deine Elixio-Assistentin",
+    "title": "Aura",
+    "subtitle": "Frag alles über Elixio. Aura ist mit unserer Dokumentation trainiert und spricht 42 Sprachen.",
+    "welcome_title": "Hallo! Ich bin Aura.",
+    "welcome_body": "Frag mich alles über Elixio — Funktionen, Preise, Konto-Probleme, Barrierefreiheit. Du kannst tippen, sprechen oder dir Antworten vorlesen lassen.",
+    "welcome_body_long": "Ich bin Aura, die Elixio-Assistentin. Ich habe unsere Dokumentation, FAQ und Funktionsanleitungen gelesen, also frag mich alles über Kaufen, Verkaufen, Kontoeinstellungen, Barrierefreiheit oder Fehlerbehebung. Du kannst tippen, sprechen (Mikrofon-Taste) oder den Sprachmodus aktivieren, damit ich die Antworten vorlese.",
+    "thinking": "Aura denkt nach…",
+    "voice_mode_on": "Sprachmodus an",
+    "voice_mode_off": "Sprachmodus aus",
+    "voice_mode_description": "Antworten vorlesen",
+    "voice_continuous_on": "Hört immer zu",
+    "voice_continuous_off": "Drücken zum Sprechen",
+    "voice_continuous_description": "Sprich deine Frage, Aura antwortet laut, wiederhole",
+    "voice_speaking": "Aura spricht…",
+    "voice_listening": "Hört dir zu…",
+    "voice_no_support": "Sprache wird in diesem Browser nicht unterstützt. Versuche Chrome, Edge oder Safari.",
+    "input_hint": "Enter zum Senden. Shift+Enter neue Zeile. 🎤 für Sprache."
   }
 }

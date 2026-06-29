@@ -28,5 +28,25 @@
     "read_more": "쿠키 정책 전문 보기",
     "accept": "수락",
     "decline": "거절"
+  },
+  "chat": {
+    "name": "Aura",
+    "tagline": "당신의 Elixio 도우미",
+    "title": "Aura",
+    "subtitle": "Elixio에 대해 무엇이든 물어보세요. Aura는 문서로 학습되었으며 42개 언어를 구사합니다.",
+    "welcome_title": "안녕하세요! Aura입니다.",
+    "welcome_body": "Elixio에 대해 무엇이든 물어보세요 — 기능, 가격, 계정 문제, 접근성. 입력하거나, 음성으로 말하거나, 대답을 소리 내어 읽게 할 수 있습니다.",
+    "welcome_body_long": "저는 Aura, Elixio의 도우미입니다. 문서, FAQ, 기능 가이드를 모두 읽었으므로 구매, 판매, 계정 설정, 접근성 또는 문제 해결에 대해 무엇이든 물어보세요. 입력하거나(텍스트), 말하거나(마이크 버튼), 음성 모드를 켜서 대답을 소리 내어 읽게 할 수 있습니다.",
+    "thinking": "Aura 생각 중…",
+    "voice_mode_on": "음성 모드 켜짐",
+    "voice_mode_off": "음성 모드 꺼짐",
+    "voice_mode_description": "대답을 소리 내어 읽기",
+    "voice_continuous_on": "항상 듣는 중",
+    "voice_continuous_off": "눌러서 말하기",
+    "voice_continuous_description": "질문을 말하면, Aura가 소리 내어 대답합니다. 반복하세요",
+    "voice_speaking": "Aura 말하는 중…",
+    "voice_listening": "듣는 중…",
+    "voice_no_support": "이 브라우저는 음성을 지원하지 않습니다. Chrome, Edge 또는 Safari를 시도하세요.",
+    "input_hint": "Enter로 보내기. Shift+Enter로 새 줄. 🎤로 음성."
   }
 }

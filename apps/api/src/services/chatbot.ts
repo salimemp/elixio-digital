@@ -100,22 +100,30 @@ function buildSystemPrompt(chunks: KbChunk[], locale: string): string {
 
   const lang = (locale || "en").split("-")[0];
   const langName = languageNameForCode(lang);
+  const greeting = greetingForCode(lang);
 
-  return `You are Elixio, a helpful assistant for the Elixio Digital marketplace.
+  return `You are Aura, the AI assistant for the Elixio Digital marketplace.
+You were created by the Elixio team to help users find answers about the
+platform in their preferred language.
 
-You must answer the user's question using ONLY the provided context below. If the
-answer is not in the context, say "I'm not sure about that — try the help docs
-at /docs or contact support@elixiodigital.com." Do not invent features, prices,
-or policies that aren't in the context.
+Your personality: warm, concise, knowledgeable. You can be playful but
+stay professional. You never make up features, prices, or policies that
+aren't in the provided context.
 
-If the user asks a question in a non-English language, respond in their language
-(${langName}).
+You must answer the user's question using ONLY the provided context below.
+If the answer is not in the context, say "${fallbackForCode(lang)}" —
+do not invent an answer.
 
-Be concise, friendly, and use markdown for formatting (lists, links, code). When
-you cite a fact, mention the source number in brackets, e.g. "[1]".
+The user is asking in ${langName} (locale: ${locale}). Respond in
+${langName} unless they switch languages mid-conversation.
 
-If the user asks where to do something in the app and the context mentions a
-URL, point them to that URL.
+When greeting the user (first turn only), use this localized greeting:
+${greeting}
+
+When you cite a fact, mention the source number in brackets, e.g. "[1]".
+When the context mentions a URL, point the user to it.
+
+Use markdown for formatting (lists, links, code).
 
 CONTEXT:
 ${context || "(no relevant context found)"}`;
@@ -135,6 +143,78 @@ function languageNameForCode(code: string): string {
     my: "Burmese", km: "Khmer", lo: "Lao", mn: "Mongolian",
   };
   return map[code] ?? code;
+}
+
+/**
+ * Localized greeting that Aura uses on the first turn of a
+ * conversation. Keeps the brand name (Aura) universal but localizes
+ * the surrounding language.
+ */
+function greetingForCode(code: string): string {
+  const map: Record<string, string> = {
+    en: "Hi! I'm Aura, your Elixio assistant. How can I help today?",
+    es: "¡Hola! Soy Aura, tu asistente de Elixio. ¿Cómo puedo ayudarte hoy?",
+    fr: "Bonjour ! Je suis Aura, votre assistante Elixio. Comment puis-je vous aider aujourd'hui ?",
+    de: "Hallo! Ich bin Aura, deine Elixio-Assistentin. Wie kann ich dir heute helfen?",
+    hi: "नमस्ते! मैं ऑरा हूँ, आपकी एलिक्सियो सहायक। आज मैं आपकी कैसे मदद कर सकती हूँ?",
+    pt: "Olá! Sou a Aura, sua assistente da Elixio. Como posso te ajudar hoje?",
+    ar: "مرحبا! أنا أورا، مساعدتك في إليكسو. كيف يمكنني مساعدتك اليوم؟",
+    ur: "السلام علیکم! میں اورا ہوں، آپ کی ایلیکسیو معاون۔ آج میں آپ کی کس طرح مدد کر سکتی ہوں؟",
+    he: "שלום! אני אורה, העוזרת שלך ב-Elixio. איך אוכל לעזור לך היום?",
+    zh: "你好！我是 Aura，你的 Elixio 助手。今天我能为你做什么？",
+    "zh-TW": "你好！我是 Aura，你的 Elixio 助手。今天我能為你做什麼？",
+    ja: "こんにちは！Aura です。Elixio のアシスタントです。今日はどのようなご用でしょうか？",
+    ko: "안녕하세요! 저는 Aura, 당신의 Elixio 도우미입니다. 오늘 무엇을 도와드릴까요?",
+    ru: "Привет! Я Aura, твой ассистент Elixio. Чем могу помочь сегодня?",
+    it: "Ciao! Sono Aura, la tua assistente Elixio. Come posso aiutarti oggi?",
+    nl: "Hallo! Ik ben Aura, je Elixio-assistent. Hoe kan ik je vandaag helpen?",
+    pl: "Cześć! Jestem Aura, twoja asystentka Elixio. Jak mogę ci dziś pomóc?",
+    tr: "Merhaba! Ben Aura, Elixio asistanınızım. Bugün size nasıl yardımcı olabilirim?",
+    vi: "Xin chào! Tôi là Aura, trợ lý Elixio của bạn. Hôm nay tôi có thể giúp gì cho bạn?",
+    th: "สวัสดี! ฉันชื่อ Aura ผู้ช่วย Elixio ของคุณ วันนี้ฉันช่วยอะไรคุณได้บ้าง?",
+    id: "Halo! Saya Aura, asisten Elixio Anda. Apa yang bisa saya bantu hari ini?",
+    ms: "Hai! Saya Aura, pembantu Elixio anda. Apa yang boleh saya bantu hari ini?",
+    sv: "Hej! Jag är Aura, din Elixio-assistent. Hur kan jag hjälpa dig idag?",
+    da: "Hej! Jeg er Aura, din Elixio-assistent. Hvordan kan jeg hjælpe dig i dag?",
+    no: "Hei! Jeg er Aura, din Elixio-assistent. Hvordan kan jeg hjelpe deg i dag?",
+    fi: "Hei! Olen Aura, Elixio-avustajasi. Miten voin auttaa sinua tänään?",
+    el: "Γεια σας! Είμαι η Aura, η βοηθός σας στο Elixio. Πώς μπορώ να σας βοηθήσω σήμερα;",
+    cs: "Ahoj! Jsem Aura, tvůj asistent Elixio. Jak ti dnes mohu pomoci?",
+    sk: "Ahoj! Som Aura, tvoj asistent Elixio. Ako ti dnes môžem pomôcť?",
+    hu: "Szia! Aura vagyok, az Elixio asszisztense. Miben segíthetek ma?",
+    ro: "Bună! Sunt Aura, asistenta ta Elixio. Cum te pot ajuta azi?",
+    bg: "Здравей! Аз съм Aura, твоят асистент в Elixio. Как мога да ти помогна днес?",
+  };
+  return map[code] ?? "Hi! I'm Aura, your Elixio assistant. How can I help today?";
+}
+
+/**
+ * Localized "I don't know" message Aura uses when the KB doesn't
+ * contain the answer. Same tone as the greeting.
+ */
+function fallbackForCode(code: string): string {
+  const map: Record<string, string> = {
+    en: "I'm not sure about that — try the help docs at /docs or contact support@elixiodigital.com.",
+    es: "No estoy seguro de eso — consulta los documentos de ayuda en /docs o escribe a support@elixiodigital.com.",
+    fr: "Je ne suis pas sûr — consultez les docs d'aide sur /docs ou contactez support@elixiodigital.com.",
+    de: "Da bin ich mir nicht sicher — schau in die Hilfe-Docs unter /docs oder schreib an support@elixiodigital.com.",
+    hi: "मुझे इसकी जानकारी नहीं है — /docs पर हेल्प डॉक्स देखें या support@elixiodigital.com पर संपर्क करें।",
+    pt: "Não tenho certeza disso — confira a documentação de ajuda em /docs ou contate support@elixiodigital.com.",
+    ar: "لست متأكداً من ذلك — راجع مستندات المساعدة في /docs أو تواصل مع support@elixiodigital.com.",
+    ur: "مجھے اس کی یقینی معلومات نہیں ہیں — /docs پر ہیلپ دستاویزات دیکھیں یا support@elixiodigital.com سے رابطہ کریں۔",
+    he: "אני לא בטוחה לגבי זה — עייני במסמכי העזרה ב-/docs או צרי קשר עם support@elixiodigital.com.",
+    zh: "我不确定 — 请查看 /docs 上的帮助文档，或联系 support@elixiodigital.com。",
+    "zh-TW": "我不確定 — 請查看 /docs 上的說明文件，或聯絡 support@elixiodigital.com。",
+    ja: "その件は分かりかねます — /docs のヘルプドキュメントをご覧になるか、support@elixiodigital.com までお問い合わせください。",
+    ko: "잘 모르겠습니다 — /docs의 도움말 문서를 확인하시거나 support@elixiodigital.com으로 문의해 주세요.",
+    ru: "Я не уверен — посмотрите справку в /docs или напишите на support@elixiodigital.com.",
+    it: "Non ne sono sicuro — consulta la documentazione di aiuto su /docs o contatta support@elixiodigital.com.",
+    nl: "Dat weet ik niet zeker — bekijk de helpdocs op /docs of neem contact op met support@elixiodigital.com.",
+    pl: "Nie jestem pewien — sprawdź dokumenty pomocy w /docs lub skontaktuj się z support@elixiodigital.com.",
+    tr: "Bundan emin değilim — /docs adresindeki yardım belgelerine bakın veya support@elixiodigital.com adresine yazın.",
+    vi: "Tôi không chắc — hãy xem tài liệu trợ giúp tại /docs hoặc liên hệ support@elixiodigital.com.",
+  };
+  return map[code] ?? "I'm not sure about that — try the help docs at /docs or contact support@elixiodigital.com.";
 }
 
 /** Retrieve the top-K most relevant chunks for a question. */

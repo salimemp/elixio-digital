@@ -76,5 +76,20 @@ All pages have proper ARIA labels, live regions for dynamic updates,
 and a logical heading hierarchy.
 
 ### Languages
-42 languages including RTL (Arabic, Hebrew, Urdu). The chat widget
+42 languages including RTL (Arabic, Hebrew, Urdu). The Aura chat widget
 and AI tools respond in your selected language.
+
+### Aura — the Elixio AI assistant
+Aura is the AI helper that lives in the bottom-right chat widget and
+the fullscreen /chat page. Aura can:
+- Answer questions about Elixio (using the same knowledge base as
+  this docs site)
+- Read its responses aloud via text-to-speech (any of 100+ languages)
+- Accept your question by voice (speech-to-text)
+- Run in continuous voice mode (you speak, Aura answers aloud, repeat)
+- Give thumbs-up/down feedback on each response
+
+Aura is a RAG (retrieval-augmented generation) system: it searches
+the knowledge base for the most relevant chunks, then synthesizes an
+answer using Gemini 1.5 Flash. If Aura doesn't know, it points you
+to the docs or support email rather than inventing.

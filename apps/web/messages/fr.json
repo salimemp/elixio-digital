@@ -297,5 +297,25 @@
     "read_more": "Lire notre politique de cookies",
     "accept": "Accepter",
     "decline": "Refuser"
+  },
+  "chat": {
+    "name": "Aura",
+    "tagline": "Votre assistante Elixio",
+    "title": "Aura",
+    "subtitle": "Posez vos questions sur Elixio. Aura est formée sur notre documentation et parle 42 langues.",
+    "welcome_title": "Bonjour ! Je suis Aura.",
+    "welcome_body": "Demandez-moi tout sur Elixio : fonctionnalités, tarifs, compte, accessibilité. Vous pouvez écrire, parler, ou m'écouter lire les réponses à voix haute.",
+    "welcome_body_long": "Je suis Aura, l'assistante Elixio. J'ai lu notre documentation, notre FAQ et nos guides de fonctionnalités, alors posez-moi vos questions sur l'achat, la vente, les paramètres du compte, l'accessibilité ou le dépannage. Vous pouvez écrire, parler (bouton micro), ou activer le mode vocal pour que je lise les réponses à voix haute.",
+    "thinking": "Aura réfléchit…",
+    "voice_mode_on": "Mode vocal activé",
+    "voice_mode_off": "Mode vocal désactivé",
+    "voice_mode_description": "Lire les réponses à voix haute",
+    "voice_continuous_on": "Toujours à l'écoute",
+    "voice_continuous_off": "Appuyer pour parler",
+    "voice_continuous_description": "Dites votre question, Aura répond à voix haute, recommencez",
+    "voice_speaking": "Aura parle…",
+    "voice_listening": "Je vous écoute…",
+    "voice_no_support": "La voix n'est pas prise en charge dans ce navigateur. Essayez Chrome, Edge ou Safari.",
+    "input_hint": "Entrée pour envoyer. Maj+Entrée nouvelle ligne. 🎤 pour la voix."
   }
 }

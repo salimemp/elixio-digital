@@ -28,5 +28,25 @@
     "read_more": "閱讀我們的 Cookie 政策",
     "accept": "接受",
     "decline": "拒絕"
+  },
+  "chat": {
+    "name": "Aura",
+    "tagline": "你的 Elixio 助手",
+    "title": "Aura",
+    "subtitle": "詢問任何關於 Elixio 的問題。Aura 經過我們的文件訓練，能說 42 種語言。",
+    "welcome_title": "你好！我是 Aura。",
+    "welcome_body": "關於 Elixio 的任何問題都可以問我——功能、價格、帳號問題、無障礙。你可以打字、說話，或讓我大聲朗讀回答。",
+    "welcome_body_long": "我是 Aura，Elixio 的助手。我讀過我們的文件、常見問題和功能指南，所以關於購買、銷售、帳號設定、無障礙或疑難排解的任何問題都可以問我。你可以打字、說話（麥克風按鈕），或開啟語音模式讓我大聲朗讀回答。",
+    "thinking": "Aura 正在思考…",
+    "voice_mode_on": "語音模式已開啟",
+    "voice_mode_off": "語音模式已關閉",
+    "voice_mode_description": "大聲朗讀回答",
+    "voice_continuous_on": "始終在聽",
+    "voice_continuous_off": "按下說話",
+    "voice_continuous_description": "說出你的問題，Aura 大聲回答，重複",
+    "voice_speaking": "Aura 正在說話…",
+    "voice_listening": "正在聽你說話…",
+    "voice_no_support": "此瀏覽器不支援語音。試試 Chrome、Edge 或 Safari。",
+    "input_hint": "Enter 傳送。Shift+Enter 換行。🎤 語音。"
   }
 }

@@ -297,5 +297,25 @@
     "read_more": "Leia nossa política de cookies",
     "accept": "Aceitar",
     "decline": "Recusar"
+  },
+  "chat": {
+    "name": "Aura",
+    "tagline": "Sua assistente da Elixio",
+    "title": "Aura",
+    "subtitle": "Pergunte o que quiser sobre a Elixio. Aura é treinada com nossa documentação e fala 42 idiomas.",
+    "welcome_title": "Olá! Eu sou a Aura.",
+    "welcome_body": "Pergunte-me qualquer coisa sobre a Elixio — recursos, preços, problemas de conta, acessibilidade. Você pode digitar, falar, ou pedir que eu leia as respostas em voz alta.",
+    "welcome_body_long": "Eu sou a Aura, a assistente da Elixio. Li nossa documentação, FAQ e guias de recursos, então pergunte-me qualquer coisa sobre comprar, vender, configurações de conta, acessibilidade ou solução de problemas. Você pode digitar, falar (botão de microfone) ou ativar o modo de voz para que eu leia as respostas em voz alta.",
+    "thinking": "Aura está pensando…",
+    "voice_mode_on": "Modo de voz ativado",
+    "voice_mode_off": "Modo de voz desativado",
+    "voice_mode_description": "Ler respostas em voz alta",
+    "voice_continuous_on": "Sempre ouvindo",
+    "voice_continuous_off": "Pressione para falar",
+    "voice_continuous_description": "Fale sua pergunta, Aura responde em voz alta, repita",
+    "voice_speaking": "Aura está falando…",
+    "voice_listening": "Ouvindo você…",
+    "voice_no_support": "A voz não é compatível com este navegador. Tente Chrome, Edge ou Safari.",
+    "input_hint": "Enter para enviar. Shift+Enter nova linha. 🎤 para voz."
   }
 }
