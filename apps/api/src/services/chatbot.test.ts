@@ -125,7 +125,7 @@ describe("answerQuestion", () => {
     embedTextMock.mockResolvedValueOnce(vec(1.0));
     generateMock.mockResolvedValueOnce({
       text: "Creators keep 90% of each sale.",
-      record: { modelName: "gemini-1.5-flash-8b", tokensIn: 100, tokensOut: 50, costUsd: 0 },
+      record: { modelName: "gemini-2.5-flash", tokensIn: 100, tokensOut: 50, costUsd: 0 },
     });
 
     const result = await answerQuestion({ question: "How much do creators keep?" });

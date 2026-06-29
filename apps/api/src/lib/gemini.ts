@@ -24,11 +24,13 @@ function getClient(): GoogleGenerativeAI {
 }
 
 /**
- * Explicit versioned model name. The alias `gemini-1.5-flash` resolves
- * server-side to `-latest`, which 404s on some API keys (regional SKU
- * availability differences). Pinning to `-001` gives a stable URL.
+ * Current default. Gemini 1.5 models (gemini-1.5-flash, -001, -8b,
+ * -pro) were deprecated in 2025 and 404 on any 2026-era API key.
+ * Gemini 2.5 Flash is the current fast tier — same latency profile
+ * as 1.5 Flash but with better quality and lower cost. Free tier:
+ * 15 RPM / 1500 RPD.
  */
-const DEFAULT_MODEL = "gemini-1.5-flash-001";
+const DEFAULT_MODEL = "gemini-2.5-flash";
 
 export interface GenerateOptions {
   /** Higher = more creative. Default 0.4 (factual listing copy). */
@@ -111,16 +113,20 @@ export async function generate(
 }
 
 /**
- * Embed a batch of texts using Gemini's `text-embedding-004` model.
+ * Embed a batch of texts using Gemini's `gemini-embedding-001` model.
  *
  * Returns one 768-dim vector per input text, in the same order.
  * Used by the chatbot's RAG indexer.
+ *
+ * Note: `text-embedding-004` was deprecated in 2025; the current
+ * model is `gemini-embedding-001`. Same 768-dim output, same
+ * retrieval quality, free-tier limits.
  *
  * Batches input into groups of 100 (the API's per-call limit) and
  * makes concurrent calls. Returns zero-vectors on failure (caller
  * falls back to keyword retrieval).
  */
-const EMBED_MODEL = "text-embedding-004";
+const EMBED_MODEL = "gemini-embedding-001";
 const EMBED_BATCH_SIZE = 100;
 
 export async function embedTexts(texts: string[]): Promise<number[][]> {

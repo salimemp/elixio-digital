@@ -77,7 +77,7 @@ Return a JSON object with exactly these fields:
       kind: "listing_copywriter",
       inputJson: input,
       outputJson: null,
-      record: { modelName: "gemini-1.5-flash-8b", tokensIn: 0, tokensOut: 0, costUsd: 0 },
+      record: { modelName: "gemini-2.5-flash", tokensIn: 0, tokensOut: 0, costUsd: 0 },
       durationMs: Date.now() - startedAt,
       errorMessage: msg,
     });
@@ -187,16 +187,21 @@ Return JSON with:
     const { GoogleGenerativeAI } = await import("@google/generative-ai");
     const { env } = await import("../config/env.js");
     if (!env.GEMINI_API_KEY) throw new Error("GEMINI_API_KEY not set");
-    const model = new GoogleGenerativeAI(env.GEMINI_API_KEY).getGenerativeModel({
-      model: "gemini-1.5-flash", // multimodal — flash-8b is text-only
-      generationConfig: {
-        temperature: 0.5,
-        maxOutputTokens: 2000,
-        responseMimeType: "application/json",
+    const model = new GoogleGenerativeAI(env.GEMINI_API_KEY).getGenerativeModel(
+      {
+        model: "gemini-2.5-flash", // multimodal; supports image inputs
+        generationConfig: {
+          temperature: 0.5,
+          maxOutputTokens: 2000,
+          responseMimeType: "application/json",
+        },
       },
-    });
+      { apiVersion: "v1" }
+    );
     const r = await model.generateContent({
+      // Inline system prompt as first content entry — works on v1 + v1beta.
       contents: [
+        { role: "system", parts: [{ text: systemPrompt }] },
         {
           role: "user",
           parts: [
@@ -205,13 +210,12 @@ Return JSON with:
           ],
         },
       ],
-      systemInstruction: { role: "system", parts: [{ text: systemPrompt }] },
     });
     const response = await r.response;
     result = {
       text: response.text(),
       record: {
-        modelName: "gemini-1.5-flash",
+        modelName: "gemini-2.5-flash",
         tokensIn: response.usageMetadata?.promptTokenCount ?? 0,
         tokensOut: response.usageMetadata?.candidatesTokenCount ?? 0,
         costUsd: 0,
@@ -224,7 +228,7 @@ Return JSON with:
       kind: "asset_critique",
       inputJson: input,
       outputJson: null,
-      record: { modelName: "gemini-1.5-flash", tokensIn: 0, tokensOut: 0, costUsd: 0 },
+      record: { modelName: "gemini-2.5-flash", tokensIn: 0, tokensOut: 0, costUsd: 0 },
       durationMs: Date.now() - startedAt,
       errorMessage: msg,
     });
@@ -337,7 +341,7 @@ Keep insights to 5 or fewer. Keep pricing suggestions to 3 or fewer.`;
       temperature: 0.5,
       maxOutputTokens: 2500,
       jsonMode: true,
-      model: "gemini-1.5-flash", // pro isn't needed for structured analysis
+      model: "gemini-2.5-flash", // structured analysis — flash tier is enough
     });
   } catch (e) {
     const msg = (e as Error).message;
@@ -346,7 +350,7 @@ Keep insights to 5 or fewer. Keep pricing suggestions to 3 or fewer.`;
       kind: "sales_coach",
       inputJson: input,
       outputJson: null,
-      record: { modelName: "gemini-1.5-flash", tokensIn: 0, tokensOut: 0, costUsd: 0 },
+      record: { modelName: "gemini-2.5-flash", tokensIn: 0, tokensOut: 0, costUsd: 0 },
       durationMs: Date.now() - startedAt,
       errorMessage: msg,
     });
