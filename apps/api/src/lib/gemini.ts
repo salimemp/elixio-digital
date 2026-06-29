@@ -23,7 +23,7 @@ function getClient(): GoogleGenerativeAI {
   return client;
 }
 
-const DEFAULT_MODEL = "gemini-1.5-flash-8b";
+const DEFAULT_MODEL = "gemini-1.5-flash";
 
 export interface GenerateOptions {
   /** Higher = more creative. Default 0.4 (factual listing copy). */
