@@ -18,6 +18,7 @@ import { creatorAnalyticsRoutes } from "./routes/creator-analytics.js";
 import { creatorAIRoutes } from "./routes/creator-ai.js";
 import { creatorToolsRoutes } from "./routes/creator-tools.js";
 import { bulkOpsRoutes } from "./routes/creator-bulk.js";
+import { assetFileRoutes } from "./routes/asset-files.js";
 import { chatRoutes } from "./routes/chat.js";
 import { downloadRoutes } from "./routes/downloads.js";
 import { taxRoutes } from "./routes/tax.js";
@@ -134,6 +135,13 @@ export async function buildApp(): Promise<FastifyInstance> {
     // Buyer-only routes — purchase, downloads, library. Each gated by
     // app.requireBuyer (DB re-check, not just JWT flag).
     await api.register(downloadRoutes, { prefix: "/downloads" });
+
+    // Asset file upload + management. Creator-only (requireCreator).
+    // Mounted at /asset-files/* so it doesn't conflict with the
+    // public asset CRUD at /assets/:id (both share an /assets
+    // prefix in the routes file, but Fastify routes by exact path
+    // match — using a different top-level prefix avoids ambiguity).
+    await api.register(assetFileRoutes, { prefix: "/asset-files" });
 
     // Tax routes — public calculate/list, admin-only re-seed
     await api.register(taxRoutes, { prefix: "/tax" });

@@ -2,16 +2,28 @@ import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { recordAssetDownload } from "../services/analytics.js";
+import {
+  generateDownloadUrl,
+  StorageNotConfiguredError,
+  withStorageErrors,
+} from "../services/storage.js";
 
 /**
  * Buyer-facing download routes. Buyer-only (requireBuyer). Every
  * download attempt records an AssetDownload row so creators see
  * download counts in their analytics dashboard.
  *
- * File streaming: when R2/S3 is wired up, the redirect target
- * becomes a presigned URL. For now (Phase 1, no R2 yet) we return
- * a 501 with the storageKey so the client knows the file is on
- * the way.
+ * Flow:
+ *   1. Verify buyer has a valid DownloadGrant for this asset
+ *   2. Find the latest AssetFile
+ *   3. Generate a presigned GET URL to R2 (5-minute expiry)
+ *   4. Return the URL to the client, who downloads directly
+ *      from Cloudflare (zero egress on our side)
+ *
+ * If R2 is not configured, returns a metadata-only stub with
+ * `downloadUrl: null` so the client knows the file isn't ready
+ * yet (asset exists but no file uploaded). The frontend can show
+ * "Coming soon" in that case.
  */
 export async function downloadRoutes(app: FastifyInstance): Promise<void> {
   /**
@@ -108,7 +120,35 @@ export async function downloadRoutes(app: FastifyInstance): Promise<void> {
         return;
       }
 
-      // Phase 1: return the storage key as a placeholder. Phase 2: R2 presigned URL.
+      // Phase 2: R2 is wired up. Generate a presigned GET URL with a
+      // 5-minute expiry. The client downloads directly from Cloudflare
+      // (zero egress cost on our side).
+      let downloadUrl: string | null = null;
+      let downloadExpiresAt: string | null = null;
+      let storageError: string | null = null;
+
+      try {
+        const presigned = await withStorageErrors(() =>
+          generateDownloadUrl({
+            key: file.storageKey,
+            expiresInSeconds: 300,
+            filename: file.filename,
+          }),
+        );
+        downloadUrl = presigned.url;
+        downloadExpiresAt = presigned.expiresAt.toISOString();
+      } catch (e) {
+        if (e instanceof StorageNotConfiguredError) {
+          // Storage not configured — return the file metadata so the
+          // client can at least show "coming soon". Don't 503 because
+          // the asset + grant are valid; just the storage backend is
+          // not yet wired up.
+          storageError = "STORAGE_NOT_CONFIGURED";
+        } else {
+          throw e;
+        }
+      }
+
       reply.send({
         ok: true,
         grantId: grant.id,
@@ -119,8 +159,9 @@ export async function downloadRoutes(app: FastifyInstance): Promise<void> {
           mimeType: file.mimeType,
           sizeBytes: file.sizeBytes,
           storageKey: file.storageKey,
-          // downloadUrl will become a presigned URL once R2 ships
-          downloadUrl: null,
+          downloadUrl,
+          downloadExpiresAt,
+          storageStatus: storageError ?? "READY",
         },
       });
     }

@@ -36,6 +36,32 @@ const envSchema = z.object({
 
   // Gemini — creator AI (listing copywriter, asset critique, sales coach)
   GEMINI_API_KEY: z.string().default(""),
+
+  // Cloudflare R2 (S3-compatible object storage for asset files +
+  // media). Free egress is the big cost win vs S3. Leave all four
+  // blank in dev — the storage service degrades gracefully to a
+  // placeholder mode where uploads return 503 and downloads return
+  // a metadata-only stub.
+  //
+  // Set these in Railway dashboard when wiring real storage:
+  //   CLOUDFLARE_R2_ACCOUNT_ID     — from R2 dashboard sidebar
+  //   CLOUDFLARE_R2_ACCESS_KEY_ID  — from API token
+  //   CLOUDFLARE_R2_SECRET_ACCESS_KEY
+  //   CLOUDFLARE_R2_BUCKET         — e.g. "elixio-assets-prod"
+  //   CLOUDFLARE_R2_PUBLIC_URL     — optional custom CDN domain
+  //                                  (e.g. assets.elixiodigital.com);
+  //                                  when set, public files use this URL
+  //                                  instead of the r2.cloudflarestorage.com
+  //                                  endpoint.
+  CLOUDFLARE_R2_ACCOUNT_ID: z.string().default(""),
+  CLOUDFLARE_R2_ACCESS_KEY_ID: z.string().default(""),
+  CLOUDFLARE_R2_SECRET_ACCESS_KEY: z.string().default(""),
+  CLOUDFLARE_R2_BUCKET: z.string().default(""),
+  CLOUDFLARE_R2_PUBLIC_URL: z
+    .string()
+    .default("")
+    .transform((s) => (s.trim() === "" ? "" : s))
+    .pipe(z.string().url().or(z.literal(""))),
 });
 
 export const env = envSchema.parse(process.env);

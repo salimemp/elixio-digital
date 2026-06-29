@@ -1,0 +1,228 @@
+# Cloudflare R2 Storage Setup
+
+Elixio uses Cloudflare R2 (S3-compatible object storage) for all asset
+files (the actual downloadable products) and media (thumbnails, previews).
+R2 is chosen over AWS S3 for one big reason: **zero egress fees**. Every
+buyer download is served directly from Cloudflare's edge — we pay $0 for
+bandwidth, regardless of size or geographic location.
+
+## Why R2, not S3
+
+| | S3 | R2 |
+|---|---|---|
+| Storage | $0.023/GB/mo | $0.015/GB/mo |
+| Egress | $0.09/GB | **Free** |
+| API | AWS S3 | S3-compatible |
+| API clients | aws-sdk | aws-sdk (same) |
+
+For a marketplace that serves 10GB downloads to 1,000 buyers = 10TB
+egress → $900 on S3 vs **$0 on R2**. At Elixio's scale (127 tax
+regions, 42 locales, global customer base), this is the single biggest
+cost win in the architecture.
+
+## Setup steps
+
+### 1. Create a Cloudflare account
+
+If you don't have one: https://dash.cloudflare.com/sign-up
+
+### 2. Create an R2 bucket
+
+1. Go to **R2 Object Storage** → **Create bucket**
+2. Bucket name: `elixio-assets-prod` (or `elixio-assets-staging` for staging)
+3. Location: **Automatic** (Cloudflare picks the cheapest)
+4. Default storage class: **Standard**
+5. Click **Create bucket**
+
+### 3. Create an API token
+
+1. R2 → **Manage R2 API Tokens** → **Create API token**
+2. Token name: `elixio-api-prod`
+3. Permissions: **Object Read & Write** (scoped to your bucket only)
+4. Specify bucket: `elixio-assets-prod`
+5. TTL: leave blank (no expiry; rotate manually)
+6. Click **Create API Token**
+7. **Copy the Access Key ID and Secret Access Key** — the secret is
+   only shown once
+
+### 4. Get your Account ID
+
+1. R2 → sidebar → **Account Details**
+2. Copy the **Account ID** (a 32-char hex string)
+
+### 5. (Optional) Configure a custom CDN domain
+
+For better caching and to avoid the `r2.cloudflarestorage.com` URL in
+user-facing links:
+
+1. R2 → your bucket → **Settings** → **Public access**
+2. Click **Custom Domains** → **Connect Domain**
+3. Enter your domain (e.g. `assets.elixiodigital.com`)
+4. Add the CNAME record Cloudflare shows you
+5. **Enable R2.dev** if you want the bucket publicly accessible (free
+   hosting for static assets — not needed if you use presigned URLs for
+   everything, which we do)
+
+### 6. Set the env vars in Railway
+
+In the Railway dashboard for your API service:
+
+| Variable | Example | Description |
+|---|---|---|
+| `CLOUDFLARE_R2_ACCOUNT_ID` | `a1b2c3d4e5f6...` | From step 4 |
+| `CLOUDFLARE_R2_ACCESS_KEY_ID` | `abc123...` | From step 3 |
+| `CLOUDFLARE_R2_SECRET_ACCESS_KEY` | `xyz789...` | From step 3 (only shown once!) |
+| `CLOUDFLARE_R2_BUCKET` | `elixio-assets-prod` | From step 2 |
+| `CLOUDFLARE_R2_PUBLIC_URL` | `https://assets.elixiodigital.com` | From step 5 (optional) |
+
+The deploy will pick up the new vars on next restart. No code changes
+needed.
+
+### 7. Verify
+
+Hit the health endpoint:
+```bash
+curl https://api.elixiodigital.com/v1/asset-files/storage-status
+```
+
+Expected response:
+```json
+{
+  "configured": true,
+  "bucket": "elixio-assets-prod",
+  "endpoint": "https://a1b2c3d4e5f6.r2.cloudflarestorage.com",
+  "hasPublicUrl": true
+}
+```
+
+If `configured: false`, check the Railway env vars and redeploy.
+
+## API contract
+
+The storage service is a thin wrapper over the AWS SDK v3 S3 client.
+We use it in three modes:
+
+### 1. Presigned PUT (creator uploads directly to R2)
+
+The browser PUTs the file bytes directly to R2. Our server only
+generates a short-lived signed URL — the file never touches our
+servers. This saves bandwidth, CPU, and time.
+
+```
+POST /v1/asset-files/:assetId/upload-init
+Body: { filename, mimeType, sizeBytes }
+→ { uploadUrl, storageKey, expiresAt, version }
+
+[Client PUTs file bytes to uploadUrl]
+
+POST /v1/asset-files/:assetId/upload-finalize
+Body: { storageKey, version? }
+→ { file: { id, filename, sizeBytes, ... } }
+```
+
+The server verifies the object actually exists in R2 before writing
+the `AssetFile` row. Catches the case where the PUT failed silently.
+
+### 2. Presigned GET (buyer downloads directly from R2)
+
+```
+GET /v1/downloads/:assetId
+→ {
+    file: {
+      downloadUrl: "https://elixio-assets-prod.r2.cloudflarestorage.com/...?X-Amz-Signature=...",
+      downloadExpiresAt: "...",
+      ...
+    }
+  }
+```
+
+The buyer's browser downloads directly from Cloudflare's edge. Our
+server only validates the purchase grant and generates the URL.
+
+### 3. Server-side (thumbnails, PDF previews)
+
+For operations that need to read or write bytes locally (e.g. the PDF
+→ images pipeline in `/creator/tools/pdf-to-images`), we use the
+`uploadBuffer()` and `deleteObject()` helpers directly.
+
+## Storage key convention
+
+```
+assets/{assetId}/v{version}/{filename}     — the actual file
+media/{assetId}/{kind}/{filename}          — thumbnails, previews
+temp/{userId}/{uuid}/{filename}            — incomplete uploads
+```
+
+Keys are generated by `buildAssetKey()`, `buildMediaKey()`, and
+`buildTempKey()` in the storage service. The client only ever sees the
+presigned URL — it doesn't know or care about the key.
+
+When an asset is re-uploaded (new version), the new file gets
+`assets/{id}/v{next}/filename` and the old file is kept (creators
+can roll back to a previous version). To delete an old version
+permanently, call `DELETE /v1/asset-files/:id/files/:fileId` — this
+removes both the R2 object and the DB row.
+
+## Security
+
+- All uploads are authenticated (creator role required)
+- All downloads are authenticated (buyer + valid purchase grant required)
+- File ownership is verified server-side (the `storageKey` must start
+  with `assets/{assetId}/` for the asset the creator owns)
+- MIME types are validated against an allow-list at upload-init
+- Blocked types: `.exe`, `.sh`, Flash, JavaScript files (would execute
+  in the browser)
+- Filenames are sanitized (control chars + path traversal removed)
+- Signed URLs expire in 1 hour (upload) or 5 minutes (download)
+
+## Cost estimate
+
+Storage (Standard class):
+- 1 TB stored = $15/mo
+- 10 TB stored = $150/mo
+- 100 TB stored = $1,500/mo
+
+Operations (free for first 10M Class A + 1B Class B per month):
+- Class A (PUT, POST, LIST): $4.50 / million
+- Class B (GET, HEAD): $0.36 / million
+
+Egress: **free, always**.
+
+## Rotation
+
+If you suspect the API token is compromised:
+1. Go to R2 → **Manage R2 API Tokens**
+2. Click the token → **Rotate** (or **Delete** + create a new one)
+3. Update the `CLOUDFLARE_R2_ACCESS_KEY_ID` and
+   `CLOUDFLARE_R2_SECRET_ACCESS_KEY` env vars in Railway
+4. Redeploy
+
+Active presigned URLs in flight will fail with `AccessDenied` — users
+just refresh the page. No data loss.
+
+## Troubleshooting
+
+**"STORAGE_NOT_CONFIGURED" in API responses**
+- Check Railway env vars are set
+- Check the deploy picked them up (check Railway logs)
+- Hit `/v1/asset-files/storage-status` to verify the service sees them
+
+**"AccessDenied" on upload/download**
+- API token doesn't have the right permissions
+- Token expired (set TTL on token creation)
+- Bucket name in env var doesn't match the actual bucket
+
+**"SignatureDoesNotMatch"**
+- Secret access key typo
+- Cloudflare rotated the secret (rare, but happens)
+- Solution: re-issue the token and update env var
+
+**Upload succeeds but finalize says "UPLOAD_NOT_FOUND"**
+- Browser took longer than the 1-hour expiry to PUT the file
+- Network error during PUT
+- Solution: client retries with a fresh presigned URL
+
+**Files upload but download fails with 404**
+- Wrong bucket name in env var
+- Object was deleted manually in R2 dashboard
+- Lifecycle rule expired the object (set these carefully)
