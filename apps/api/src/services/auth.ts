@@ -288,9 +288,9 @@ export async function login(
     throw httpError("Account temporarily locked. Try again later.", 429, "TOO_MANY_REQUESTS");
   }
   const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) {
+  if (!user || !user.passwordHash) {
     const geo = ip ? await lookupGeo(ip) : null;
-    await recordLoginAttempt(email, null, ip, ua, false, "password", "user_not_found", geo);
+    await recordLoginAttempt(email, user?.id ?? null, ip, ua, false, "password", user?.deletedAt ? "account_deleted" : "user_not_found", geo);
     throw httpError("Invalid credentials", 401, "UNAUTHORIZED");
   }
   const valid = await bcrypt.compare(input.password, user.passwordHash);
@@ -414,7 +414,7 @@ export async function changePassword(
   input: { currentPassword: string; newPassword: string }
 ): Promise<void> {
   const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) throw httpError("User not found", 404, "NOT_FOUND");
+  if (!user || !user.passwordHash) throw httpError("User not found", 404, "NOT_FOUND");
   const valid = await bcrypt.compare(input.currentPassword, user.passwordHash);
   if (!valid) throw httpError("Invalid credentials", 401, "UNAUTHORIZED");
   const passwordHash = await bcrypt.hash(input.newPassword, SALT_ROUNDS);
@@ -642,7 +642,7 @@ export async function disableMfa(
   password: string
 ): Promise<void> {
   const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) throw httpError("User not found", 404, "NOT_FOUND");
+  if (!user || !user.passwordHash) throw httpError("User not found", 404, "NOT_FOUND");
   if (!(await bcrypt.compare(password, user.passwordHash))) {
     throw httpError("Invalid credentials", 401, "UNAUTHORIZED");
   }
@@ -658,7 +658,7 @@ export async function regenerateBackupCodes(
   password: string
 ): Promise<{ backupCodes: string[] }> {
   const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) throw httpError("User not found", 404, "NOT_FOUND");
+  if (!user || !user.passwordHash) throw httpError("User not found", 404, "NOT_FOUND");
   if (!(await bcrypt.compare(password, user.passwordHash))) {
     throw httpError("Invalid credentials", 401, "UNAUTHORIZED");
   }

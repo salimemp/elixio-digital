@@ -10,6 +10,9 @@ interface AuthUser {
   emailVerified: boolean;
   mfaEnabled: boolean;
   isAdmin: boolean;
+  isCreator: boolean;
+  bio?: string | null;
+  avatarUrl?: string | null;
 }
 
 interface AuthSession {

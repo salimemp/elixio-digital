@@ -65,6 +65,21 @@ export async function registerAuth(
         await request.jwtVerify();
       } catch (err) {
         reply.send(err as Error);
+        return;
+      }
+      // Reject tokens for soft-deleted users. The token may still be
+      // cryptographically valid, but the user has exercised their right
+      // to be forgotten (GDPR Art. 17 / CCPA Right to Delete).
+      if (request.user?.userId) {
+        const u = await prisma.user.findUnique({
+          where: { id: request.user.userId },
+          select: { deletedAt: true },
+        });
+        if (!u || u.deletedAt) {
+          reply.status(401).send({
+            error: { code: "ACCOUNT_DELETED", message: "This account has been deleted" },
+          });
+        }
       }
     }
   );

@@ -58,7 +58,7 @@ enum MfaFactorType {
 model User {
   id           String   @id @default(uuid()) @db.Uuid
   email        String   @unique
-  passwordHash String
+  passwordHash String?  // null after soft-delete (password-auth no longer valid)
   role         UserRole
   displayName  String
   avatarUrl    String?
@@ -71,6 +71,8 @@ model User {
   mfaEnrolledAt     DateTime?
   lastMfaVerifiedAt DateTime?
   lockedUntil       DateTime?
+  deletedAt    DateTime?  // soft-delete tombstone (GDPR Art. 17 + CCPA)
+  scheduledHardDeleteAt DateTime?  // +30 days from deletedAt
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

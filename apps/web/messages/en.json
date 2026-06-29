@@ -15,7 +15,15 @@
     "tagline": "Sell your digital work without the headaches.",
     "loading": "Loading…",
     "save": "Save",
+    "saving": "Saving…",
     "cancel": "Cancel",
+    "delete": "Delete",
+    "deleting": "Deleting…",
+    "change": "Change",
+    "manage": "Manage",
+    "view": "View",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
     "submit": "Submit",
     "continue": "Continue",
     "back": "Back",
@@ -34,7 +42,6 @@
     "open": "Open",
     "download": "Download",
     "upload": "Upload",
-    "delete": "Delete",
     "edit": "Edit",
     "create": "Create",
     "publish": "Publish",
@@ -69,6 +76,8 @@
     "dashboard": "Dashboard",
     "start_selling": "Start Selling",
     "sign_in": "Sign in",
+    "sign_out": "Sign out",
+    "profile": "Profile",
     "get_started": "Get Started",
     "buyer_tag": "Buyer",
     "creator_tag": "Creator"
@@ -278,6 +287,191 @@
     "validation": "Please check the form for errors",
     "network": "Network error. Please try again.",
     "rate_limited": "Too many requests. Please slow down."
+  },
+  "profile": {
+    "nav": {
+      "overview": "Overview",
+      "account": "Account",
+      "security": "Security",
+      "notifications": "Notifications",
+      "privacy": "Privacy & data",
+      "delete": "Delete account"
+    },
+    "overview": {
+      "title": "Your profile",
+      "subtitle": "Manage how you appear across Elixio and what data you share."
+    },
+    "avatar": {
+      "title": "Avatar & display",
+      "subtitle": "Your avatar appears on your storefront, profile, and any assets you sell.",
+      "help": "Paste a URL to an image you'd like to use, or leave blank to use your initials.",
+      "url_label": "Avatar image URL",
+      "edit": "Edit account"
+    },
+    "public_profile": "Your public profile URL",
+    "og_preview": "Social share preview",
+    "creator_badge": "Creator",
+    "buyer_badge": "Buyer",
+    "stats": {
+      "title": "Account overview",
+      "subtitle": "Quick stats about your account.",
+      "member_since": "Member since",
+      "role": "Role",
+      "mfa": "Two-factor auth",
+      "locale": "Browser locale"
+    },
+    "role": {
+      "creator": "Creator",
+      "buyer": "Buyer"
+    },
+    "quick_links": {
+      "title": "Quick links",
+      "subtitle": "Jump to the section you need.",
+      "security_desc": "Password, MFA, sessions, OAuth accounts.",
+      "privacy_desc": "Data export, cookie consent, sale opt-out.",
+      "notifications_desc": "Pick which emails you receive.",
+      "account_desc": "Update your display name, bio, and avatar."
+    },
+    "account": {
+      "title": "Account",
+      "subtitle": "Edit your display name, bio, and avatar.",
+      "display_name": "Display name",
+      "bio": "Bio",
+      "bio_help": "A short description that shows on your public profile and storefront.",
+      "bio_placeholder": "Tell people a little about yourself…",
+      "email": "Email",
+      "email_help": "Email changes require a separate verification flow.",
+      "email_change_soon": "Email change coming soon",
+      "saved": "Saved."
+    },
+    "security": {
+      "title": "Security",
+      "subtitle": "Password, two-factor authentication, passkeys, OAuth, and active sessions.",
+      "password": {
+        "title": "Password",
+        "subtitle": "Set or change your account password.",
+        "change": "Change password"
+      },
+      "mfa": {
+        "title": "Two-factor authentication",
+        "subtitle": "Add an extra factor to your login.",
+        "enabled_help": "Your account is protected with two-factor authentication.",
+        "disabled_help": "Enable two-factor authentication to protect your account."
+      },
+      "passkeys": {
+        "title": "Passkeys",
+        "subtitle": "Sign in with a fingerprint, face, or hardware key."
+      },
+      "oauth": {
+        "title": "Connected accounts",
+        "subtitle": "Sign in faster with Google or GitHub."
+      },
+      "sessions": {
+        "title": "Active sessions",
+        "subtitle": "Devices currently signed in to your account."
+      },
+      "activity": {
+        "title": "Recent activity",
+        "subtitle": "Logins, downloads, and account changes."
+      }
+    },
+    "notifications": {
+      "title": "Notifications",
+      "subtitle": "Pick which emails you want from us.",
+      "email": {
+        "title": "Email",
+        "orders": "Order receipts",
+        "orders_help": "Required — confirms your purchases and tax receipts.",
+        "security": "Security alerts",
+        "security_help": "Required — alerts for new logins, password changes, MFA events.",
+        "product": "Product updates",
+        "product_help": "New features, improvements, and occasional tips.",
+        "marketing": "Marketing",
+        "marketing_help": "Promotions, seasonal campaigns, and partner offers.",
+        "creator": "Creator activity",
+        "creator_help": "Reviews, follows, sales, payout updates."
+      },
+      "push": {
+        "title": "Push notifications",
+        "subtitle": "Mobile and desktop push.",
+        "mobile_only": "Coming to mobile soon",
+        "mobile_only_help": "Push notifications will be available in the Elixio mobile app. Add your email to the list above for now."
+      }
+    },
+    "privacy": {
+      "title": "Privacy & data",
+      "subtitle": "Export your data, manage cookies, and exercise your rights.",
+      "export": {
+        "title": "Export your data",
+        "subtitle": "Download a JSON archive of everything we hold on you.",
+        "help": "We email a download link to your registered address. The link expires in 24 hours.",
+        "includes": {
+          "profile": "Profile, bio, avatar, account settings",
+          "orders": "Order history, receipts, tax line items",
+          "downloads": "Asset download history",
+          "ai_history": "AI tool prompts and outputs",
+          "activity_log": "Recent login + security events"
+        },
+        "request": "Request my data",
+        "requesting": "Requesting…",
+        "requested": "Check your inbox. Your data export will arrive within a few minutes."
+      },
+      "cookies": {
+        "title": "Cookie consent",
+        "subtitle": "Manage which cookies Elixio can store.",
+        "necessary": "Essential",
+        "necessary_help": "Required for authentication, security, and your locale preference. Always on.",
+        "analytics": "Analytics",
+        "analytics_help": "Anonymous usage data — helps us improve the product. Off by default.",
+        "marketing": "Marketing",
+        "marketing_help": "Personalized content and ad measurement. Off by default."
+      },
+      "sale": {
+        "title": "Sale of personal information",
+        "subtitle": "California Consumer Privacy Act (CCPA) Right to Opt-Out.",
+        "not_sold": "We do not sell your personal information.",
+        "not_sold_help": "Elixio Digital has never sold, rented, or shared personal information with third-party advertisers. This applies to all users regardless of locale."
+      },
+      "policies": {
+        "title": "Policies"
+      }
+    },
+    "delete": {
+      "title": "Delete your account",
+      "subtitle": "Permanently remove your account and personal information.",
+      "warning_title": "This action is irreversible",
+      "warning_body": "Once deleted, your account cannot be recovered. Make sure you've exported any data you want to keep first.",
+      "what_gets_deleted": "What gets deleted",
+      "deletes": {
+        "profile": "Profile, display name, avatar, bio",
+        "bio": "Bio and any custom fields",
+        "avatar": "Avatar image",
+        "mfa": "Two-factor authentication factors",
+        "passkeys": "Passkeys",
+        "tokens": "Active sessions and refresh tokens",
+        "notifications": "Notification preferences"
+      },
+      "whats_preserved": "What we keep (anonymized)",
+      "whats_preserved_help": "We retain a minimal, anonymized record of past transactions to meet tax, accounting, and fraud-prevention obligations.",
+      "preserves": {
+        "transactions": "Order IDs + totals (no personal info)",
+        "tax": "Tax records required for 7-year retention",
+        "abuse_records": "Anti-fraud / abuse signals"
+      },
+      "preserves_legal_basis": "Legal basis: tax law (US, EU, India, Brazil), financial recordkeeping (SOX-equivalent), fraud prevention.",
+      "reason_label": "Reason (optional)",
+      "reason_help": "Helps us improve. Never shared publicly.",
+      "reason_placeholder": "Why are you leaving?",
+      "password_confirm": "Confirm with your password",
+      "password_confirm_help": "Enter your password to confirm deletion.",
+      "password_placeholder": "Your current password",
+      "type_delete": "Type DELETE to confirm",
+      "type_delete_help": "Type the literal word DELETE in capitals.",
+      "type_delete_matched": "Confirmed.",
+      "type_delete_not_matched": "Type DELETE exactly.",
+      "submit": "Delete my account",
+      "requested": "Account scheduled for deletion. You'll be signed out in a moment."
+    }
   },
   "footer": {
     "tagline": "The marketplace where creators and buyers meet without the platform tax headaches.",

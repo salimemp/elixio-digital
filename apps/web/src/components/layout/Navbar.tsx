@@ -4,18 +4,24 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useI18n } from "@/lib/i18n-client";
+import { useAuth } from "@/lib/auth";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { ThemeSwitcher } from "./ThemeSwitcher";
+import { Avatar } from "@/components/profile/Avatar";
 
 /**
  * Top navbar with a "Get Started" dropdown that lets the visitor pick
  * Buyer or Creator signup directly. All labels are pulled from the
  * i18n runtime so the navbar fully translates with the locale.
  *
- * Includes a LanguageSwitcher for 42-locale support.
+ * Includes a LanguageSwitcher for 42-locale support. When the user is
+ * signed in, the "Sign in" + "Get started" pair is replaced with a
+ * profile avatar + dropdown pointing at /profile.
  */
 export function Navbar() {
   const { t } = useI18n();
+  const { user } = useAuth();
+
   return (
     <header className="sticky top-0 z-50 border-b-2 border-gum-black bg-gum-cream">
       <nav className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-3">
@@ -62,16 +68,132 @@ export function Navbar() {
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
           <ThemeSwitcher />
-          <Link
-            href="/auth/login"
-            className="rounded-full border-2 border-gum-black px-4 py-2 text-sm font-semibold ink-default hover:bg-gum-mint"
-          >
-            {t("nav.sign_in")}
-          </Link>
-          <SignupDropdown />
+          {user ? (
+            <ProfileMenu />
+          ) : (
+            <>
+              <Link
+                href="/auth/login"
+                className="rounded-full border-2 border-gum-black px-4 py-2 text-sm font-semibold ink-default hover:bg-gum-mint"
+              >
+                {t("nav.sign_in")}
+              </Link>
+              <SignupDropdown />
+            </>
+          )}
         </div>
       </nav>
     </header>
+  );
+}
+
+/**
+ * Avatar + dropdown for signed-in users. Goes to /profile on click;
+ * dropdown offers quick navigation to dashboard/library.
+ */
+function ProfileMenu() {
+  const { user, signOut } = useAuth();
+  const { t } = useI18n();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  if (!user) return null;
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-label={t("nav.profile")}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className="rounded-full border-2 border-gum-black transition-transform hover:-translate-y-0.5"
+      >
+        <Avatar name={user.displayName} url={user.avatarUrl} size={36} />
+      </button>
+
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-2xl border-2 border-gum-black bg-gum-cream p-2 shadow-[0_6px_0_0_#111]"
+        >
+          <div className="border-b border-gum-black/10 px-3 py-2">
+            <p className="truncate text-sm font-extrabold ink-default">{user.displayName}</p>
+            <p className="truncate text-xs ink-muted">{user.email}</p>
+          </div>
+
+          <Link
+            href="/profile"
+            role="menuitem"
+            className="mt-2 block rounded-xl px-3 py-2 text-sm font-semibold ink-default hover:bg-gum-mint"
+          >
+            {t("nav.profile")}
+          </Link>
+          <Link
+            href="/profile/account"
+            role="menuitem"
+            className="block rounded-xl px-3 py-2 text-sm font-semibold ink-default hover:bg-gum-mint"
+          >
+            {t("profile.nav.account")}
+          </Link>
+          <Link
+            href="/profile/security"
+            role="menuitem"
+            className="block rounded-xl px-3 py-2 text-sm font-semibold ink-default hover:bg-gum-mint"
+          >
+            {t("profile.nav.security")}
+          </Link>
+          <Link
+            href="/library"
+            role="menuitem"
+            className="block rounded-xl px-3 py-2 text-sm font-semibold ink-default hover:bg-gum-mint"
+          >
+            {t("nav.library")}
+          </Link>
+          {user.isCreator && (
+            <Link
+              href="/dashboard"
+              role="menuitem"
+              className="block rounded-xl px-3 py-2 text-sm font-semibold ink-default hover:bg-gum-mint"
+            >
+              {t("nav.dashboard")}
+            </Link>
+          )}
+
+          <hr className="my-2 border-t-2 border-gum-black/10" />
+          <button
+            type="button"
+            role="menuitem"
+            onClick={async () => {
+              setOpen(false);
+              await signOut();
+              window.location.href = "/";
+            }}
+            className="block w-full rounded-xl px-3 py-2 text-left text-sm font-semibold text-red-700 hover:bg-red-50"
+          >
+            {t("nav.sign_out")}
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
