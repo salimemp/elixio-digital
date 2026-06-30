@@ -128,7 +128,33 @@ export default function BlogPostPage({
         <div
           // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: sanitizeBlogHtml(post.html) }}
-          className="prose prose-lg max-w-none prose-headings:font-extrabold prose-h2:mt-10 prose-h2:text-3xl prose-h3:mt-8 prose-h3:text-2xl prose-a:text-gum-purple prose-a:underline prose-strong:font-bold prose-ul:my-4 prose-li:my-1"
+          className="prose prose-lg max-w-none
+            prose-headings:font-extrabold prose-headings:text-ink-default
+            prose-h1:text-4xl prose-h1:mt-12 prose-h1:mb-4
+            prose-h2:mt-12 prose-h2:mb-4 prose-h2:text-3xl prose-h2:border-b-2 prose-h2:border-gum-black prose-h2:pb-2
+            prose-h3:mt-8 prose-h3:mb-3 prose-h3:text-2xl
+            prose-h4:mt-6 prose-h4:mb-2 prose-h4:text-xl
+            prose-p:my-4 prose-p:leading-relaxed prose-p:text-ink-default
+            prose-a:text-gum-purple prose-a:font-semibold prose-a:no-underline hover:prose-a:underline
+            prose-strong:font-bold prose-strong:text-ink-default
+            prose-ul:my-4 prose-ul:list-disc prose-li:my-1 prose-li:text-ink-default
+            prose-ol:my-4 prose-ol:list-decimal prose-li:my-1
+            prose-blockquote:border-l-4 prose-blockquote:border-gum-purple prose-blockquote:bg-gum-cream/30 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:my-6 prose-blockquote:not-italic prose-blockquote:text-ink-default
+            prose-code:bg-surface-muted prose-code:text-gum-purple prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-mono prose-code:text-[0.9em] prose-code:before:content-none prose-code:after:content-none
+            prose-pre:bg-ink-default prose-pre:text-gum-cream prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto
+            prose-img:rounded-xl prose-img:shadow-gum prose-img:my-8 prose-img:mx-auto
+            prose-figure:my-8
+            prose-figcaption:text-center prose-figcaption:text-sm prose-figcaption:ink-muted prose-figcaption:mt-2
+            prose-table:w-full prose-table:my-8 prose-table:border-collapse
+            prose-thead:bg-gum-cream prose-thead:text-left
+            prose-th:border-2 prose-th:border-gum-black prose-th:px-4 prose-th:py-3 prose-th:font-extrabold
+            prose-td:border-2 prose-td:border-gum-black prose-td:px-4 prose-td:py-3
+            prose-tr:border-2 prose-tr:border-gum-black
+            prose-hr:border-gum-black prose-hr:my-10
+            prose-lead:text-xl prose-lead:text-ink-muted
+            dark:prose-invert dark:prose-headings:text-ink-dark-DEFAULT
+            dark:prose-p:text-ink-dark-DEFAULT dark:prose-li:text-ink-dark-DEFAULT
+            dark:prose-strong:text-ink-dark-DEFAULT dark:prose-a:text-gum-yellow"
         />
       </article>
 

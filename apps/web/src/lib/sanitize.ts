@@ -1,21 +1,30 @@
 /**
- * HTML sanitization for user-generated content (blog posts, comments, etc.).
+ * HTML sanitization for blog post HTML.
  *
- * Why isomorphic-dompurify? It runs both server-side (Node) and client-side
- * (browser) with the same API. We use it to sanitize HTML returned by
- * HarborSEO before rendering with dangerouslySetInnerHTML.
+ * Previously used `isomorphic-dompurify`, which pulls in `jsdom` on
+ * the server. jsdom → html-encoding-sniffer → @exodus/bytes has an
+ * ESM/CJS interop bug on Vercel's Node 24 serverless runtime:
+ *
+ *   Error [ERR_REQUIRE_ESM]: require() of ES Module
+ *     @exodus/bytes/encoding-lite.js from html-encoding-sniffer
+ *     not supported.
+ *
+ * `sanitize-html` is pure CJS (no jsdom), battle-tested, smaller
+ * (~80KB vs ~5MB), and works on every Node version. The API is
+ * slightly different — see config object below.
  *
  * Allowed tags are limited to what's safe for a blog post: headings,
- * paragraphs, lists, links, images, code, blockquotes, basic formatting.
- * Anything else (scripts, iframes, event handlers, style tags) is stripped.
+ * paragraphs, lists, links, images, code, blockquotes, tables,
+ * basic formatting. Anything else (scripts, iframes, event handlers,
+ * style tags) is stripped.
  *
  * Defense in depth:
  *   1. Sanitize HTML on render (this file)
- *   2. Content-Security-Policy header (helmet)
+ *   2. Content-Security-Policy header (helmet on the API)
  *   3. SameSite cookies, HttpOnly auth tokens
  */
 
-import DOMPurify from "isomorphic-dompurify";
+import sanitizeHtmlLib from "sanitize-html";
 
 const ALLOWED_TAGS = [
   "h1", "h2", "h3", "h4", "h5", "h6",
@@ -23,15 +32,52 @@ const ALLOWED_TAGS = [
   "ul", "ol", "li",
   "strong", "em", "b", "i", "u", "s", "sub", "sup", "mark", "code", "pre",
   "a", "img",
-  "table", "thead", "tbody", "tr", "th", "td",
+  "figure", "figcaption",
+  "table", "thead", "tbody", "tfoot", "tr", "th", "td", "caption", "col", "colgroup",
+  "span", "div",
 ];
 
-const ALLOWED_ATTR = [
-  "href", "title", "alt", "src", "srcset", "sizes", "width", "height",
-  "loading", "decoding",
-  // Only allow rel on links (we force-set rel="noopener noreferrer" below)
-  "rel",
-];
+const SANITIZE_OPTIONS: sanitizeHtmlLib.IOptions = {
+  allowedTags: ALLOWED_TAGS,
+  allowedAttributes: {
+    a: ["href", "title", "rel", "target"],
+    img: ["src", "alt", "title", "width", "height", "loading", "decoding"],
+    table: ["style"],
+    th: ["style", "scope", "colspan", "rowspan"],
+    td: ["style", "colspan", "rowspan"],
+    "*": ["class", "id"],
+  },
+  // Only allow http(s), mailto, plus relative URLs (start with / or #)
+  allowedSchemes: ["http", "https", "mailto"],
+  allowedSchemesByTag: {
+    img: ["http", "https", "data"],
+  },
+  // Only allow safe data: URIs (images only). Block base64 HTML/SVG.
+  allowedSchemesAppliedToAttributes: ["src", "href"],
+  allowProtocolRelative: false,
+  // Disallow all iframes / scripts / styles
+  disallowedTagsMode: "discard",
+  transformTags: {
+    // Force all links to open in a new tab with noopener noreferrer.
+    a: (_tagName, attribs) => ({
+      tagName: "a",
+      attribs: {
+        ...attribs,
+        target: "_blank",
+        rel: "noopener noreferrer",
+      },
+    }),
+    // Force images to be lazy-loaded + async-decoded for performance.
+    img: (_tagName, attribs) => ({
+      tagName: "img",
+      attribs: {
+        ...attribs,
+        loading: attribs.loading ?? "lazy",
+        decoding: attribs.decoding ?? "async",
+      },
+    }),
+  },
+};
 
 /**
  * Sanitize HTML content for safe rendering with dangerouslySetInnerHTML.
@@ -43,39 +89,7 @@ const ALLOWED_ATTR = [
  */
 export function sanitizeBlogHtml(input: string): string {
   if (!input) return "";
-  let cleaned = DOMPurify.sanitize(input, {
-    ALLOWED_TAGS,
-    ALLOWED_ATTR,
-    // Disallow data URIs (XSS via base64-encoded SVG/HTML)
-    ALLOW_DATA_ATTR: false,
-    // Allow only http(s) and mailto schemes
-    ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto):)/i,
-    KEEP_CONTENT: true,
-    RETURN_DOM_FRAGMENT: false,
-    RETURN_DOM: false,
-  });
-  // Post-process: strip any data: URIs that DOMPurify may have missed
-  // (DOMPurify 3.x's URI regex behavior for data: is unreliable).
-  // Defense in depth: even if a future bug allows data: through,
-  // this catches it.
-  // Strip data: URIs from src/href attributes.
-  // Loop handles multiple attributes per tag and uses a more restrictive
-  // pattern (word boundary + closing quote required) to avoid the
-  // "incomplete sanitization" CodeQL warning.
-  cleaned = cleaned.replace(
-    /(<(?:img|source|video|audio|iframe|a|link)\b[^>]{0,2000}?\s(?:src|href|poster|xlink:href)\s*=\s*["'])data:[^"']{0,2000}/gi,
-    "$1#"
-  );
-  // Remove dangerous tags entirely (defense in depth beyond DOMPurify)
-  cleaned = cleaned.replace(
-    /<\s*(style|script|iframe|object|embed)\b[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi,
-    ""
-  );
-  cleaned = cleaned.replace(
-    /<\s*(style|script|iframe|object|embed)\b[^>]*\/\s*>/gi,
-    ""
-  );
-  return cleaned;
+  return sanitizeHtmlLib(input, SANITIZE_OPTIONS);
 }
 
 /**
@@ -86,7 +100,7 @@ export function sanitizeUrl(url: string): string | null {
   if (!url) return null;
   const cleaned = url.trim();
   if (/^javascript:/i.test(cleaned)) return null;
-  if (/^data:/i.test(cleaned)) return null;
+  if (/^data:/i.test(cleaned) && !/^data:image\//i.test(cleaned)) return null;
   if (/^vbscript:/i.test(cleaned)) return null;
   return cleaned;
 }
