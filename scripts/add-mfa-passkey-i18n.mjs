@@ -106,6 +106,13 @@ const authSignInRequiredKey = {
   sign_in_required: "Please sign in to view this page.",
 };
 
+// Keys that must never be assigned via merge — they would mutate
+// the global Object prototype and pollute every object in the
+// process. JSON.parse() filters `__proto__` from parsed strings
+// in modern Node, but defense in depth + we still iterate keys
+// from sources that may have been mutated by upstream code.
+const FORBIDDEN_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+
 function deepMerge(target, source) {
   if (typeof source !== "object" || source === null || Array.isArray(source)) {
     return source;
@@ -114,6 +121,7 @@ function deepMerge(target, source) {
     target = {};
   }
   for (const key of Object.keys(source)) {
+    if (FORBIDDEN_KEYS.has(key)) continue; // skip prototype-polluting keys
     if (
       typeof source[key] === "object" &&
       source[key] !== null &&
@@ -173,6 +181,10 @@ for (const locale of locales) {
     const enData = loadLocale("en");
     const ensureEnglishFallback = (target, source) => {
       for (const k of Object.keys(source)) {
+        // Defense in depth: skip prototype-polluting keys so a
+        // malicious or malformed locale JSON can't mutate
+        // Object.prototype globally. (CodeQL js/prototype-pollution-utility)
+        if (FORBIDDEN_KEYS.has(k)) continue;
         if (
           typeof source[k] === "object" &&
           source[k] !== null &&

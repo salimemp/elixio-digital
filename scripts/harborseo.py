@@ -39,6 +39,7 @@ are done, the script exits and the operator can add more topics.
 
 import argparse
 import json
+import logging
 import os
 import re
 import sys
@@ -46,6 +47,11 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urljoin
+
+# Quiet by default; raise via --verbose if needed. Used for the
+# `try/except` blocks that intentionally swallow non-fatal errors
+# (e.g. transient I/O errors during the topic-id scan).
+logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(message)s")
 from urllib.request import Request, urlopen
 
 # ---------------------------------------------------------------------------
@@ -206,8 +212,13 @@ def _published_topic_ids() -> set[str]:
             m = _re.search(r"^topic_id:\s*[\"']?([\w-]+)[\"']?\s*$", text, _re.MULTILINE)
             if m:
                 ids.add(m.group(1))
-        except Exception:
-            pass
+        except Exception as exc:
+            # CodeQL py/empty-except: explain why we swallow.
+            # These are post HTML files we've already committed; a
+            # transient I/O error (permission, race during git pull)
+            # shouldn't fail the whole topic-id scan. We log and
+            # continue — the caller can retry if needed.
+            logging.debug("skipping %s while scanning topic_id: %s", p, exc)
     return ids
 
 

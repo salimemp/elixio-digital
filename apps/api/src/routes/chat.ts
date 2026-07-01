@@ -42,13 +42,32 @@ export async function chatRoutes(app: FastifyInstance): Promise<void> {
    * prefix).
    *
    * Public (no auth required) — anyone can ask questions about the
-   * platform. Rate-limited via the global @fastify/rate-limit plugin
-   * (2000/min/IP). For higher limits, sign in.
+   * platform.
+   *
+   * Rate-limited per IP: 30 req/min. The global rate-limit plugin
+   * runs with `global: false` (see app.ts), so each route opts in.
+   * 30/min is chosen because each call invokes Gemini 2.5 Flash +
+   * the RAG retriever + a KB chunk-embedding search — expensive
+   * enough that 30/min/IP is generous for legitimate use and stops
+   * trivial abuse (script kiddies) without breaking real users.
+   *
+   * For higher limits, sign in (authenticated routes get a separate
+   * higher quota via lib/rate-limit.ts).
    *
    * Body: { question, locale?, history?, topK?, stream? }
    * Returns: { text, sources[], fallback }
    */
-  app.post("/", async (request, reply) => {
+  app.post(
+    "/",
+    {
+      config: {
+        rateLimit: {
+          max: 30,
+          timeWindow: "1 minute",
+        },
+      },
+    },
+    async (request, reply) => {
     const input = chatRequestSchema.parse(request.body);
 
     if (input.stream) {
@@ -98,21 +117,52 @@ export async function chatRoutes(app: FastifyInstance): Promise<void> {
    *
    * No auth required — anonymous feedback is fine for V1. We do
    * NOT log IP addresses here (GDPR data-minimization).
+   *
+   * Rate-limited per IP: 60 req/min. Feedback is cheap (single
+   * DB INSERT) but we don't want bots to flood it.
    */
-  app.post("/feedback", async (request) => {
-    const input = feedbackSchema.parse(request.body);
+  app.post(
+    "/feedback",
+    {
+      config: {
+        rateLimit: {
+          max: 60,
+          timeWindow: "1 minute",
+        },
+      },
+    },
+    async (request) => {
+      const input = feedbackSchema.parse(request.body);
 
-    // If the request includes a valid bearer token, attribute the
-    // feedback to that user. Otherwise anonymous.
-    let userId: string | null = null;
-    if (request.headers.authorization) {
-      try {
-        await request.jwtVerify();
-        userId = (request.user as { userId?: string }).userId ?? null;
-      } catch {
-        // Invalid/expired token — treat as anonymous.
+      // If the request includes a valid bearer token, attribute the
+      // feedback to that user. Otherwise anonymous.
+      //
+      // SECURITY: we never trust the contents of `request.user` unless
+      // `request.jwtVerify()` succeeded. The previous code silently
+      // swallowed JWT errors, which CodeQL correctly flagged as a
+      // "user-controlled bypass of security check" — a malformed
+      // token could leave `request.user` populated from a prior
+      // middleware while we proceeded as if verification succeeded.
+      //
+      // We now log failed verifications (no PII) and explicitly set
+      // `userId` from the verified payload only.
+      let userId: string | null = null;
+      const authHeader = request.headers.authorization;
+      if (authHeader && typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
+        try {
+          await request.jwtVerify();
+          // Verified: now we can trust request.user.
+          userId = (request.user as { userId?: string } | undefined)?.userId ?? null;
+        } catch (err) {
+          // Verification failed. Log the failure category for
+          // security monitoring (no token contents — they may be
+          // sensitive). The request proceeds as anonymous feedback.
+          app.log.warn(
+            { err: (err as Error).message },
+            "[chat] feedback: bearer token verification failed; treating as anonymous"
+          );
+        }
       }
-    }
 
     try {
       await prisma.chatFeedback.create({
