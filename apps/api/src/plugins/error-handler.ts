@@ -58,6 +58,20 @@ export async function registerErrorHandler(app: FastifyInstance): Promise<void> 
     // doesn't always bypass setErrorHandler in v9. Detect by code
     // prefix, status code, OR our custom RATE_LIMITED code (set by
     // the app-level errorResponseBuilder in app.ts).
+    //
+    // DEBUG: log full error shape so we can see what fields the
+    // plugin actually sets (was failing in prod — see git log).
+    request.log.warn(
+      {
+        debug_rate_limit: true,
+        err_code: error.code,
+        err_statusCode: error.statusCode,
+        err_name: error.name,
+        err_message: error.message,
+        err_keys: Object.keys(error),
+      },
+      "error handler reached — checking if rate limit"
+    );
     if (
       error.statusCode === 429 ||
       (typeof error.code === "string" && error.code.startsWith("FST_ERR_RATE_LIMIT")) ||
