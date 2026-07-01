@@ -192,9 +192,11 @@ function TabButton({
 }
 
 /**
- * HTML5 video player. Falls back to a poster + "video coming soon"
- * overlay when the source is missing (the actual video is rendered
- * by the marketing team; see docs/marketing/onboarding-video-script.md).
+ * HTML5 video player. The current file is a 6-second AI teaser;
+ * the full 6:30 production is in progress (see
+ * docs/marketing/onboarding-storyboard.md). We show a prominent
+ * "teaser" badge so visitors don't mistake the 6s clip for the
+ * full video.
  */
 function VideoPlayer({
   src,
@@ -207,9 +209,22 @@ function VideoPlayer({
 }) {
   return (
     <div className="relative overflow-hidden rounded-2xl border-2 border-gum-black bg-gum-black shadow-[0_6px_0_0_#111]">
-      {/* We use a <video> element with controls. If the file is missing,
-          the browser shows the poster image with a broken-state indicator;
-          our overlay adds a friendly "coming soon" message. */}
+      {/* Teaser badge — visible by default, dismissable per session.
+          Anchored to the top-left so it doesn't collide with the
+          native browser controls at the bottom. */}
+      <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-wrap items-center gap-2">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/40 bg-gum-purple/90 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white shadow-[0_2px_0_0_#111] backdrop-blur-sm">
+          🎬 6s teaser
+        </span>
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/40 bg-gum-black/70 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+          ⏳ Full 6:30 version coming soon
+        </span>
+      </div>
+
+      {/* We use a <video> element with controls. The actual file
+          is the AI teaser (~6s); when the full production lands
+          we just replace /public/onboarding-video.mp4 — no code
+          change needed. */}
       <video
         controls
         preload="metadata"
@@ -220,7 +235,10 @@ function VideoPlayer({
       >
         <source src={src} type="video/mp4" />
         {/* Captions for the 12 priority languages. Files live in
-            /public/captions/onboarding-{lang}.vtt */}
+            /public/captions/onboarding-{lang}.vtt. (Captions are
+            for the planned 6:30 narration; the current 6s teaser
+            has no spoken audio so the captions are empty — they
+            will populate when the real video lands.) */}
         {["en", "es", "fr", "de", "hi", "pt", "ar", "ur", "he", "zh", "zh-TW", "ja", "ko"].map((lang) => (
           <track
             key={lang}
@@ -233,21 +251,21 @@ function VideoPlayer({
         ))}
         Your browser does not support the video tag. Download the{" "}
         <a href={src} className="underline">
-          onboarding video
+          onboarding teaser
         </a>{" "}
         to watch it.
       </video>
 
-      {/* Caption bar / fallback overlay. Visible until the user clicks
-          play; also useful when the file is missing. */}
+      {/* Caption bar — now reflects the teaser status, not the
+          planned 6:30 runtime. Updated when the real video lands. */}
       <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between bg-gum-black/60 px-4 py-2 text-xs text-white">
-        <span>📺 6:30 · 10 scenes · 12 languages</span>
+        <span>🎬 6s teaser · full 6:30 video coming soon</span>
         <a
           href={src}
           download
           className="rounded-full border border-white/40 px-3 py-1 hover:bg-white/10"
         >
-          Download MP4
+          Download teaser (MP4)
         </a>
       </div>
     </div>
