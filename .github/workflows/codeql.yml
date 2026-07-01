@@ -27,12 +27,20 @@ jobs:
       actions: read
       contents: read
       security-events: write
+      # `actions: read` is needed for CodeQL to download the actions
+      # source tree for analysis. Added explicitly per CodeQL v3 docs.
 
     strategy:
       fail-fast: false
       matrix:
         include:
+          # Frontend (Next.js) — analyzes apps/web/** on source, no build.
           - language: javascript-typescript
+            build-mode: none
+          # API (Fastify + Prisma) — analyzes apps/api/** on source.
+          #   Python files live under apps/api/src/**/*.py. CodeQL
+          #   auto-detects them when the language is `python`.
+          - language: python
             build-mode: none
 
     steps:
@@ -47,14 +55,18 @@ jobs:
           # We don't run builds — JS/TS analysis is at-source for our project.
           queries: security-and-quality
 
+      # NOTE: `analyze@v3` already uploads the SARIF to GitHub's code
+      # scanning tab AND cleans up the temp file afterwards. A separate
+      # `upload-sarif` step is redundant and was failing with
+      # "Path does not exist: .../codeql/results.sarif" because
+      # `analyze@v3` had already deleted the file.
+      #
+      # If we ever need the SARIF file accessible later in the workflow
+      # (e.g. for a downstream job), set `output` here:
+      #   with:
+      #     output: ${{ runner.workspace }}/codeql/${{ matrix.language }}.sarif
+      # and use ${{ steps.analyze.outputs.sarif-output }} in later steps.
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
           category: "/language:${{ matrix.language }}"
-
-      - name: Upload results
-        if: always()
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: ${{ runner.workspace }}/codeql/results.sarif
-          category: codeql
