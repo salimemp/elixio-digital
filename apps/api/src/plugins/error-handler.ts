@@ -56,11 +56,12 @@ export async function registerErrorHandler(app: FastifyInstance): Promise<void> 
     // Rate limit errors thrown by @fastify/rate-limit come through
     // here with statusCode 429 but the plugin's `errorResponseBuilder`
     // doesn't always bypass setErrorHandler in v9. Detect by code
-    // prefix and the 429 status, then forward the rate-limit body's
-    // shape unchanged.
+    // prefix, status code, OR our custom RATE_LIMITED code (set by
+    // the app-level errorResponseBuilder in app.ts).
     if (
       error.statusCode === 429 ||
-      (typeof error.code === "string" && error.code.startsWith("FST_ERR_RATE_LIMIT"))
+      (typeof error.code === "string" && error.code.startsWith("FST_ERR_RATE_LIMIT")) ||
+      error.code === "RATE_LIMITED"
     ) {
       reply.status(429).send({
         error: {
