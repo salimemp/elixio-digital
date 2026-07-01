@@ -55,33 +55,32 @@ export async function registerErrorHandler(app: FastifyInstance): Promise<void> 
 
     // Rate limit errors thrown by @fastify/rate-limit come through
     // here with statusCode 429 but the plugin's `errorResponseBuilder`
-    // doesn't always bypass setErrorHandler in v9. Detect by code
-    // prefix, status code, OR our custom RATE_LIMITED code (set by
-    // the app-level errorResponseBuilder in app.ts).
+    // doesn't always bypass setErrorHandler in v9. Detect by:
+    //   - status code 429 (set by the plugin),
+    //   - FST_ERR_RATE_LIMIT* code prefix (plugin-thrown error),
+    //   - the `error.error.code === "RATE_LIMITED"` shape (when the
+    //     plugin wraps our errorResponseBuilder output in {error: ...}).
     //
-    // DEBUG: log full error shape so we can see what fields the
-    // plugin actually sets (was failing in prod — see git log).
-    request.log.warn(
-      {
-        debug_rate_limit: true,
-        err_code: error.code,
-        err_statusCode: error.statusCode,
-        err_name: error.name,
-        err_message: error.message,
-        err_keys: Object.keys(error),
-      },
-      "error handler reached — checking if rate limit"
-    );
+    // The third pattern was the actual production shape discovered
+    // via debug logging (see git log "debug(api): log rate-limit
+    // error shape to find the actual fields"). The error object
+    // literally has a single key, "error", whose value is the
+    // builder's return payload — so all the standard FastifyError
+    // fields (code, statusCode, name) are undefined.
+    const errWrapper = (error as unknown as { error?: { code?: string; message?: string } });
     if (
       error.statusCode === 429 ||
       (typeof error.code === "string" && error.code.startsWith("FST_ERR_RATE_LIMIT")) ||
-      error.code === "RATE_LIMITED"
+      error.code === "RATE_LIMITED" ||
+      errWrapper.error?.code === "RATE_LIMITED"
     ) {
       reply.status(429).send({
         error: {
           code: "RATE_LIMITED",
           message:
-            (error.message as string) || "Too many requests. Please slow down.",
+            errWrapper.error?.message ||
+            (error.message as string) ||
+            "Too many requests. Please slow down.",
         },
       });
       return;
